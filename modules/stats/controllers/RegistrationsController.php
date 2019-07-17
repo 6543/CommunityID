@@ -79,7 +79,7 @@ class Stats_RegistrationsController extends CommunityID_Controller_Action
     private function _populateWeekData(&$labelsy, &$datay)
     {
         $stats = new Stats_Model_Stats();
-        $registeredUsers  = $stats->getNumRegisteredUsersDays(strtotime('-1 week'), time());
+        $registeredUsers  = $stats->getNumRegisteredUsersDays(strtotime('-1 week'), time(), true);
 
         for ($i = -7; $i < 0; $i++) {
             $time = strtotime("$i days");
@@ -96,7 +96,7 @@ class Stats_RegistrationsController extends CommunityID_Controller_Action
     private function _populateMonthData(&$labelsy, &$datay)
     {
         $stats = new Stats_Model_Stats();
-        $registeredUsers  = $stats->getNumRegisteredUsersDays(strtotime('-30 days'), strtotime('-1 week'));
+        $registeredUsers  = $stats->getNumRegisteredUsersDays(strtotime('-30 days'), strtotime('-1 week'), true);
 
         for ($i = -30; $i < -7; $i++) {
             $time = strtotime("$i days");
@@ -114,7 +114,7 @@ class Stats_RegistrationsController extends CommunityID_Controller_Action
     {
         $stats = new Stats_Model_Stats();
         $firstDayOfMonth = date('Y-' . date('m') . '-01');
-        $registeredUsers  = $stats->getNumRegisteredUsersYear(strtotime('-11 months', strtotime($firstDayOfMonth)), time());
+        $registeredUsers  = $stats->getNumRegisteredUsersYear(strtotime('-11 months', strtotime($firstDayOfMonth)), time(), true);
 
         for ($i = -11; $i <= 0; $i++) {
             $time = strtotime("$i months");

@@ -1,4 +1,4 @@
-<?
+<?php
 
 class Monkeys_Form_Decorator_Composite extends Zend_Form_Decorator_Abstract
         implements Zend_Form_Decorator_Marker_File_Interface // to avoid Zend_Form_Element_File to whine

@@ -11,13 +11,15 @@
 
 class Application
 {
-    const VERSION = '1.1.0.beta1';
+    const VERSION = '1.1.0.RC2';
 
     public static $config;
     public static $logger;
     public static $mockLogger;
     public static $acl;
     public static $front;
+
+    private static $_pathList;
 
     /**
     * Used in unit tests
@@ -31,14 +33,19 @@ class Application
 
     public static function setIncludePath()
     {
-        $pathList = array(
+        if (isset(self::$_pathList)) {
+            // to avoid passing here more than once in unit tests
+            return;
+        }
+
+        self::$_pathList = array(
             '.',
             APP_DIR,
             APP_DIR.'/libs',
             // this should go at the end to avoid clashes with other Zend Framework versions in the machine
             get_include_path(),
         );
-        if (!set_include_path(implode(PATH_SEPARATOR, $pathList))) {
+        if (!set_include_path(implode(PATH_SEPARATOR, self::$_pathList))) {
             die('ERROR: couldn\'t execute PHP\'s set_include_path() function in your system.'
                 .' Please ask your system admin to enable that functionality.');
         }
@@ -83,6 +90,14 @@ class Application
 
         $config = array();
         require $configFile;
+
+        // in case config.php is empty (during install)
+        if (!$config) {
+            $configFile = APP_DIR . DIRECTORY_SEPARATOR . 'config.default.php';
+            require $configFile;
+
+        }
+
         self::$config = new Zend_Config($config, array('allowModifications' => true));
         if(self::$config->environment->installed === null) {
             $configFile = APP_DIR . DIRECTORY_SEPARATOR . 'config.default.php';
@@ -147,14 +162,18 @@ class Application
 
     public static function setDatabase()
     {
-        self::$config->database->params->driver_options = array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true);
+        // constant not set if pdo_mysql extension is not loaded
+        if (defined('PDO::MYSQL_ATTR_USE_BUFFERED_QUERY')) {
+            self::$config->database->params->driver_options = array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true);
+        }
+
         $db = Zend_Db::factory(self::$config->database);
         if (self::$config->logging->level == Zend_Log::DEBUG) {
             $profiler = new Monkeys_Db_Profiler();
             $db->setProfiler($profiler);
         }
         Zend_Db_Table_Abstract::setDefaultAdapter($db);
-        // unknown PHP bug (tested on PHP 2.8 and PHP 2.10) corrupts the $db reference, so I gotta retrieve it again:
+        // unknown PHP bug (tested on PHP 5.2.8 and PHP 5.2.10) corrupts the $db reference, so I gotta retrieve it again:
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         Zend_Registry::set('db', $db);
 

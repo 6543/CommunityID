@@ -14,6 +14,7 @@ require_once dirname(__FILE__) . '/../../../TestHarness.php';
 class MessageusersControllerTests extends PHPUnit_Framework_TestCase
 {
     private $_response;
+    private $_user;
 
     public function setUp()
     {
@@ -23,34 +24,42 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
         Application::$front->setResponse($this->_response);
 
         $users = new Users_Model_Users();
-        $user = $users->createRow();
-        $user->id = 23;
-        $user->role = Users_Model_User::ROLE_ADMIN;
-        $user->username = 'testadmin';
-        Zend_Registry::set('user', $user);
+        $this->_user = $users->createRow();
+        $this->_user->id = 23;
+        $this->_user->role = Users_Model_User::ROLE_ADMIN;
+        $this->_user->username = 'testadmin';
+        Zend_Registry::set('user', $this->_user);
 
     }
 
-    /**
-    * @expectedException Monkeys_AccessDeniedException
-    */
     public function testIndexGuestUserAction()
     {
-        Zend_Registry::get('user')->role = Users_Model_User::ROLE_GUEST;
+        $this->_user->role = Users_Model_User::ROLE_GUEST;
 
         Application::$front->setRequest(new TestRequest('/messageusers'));
-        Application::dispatch();
+        try {
+            Application::dispatch();
+        } catch (Monkeys_AccessDeniedException $e) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->fail('Expected Monkeys_AccessDeniedException was not raised');
     }
 
-    /**
-    * @expectedException Monkeys_AccessDeniedException
-    */
     public function testIndexRegisteredUserAction()
     {
-        Zend_Registry::get('user')->role = Users_Model_User::ROLE_REGISTERED;
+        $this->_user->role = Users_Model_User::ROLE_REGISTERED;
 
         Application::$front->setRequest(new TestRequest('/messageusers'));
-        Application::dispatch();
+        try {
+            Application::dispatch();
+        } catch (Monkeys_AccessDeniedException $e) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->fail('Expected Monkeys_AccessDeniedException was not raised');
     }
 
     public function testIndexAction()
@@ -93,26 +102,34 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
         $this->assertContains('CC field must be a comma-separated list of valid E-mails', $this->_response->getBody());
     }
 
-    /**
-    * @expectedException Monkeys_AccessDeniedException
-    */
     public function testSaveGuestUser()
     {
-        Zend_Registry::get('user')->role = Users_Model_User::ROLE_GUEST;
+        $this->_user->role = Users_Model_User::ROLE_GUEST;
 
         Application::$front->setRequest(new TestRequest('/messageusers/send'));
-        Application::dispatch();
+        try {
+            Application::dispatch();
+        } catch (Monkeys_AccessDeniedException $e) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->fail('Expected Monkeys_AccessDeniedException was not raised');
     }
 
-    /**
-    * @expectedException Monkeys_AccessDeniedException
-    */
     public function testSaveRegisteredUser()
     {
-        Zend_Registry::get('user')->role = Users_Model_User::ROLE_REGISTERED;
+        $this->_user->role = Users_Model_User::ROLE_REGISTERED;
 
         Application::$front->setRequest(new TestRequest('/messageusers/send'));
-        Application::dispatch();
+        try {
+            Application::dispatch();
+        } catch (Monkeys_AccessDeniedException $e) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->fail('Expected Monkeys_AccessDeniedException was not raised');
     }
 
     public function testSaveSuccessfull()

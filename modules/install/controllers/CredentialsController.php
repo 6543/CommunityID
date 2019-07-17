@@ -51,6 +51,7 @@ class Install_CredentialsController extends CommunityID_Controller_Action
         }
 
         $this->_importDb();
+        $this->_createAdmin($form);
 
         if (!$this->_writeConfig($form)) {
             throw new Exception('Couldn\'t write to config file ' . APP_DIR . DIRECTORY_SEPARATOR . 'config.php');
@@ -140,6 +141,22 @@ class Install_CredentialsController extends CommunityID_Controller_Action
     private function _importDb()
     {
         $this->_runSqlFILE('final.sql');
+    }
+
+    private function _createAdmin(Install_Form_Install $form)
+    {
+        $users = new Users_Model_Users();
+        $user = $users->createRow();
+        $user->username = $form->getValue('adminUsername');
+        $user->accepted_eula = 1;
+        $user->registration_date = date('Y-m-d');
+        $user->openid = '';
+        $user->setClearPassword($form->getValue('password1'));
+        $user->firstname = 'Admin';
+        $user->lastname = 'User';
+        $user->email = $form->getValue('supportemail');
+        $user->role = Users_Model_User::ROLE_ADMIN;
+        $user->save();
     }
 
     function _runSqlFile($fileName) {

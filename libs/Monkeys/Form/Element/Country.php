@@ -35,7 +35,7 @@ class Monkeys_Form_Element_Country extends Zend_Form_Element_Select
         
         translate('-- Select a Country --');
         $this->addMultiOption(0, '-- Select a Country --');
-        $this->addMultiOptions(Zend_Locale::getCountryTranslationList(Zend_Registry::get('Zend_Locale')));
+        $this->addMultiOptions(Zend_Locale::getTranslationList('territory', Zend_Registry::get('Zend_Locale')));
         asort($this->options);
     }
 }

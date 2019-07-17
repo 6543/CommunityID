@@ -6,7 +6,7 @@
     <link rel="shortcut icon" href="<?php echo $this->base ?>/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="<?php echo $this->base ?>/javascript/yui/assets/skins/sam/skin.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo $this->base ?>/javascript/yui/reset-fonts-grids/reset-fonts-grids.css" />
-	<link rel="stylesheet" href="<?php echo $this->base ?>/styles/style.css?v=<?= $this->version ?>" type="text/css" media="screen" charset="utf-8"/>
+	<link rel="stylesheet" href="<?php echo $this->base ?>/styles/style.css?v=<?php echo $this->version ?>" type="text/css" media="screen" charset="utf-8"/>
     <?php echo $this->headLink() ?>
     <?php echo $this->headStyle() ?>
     <script type="text/javascript" src="<?php echo $this->base ?>/javascript/yui/utilities/utilities.js"></script>
@@ -29,10 +29,10 @@ var myLogReader = new YAHOO.widget.LogReader();
             <div id="topNav"><!-- gotta wrap the UL for an IE bug workaround -->
                 <ul>
                     <li>
-                        <a href="<?php echo $this->base ?>/"><?= $this->translate('Home') ?></a>
+                        <a href="<?php echo $this->base ?>/"><?php echo $this->translate('Home') ?></a>
                     </li>
                     <li>
-                        <a href="<?php echo $this->base ?>/feedback"><?= $this->translate('Feedback') ?></a>
+                        <a href="<?php echo $this->base ?>/feedback"><?php echo $this->translate('Feedback') ?></a>
                     </li>
                 </ul>
             </div>
@@ -78,8 +78,8 @@ var myLogReader = new YAHOO.widget.LogReader();
         </div>
    </div> 
 </div>
-<script type="text/javascript" src="<?php echo $this->base ?>/javascript/language.php?v=<?= $this->version ?>"></script>
-<script type="text/javascript" src="<?php echo $this->base ?>/javascript/communityid.js?v=<?= $this->version ?>"></script>
+<script type="text/javascript" src="<?php echo $this->base ?>/javascript/language.php?v=<?php echo $this->version ?>"></script>
+<script type="text/javascript" src="<?php echo $this->base ?>/javascript/communityid.js?v=<?php echo $this->version ?>"></script>
 <script type="text/javascript">
     COMMID.baseDir = "<?php echo $this->base ?>";
     COMMID.userId = <?php echo $this->user->id? $this->user->id : 0 ?>;

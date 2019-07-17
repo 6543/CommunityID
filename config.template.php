@@ -17,7 +17,6 @@ $config['environment']['registrations_enabled'] = {environment.registrations_ena
 $config['environment']['locale']            = '{environment.locale}';
 
 $config['environment']['template']          = '{environment.template}';
-$config['environment']['news_feed']         = '{environment.news_feed}';
 
 
 #

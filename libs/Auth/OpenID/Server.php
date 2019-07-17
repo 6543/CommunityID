@@ -821,7 +821,11 @@ class Auth_OpenID_CheckIDRequest extends Auth_OpenID_Request {
                                     array($this->trust_root, $this->return_to));
     }
 
-    function fromMessage(&$message, $server)
+    /*
+    * Keyboard Monkeys modification:
+    * Removed & marker in argument
+    */
+    function fromMessage($message, $server)
     {
         $mode = $message->getArg(Auth_OpenID_OPENID_NS, 'mode');
         $immediate = null;
@@ -1097,7 +1101,11 @@ class Auth_OpenID_CheckIDRequest extends Auth_OpenID_Request {
                                   in OpenID 1.x immediate mode.');
                 }
 
-                $setup_request =& new Auth_OpenID_CheckIDRequest(
+                /*
+                * Keyboard Monkeys modification:
+                * Assigning the return value of new by reference is deprecated
+                */
+                $setup_request = new Auth_OpenID_CheckIDRequest(
                                                 $this->identity,
                                                 $this->return_to,
                                                 $this->trust_root,
@@ -1676,12 +1684,16 @@ class Auth_OpenID_UntrustedReturnURL extends Auth_OpenID_ServerError {
 class Auth_OpenID_Server {
     function Auth_OpenID_Server(&$store, $op_endpoint=null)
     {
-        $this->store =& $store;
-        $this->signatory =& new Auth_OpenID_Signatory($this->store);
-        $this->encoder =& new Auth_OpenID_SigningEncoder($this->signatory);
-        $this->decoder =& new Auth_OpenID_Decoder($this);
+        /*
+        * Keyboard Monkeys modification:
+        * Assigning the return value of new by reference is deprecated
+        */
+        $this->store = $store;
+        $this->signatory = new Auth_OpenID_Signatory($this->store);
+        $this->encoder = new Auth_OpenID_SigningEncoder($this->signatory);
+        $this->decoder = new Auth_OpenID_Decoder($this);
         $this->op_endpoint = $op_endpoint;
-        $this->negotiator =& Auth_OpenID_getDefaultNegotiator();
+        $this->negotiator = Auth_OpenID_getDefaultNegotiator();
     }
 
     /**
@@ -1714,8 +1726,9 @@ class Auth_OpenID_Server {
 
     /**
      * The callback for 'associate' messages.
+     * Keyboard Monkeys modification: removed & in argument, because it was killing unit tests
      */
-    function openid_associate(&$request)
+    function openid_associate($request)
     {
         $assoc_type = $request->assoc_type;
         $session_type = $request->session->session_type;

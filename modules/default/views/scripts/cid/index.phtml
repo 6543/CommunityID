@@ -1,4 +1,4 @@
-<h2><?php echo $this->translate('About Community-id') ?></h2>
+<h2><?php echo $this->translate('About Community-ID') ?></h2>
 <div>
     <label><?php echo $this->translate('Version installed:') ?></label>
     <?php echo $this->version ?>
@@ -12,7 +12,7 @@
     <?php foreach ($this->news as $item): ?>
         <li>
             <div>
-                <a href="<?php echo $item->link ?>"><?= $item->title ?></a>
+                <a href="<?php echo $item->link ?>"><?php echo $item->title ?></a>
             </div>
             <div class="newsExcerpt">
                 <?php echo $item->content ?>

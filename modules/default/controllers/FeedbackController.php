@@ -54,9 +54,9 @@ class FeedbackController extends CommunityID_Controller_Action
 
         try {
             $mail->send();
-            $this->_helper->FlashMessenger->addMessage('Thank you for your interest. Your message has been routed.');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Thank you for your interest. Your message has been routed.'));
         } catch (Zend_Mail_Protocol_Exception $e) {
-            $this->_helper->FlashMessenger->addMessage('Sorry, the feedback couldn\'t be delivered. Please try again later.');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Sorry, the feedback couldn\'t be delivered. Please try again later.'));
             if ($this->_config->logging->level == Zend_Log::DEBUG) {
                 $this->_helper->FlashMessenger->addMessage($e->getMessage());
             }
@@ -90,7 +90,7 @@ class FeedbackController extends CommunityID_Controller_Action
                 Zend_Mail::setDefaultTransport(new Zend_Mail_Transport_Sendmail());
         }
 
-        $mail = new Zend_Mail();
+        $mail = new Zend_Mail('UTF-8');
         $mail->setBodyText(<<<EOD
 Dear Administrator,
 

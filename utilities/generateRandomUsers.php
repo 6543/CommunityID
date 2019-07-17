@@ -43,6 +43,8 @@ class GenerateRandomUsers
     {
         $users = new Users_Model_Users();
         for ($i = 0; $i < NUM_USERS ; $i++) {
+            $confirmed = array_rand(array(true, false));
+
             $firstname = trim($this->_names[rand(0, $this->_numNames)]);
             $username = strtolower(substr($firstname, 0, 4));
             $user = $users->createRow();
@@ -50,13 +52,13 @@ class GenerateRandomUsers
             $user->test                   = 1;
             $user->username               = $username;
             $user->openid                 = "http://localhost/communityid/identity/$username";
-            $user->accepted_eula          = 1;
+            $user->accepted_eula          = $confirmed? 1 : 0;
             $user->registration_date      = date('Y-m-d', time() - rand(0, 365) * 24 * 60 * 60);
             $user->firstname              = $firstname;
             $user->lastname               = trim($this->_names[rand(0, $this->_numNames)]);
             $user->email                  = "$username@mailinator.com";
-            $user->role                   = 'registered';
-            $user->token                  = '';
+            $user->role                   = $confirmed? Users_Model_User::ROLE_REGISTERED : Users_Model_User::ROLE_GUEST;
+            $user->token                  = $confirmed? '' : Users_Model_User::generateToken();
             $user->save();
         }
     }

@@ -182,6 +182,10 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
 
     public function confirmdeleteAction()
     {
+        if ($this->user->role == Users_Model_User::ROLE_ADMIN) {
+            throw new Monkeys_AccessDeniedException();
+        }
+
         $this->_helper->actionStack('index', 'login', 'users');
     }
 

@@ -67,7 +67,7 @@ class MessageusersController extends CommunityID_Controller_Action
 
         $users = new Users_Model_Users();
         foreach ($users->getUsers() as $user) {
-            if ($user->role == ROLE_ADMIN) {
+            if ($user->role == Users_Model_User::ROLE_ADMIN) {
                 continue;
             }
 

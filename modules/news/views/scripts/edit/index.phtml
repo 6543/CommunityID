@@ -1,5 +1,5 @@
 <form method="post" action="<?php echo $this->base ?>/news/edit/save" class="formGrid">
-    <input type="hidden" name="id" value="<?= $this->articleId ?>" />
+    <input type="hidden" name="id" value="<?php echo $this->articleId ?>" />
     <?php echo $this->articleForm->title ?>
     <?php echo $this->articleForm->excerpt ?>
     <?php echo $this->articleForm->date ?>

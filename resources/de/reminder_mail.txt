@@ -1,0 +1,13 @@
+Sehr geehrte(r) {userName},
+
+Leider haben wir die Bestätigung für dein community-id.org Benutzerkonto nicht
+erhalten.
+
+Bitte bestätige dein Benutzerkonto durch klicken des folgenden Link oder dein
+Benutzerkonto wird gelöscht in einigen Tagen. 
+
+{registrationURL}
+
+
+Danke,
+Das Community-ID Team

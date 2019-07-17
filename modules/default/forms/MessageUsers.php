@@ -14,12 +14,12 @@ class Form_MessageUsers extends Zend_Form
     public function init()
     {
         $subject = new Monkeys_Form_Element_Text('subject');
-        translate('Subject:');
+        translate('Subject');
         $subject->setLabel('Subject')
                 ->setRequired(true);
 
         $cc = new Monkeys_Form_Element_Text('cc');
-        translate('CC:');
+        translate('CC');
         $cc->setLabel('CC');
 
         $bodyPlain = new Monkeys_Form_Element_Textarea('bodyPlain');

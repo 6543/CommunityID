@@ -1,4 +1,4 @@
-<?
+<?php
 
 abstract class Monkeys_Controller_Error extends Monkeys_Controller_Action
 {

@@ -178,7 +178,7 @@ class Auth_OpenID_SQLStore extends Auth_OpenID_OpenIDStore {
      */
     function isError($value)
     {
-        return PEAR::isError($value);
+        return false;
     }
 
     /**
@@ -188,11 +188,7 @@ class Auth_OpenID_SQLStore extends Auth_OpenID_OpenIDStore {
      */
     function resultToBool($obj)
     {
-        if ($this->isError($obj)) {
-            return false;
-        } else {
-            return true;
-        }
+        return true;
     }
 
     /**

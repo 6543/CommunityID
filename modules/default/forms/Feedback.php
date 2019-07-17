@@ -48,7 +48,7 @@ class Form_Feedback extends Zend_Form
                 'captcha'       => 'Image',
                 'sessionClass'  => get_class(Zend_Registry::get('appSession')),
                 'font'          => APP_DIR . '/libs/Monkeys/fonts/Verdana.ttf',
-                'imgDir'        => APP_DIR . '/webdir/captchas',
+                'imgDir'        => WEB_DIR . '/captchas',
                 'imgUrl'        => $this->_baseWebDir . '/captchas',
                 'wordLen'       => 4,
                 'fontSize'      => 30,

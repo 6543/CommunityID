@@ -7,7 +7,7 @@
     </div>
 <?php endif ?>
 <?php if (count($this->paginator) == 0): ?>
-    <div><?= $this->translate('There are no news articles yet') ?></div>
+    <div><?php echo $this->translate('There are no news articles yet') ?></div>
 <?php else: ?>
     <?php foreach ($this->paginator as $article): ?>
     <div class="post">

@@ -120,6 +120,7 @@ class Users_RegisterController extends CommunityID_Controller_Action
                 || !($user = $users->getUserWithToken($this->_request->getParam('token')))) {
             $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid token'));
             $this->_redirect('');
+            return;
         }
 
         $this->view->token = $user->token;
@@ -148,6 +149,7 @@ class Users_RegisterController extends CommunityID_Controller_Action
             Zend_Registry::get('logger')->log('invalid token', Zend_Log::DEBUG);
             $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid token'));
             $this->_redirect('');
+            return;
         }
 
         $user->delete();
@@ -162,6 +164,7 @@ class Users_RegisterController extends CommunityID_Controller_Action
                 || !($user = $users->getUserWithToken($this->_request->getParam('token')))) {
             $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid token'));
             $this->_redirect('');
+            return;
         }
 
         $user->role = Users_Model_User::ROLE_REGISTERED;

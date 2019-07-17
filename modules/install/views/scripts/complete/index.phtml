@@ -1,10 +1,10 @@
 <h3>
-    <?php echo $this->translate('The installation was performed successfully') ?>
+    <?= $this->translate('The installation was performed successfully') ?>
 </h3>
 <div style="margin-top:20px">
     <div>
-        You can login as the administrator with the username "admin" and the password "admin"<br />
-        Please note that this user is only meant for administrative tasks, and cannot have an OpenID credential.
+        <?= $this->translate('You can login as the administrator with the username and password you just provided.') ?><br />
+        <?= $this->translate('Please note that this user is only meant for administrative tasks, and cannot have an OpenID credential.') ?>
     </div>
     <div style="margin-top:20px">
         <input type="button" id="start" value="<?php echo $this->translate('Finish') ?>" />
@@ -13,7 +13,7 @@
         var oButton = new YAHOO.widget.Button(
             "start",
             {
-                onclick: {fn: function() {location.href="<?php echo $this->base ?>"}}
+                onclick: {fn: function() {location.href="<?php echo $this->base ?>/"}}
             }
         );
     </script> 

@@ -1,4 +1,48 @@
-2009-08-21 Reiner Jung <reiner@kb-m.com>
+2009-09-18 / 1.1.0-RC2 / Reiner Jung <reiner@kb-m.com>
+
+NEW FEATURES:
+
+- During installation, ask for desired admin user username and 
+password, instead of using the default admin/admin. The admin's E-mail 
+is set to the support E-mail provided in that same form.
+- Language updates.
+
+FIXED BUGS:
+
+- Set admin user creation date upon installation, to the current date.
+- Not count unconfirmed users in the Trusted Sites stats graph.
+
+2009-09-07 / 1.1.0-RC1 / Reiner Jung <reiner@kb-m.com>
+
+NEW FEATURES:
+
+- Clear button in Manage Users section will clear search input box, and 
+restore the current filtered list.
+- Updated translation strings
+- Added i18n to the account reminder E-mail template
+- When browsing users, show the number of reminders sent to unconfirmed 
+users, in the status column.
+- Upgraded Zend Framework to latest stable version, 1.9.2
+- Completely removed the requirement of having to enable short tags in 
+php.ini
+
+FIXED BUGS:
+
+- Fixed return on denied immediate request
+- Wasn't forgetting user after closing browser, when not using the 
+Remember Me feature
+- Fixed issues with the unconfirmed user message reminders
+- Clean error message when attempting to install with empty config.php file
+- Fixed warning message when pdo_mysql extension is not loaded. Note 
+that that extension still isn't a requirement, since we're still using 
+mysqli
+- Fixed small installation issue when installing directly on the web 
+root dir
+- After the upgrade process finishes, log out the user to avoid problems 
+when the users table structure changes.
+
+
+2009-08-21 / 1.1.0BETA / Reiner Jung <reiner@kb-m.com>
 
 NEW FEATURES:
 
@@ -47,7 +91,7 @@ NEW REQUIREMENTS:
 
 - Minimal supported PHP version is 5.2.4
 
-2009-04-21 Reiner Jung <reiner@kb-m.com>
+2009-04-21 / 1.0.0 / Reiner Jung <reiner@kb-m.com>
 
 NEW FEATURES:
 

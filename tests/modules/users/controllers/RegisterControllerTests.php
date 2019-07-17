@@ -22,7 +22,14 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         TestHarness::setUp();
         Application::$front->returnResponse(true);
         $this->_response = new Zend_Controller_Response_Http();
+        $this->_response->headersSentThrowsException = false;
         Application::$front->setResponse($this->_response);
+
+        // this is to be able to catch the redirection headers and avoid the
+        // "headers already sent" error
+        $redirectorHelper = new Zend_Controller_Action_Helper_Redirector();
+        $redirectorHelper->setExit(false);
+        Zend_Controller_Action_HelperBroker::addHelper($redirectorHelper);
     }
 
     public function testIndexAction()
@@ -140,8 +147,7 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         } catch (Zend_Controller_Response_Exception $e) {
             // I still don't know how to avoid the "headers already sent" problem here...
         }
-        $lastLog = array_pop(Application::$mockLogger->events);
-        $this->assertEquals("redirected to ''", $lastLog['message']);
+        $this->_assertRedirectedTo('/communityid/');
 
         $users = new Users_Model_Users();
         $user = $users->getUserWithEmail($email);
@@ -165,7 +171,6 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         // this is used to build the the registration URL
         $_SERVER['SCRIPT_URI'] = 'http://localhost/communityid/users/register/save';
 
-        require_once APP_DIR . '/modules/users/controllers/RegisterController.php';
         $mail = Users_RegisterController::getMail($user, 'Community-ID registration confirmation');
         $this->assertType('Zend_Mail', $mail);
         $mailBody = $mail->getBodyText(true);
@@ -175,18 +180,17 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         $token = str_replace('=0', '', $matches[1]);  // remove trailing return chars
         $token = str_replace(array('=', "\n"), '', $token);
         $this->assertEquals($token, $user->token);
+        unset($user);
     }
 
     public function testEulaBadTokenAction()
     {
         $_GET = array('token' => 'asdfsdf');
         Application::$front->setRequest(new TestRequest('/users/register/eula'));
-        try {
-            Application::dispatch();
-        } catch (Zend_Controller_Response_Exception $e) {
-        }
-        $lastLog = array_pop(Application::$mockLogger->events);
-        $this->assertEquals("redirected to ''", $lastLog['message']);
+
+        Application::dispatch();
+
+        $this->_assertRedirectedTo('/communityid/');
     }
 
     public function testEulaAction()
@@ -210,8 +214,8 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
             Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
         }
+        $this->_assertRedirectedTo('/communityid/');
         $lastLog = array_pop(Application::$mockLogger->events);
-        $this->assertEquals("redirected to ''", $lastLog['message']);
         $lastLog = array_pop(Application::$mockLogger->events);
         $this->assertEquals("invalid token", $lastLog['message']);
     }
@@ -228,8 +232,7 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
             Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
         }
-        $lastLog = array_pop(Application::$mockLogger->events);
-        $this->assertEquals("redirected to ''", $lastLog['message']);
+        $this->_assertRedirectedTo('/communityid/');
 
         $users = new Users_Model_Users();
         $user = $users->getUserWithToken($token);
@@ -244,8 +247,7 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
             Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
         }
-        $lastLog = array_pop(Application::$mockLogger->events);
-        $this->assertEquals("redirected to ''", $lastLog['message']);
+        $this->_assertRedirectedTo('/communityid/');
     }
 
     public function testAccepteulaAction()
@@ -257,14 +259,18 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         $_GET = array('token' => $user->token);
 
         Application::$front->setRequest(new TestRequest('/users/register/accepteula'));
-        try {
-            Application::dispatch();
-        } catch (Zend_Controller_Response_Exception $e) {
-        }
-        $lastLog = array_pop(Application::$mockLogger->events);
-        $this->assertEquals("redirected to '/users/profile'", $lastLog['message']);
+        Application::dispatch();
+
+        $this->_assertRedirectedTo('/communityid/users/profile');
 
         $user->delete();
+    }
+
+    public function tearDown()
+    {
+        // I know this is done again in setUp(), but if I don't do it here too,
+        // hell breaks appart
+        Application::cleanUp();
     }
 
     public function provideBadRegistrationInput()
@@ -307,5 +313,12 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         $user->email = 'john@mailinator.com';
 
         return $user;
+    }
+
+    private function _assertRedirectedTo($location)
+    {
+        $responseHeaders = $this->_response->getHeaders();
+        $this->assertEquals($responseHeaders[0]['name'], 'Location');
+        $this->assertEquals($responseHeaders[0]['value'], $location);
     }
 }

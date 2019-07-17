@@ -21,7 +21,7 @@ class OpenidController extends CommunityID_Controller_Action
 
         if (!$request) {
             $this->_helper->viewRenderer->setNeverRender(true);
-            header('HTTP/1.0 403 Forbidden');
+            $this->_response->setRawHeader('HTTP/1.0 403 Forbidden');
             Zend_Registry::get('logger')->log("OpenIdController::providerAction: FORBIDDEN", Zend_Log::DEBUG);
             echo 'Forbidden';
             return;
@@ -159,7 +159,7 @@ class OpenidController extends CommunityID_Controller_Action
         $this->view->policyUrl = false;
 
         // The class Auth_OpenID_SRegRequest is included in the following file
-        require 'libs/Auth/OpenID/SReg.php';
+        require_once 'libs/Auth/OpenID/SReg.php';
 
         $sregRequest = Auth_OpenID_SRegRequest::fromOpenIDRequest($request);
         $props = $sregRequest->allRequestedFields();
@@ -203,7 +203,7 @@ class OpenidController extends CommunityID_Controller_Action
         $response = $request->answer(true, null, $id);
 
         // The class Auth_OpenID_SRegRequest is included in the following file
-        require 'libs/Auth/OpenID/SReg.php';
+        require_once 'libs/Auth/OpenID/SReg.php';
 
         $sregRequest = Auth_OpenID_SRegRequest::fromOpenIDRequest($request);
         $props = $sregRequest->allRequestedFields();
@@ -226,7 +226,7 @@ class OpenidController extends CommunityID_Controller_Action
 
             // not planning on validating stuff here yet, but I call this
             // for the date element to be filled properly
-            $personalInfoForm->isValid($formData);
+            $foo = $personalInfoForm->isValid($formData);
 
             $sregResponse = Auth_OpenID_SRegResponse::extractResponse($sregRequest,
                 $personalInfoForm->getUnqualifiedValues());
@@ -261,11 +261,15 @@ class OpenidController extends CommunityID_Controller_Action
             $webresponse = $server->encodeResponse($response);
 
             foreach ($webresponse->headers as $k => $v) {
-                header("$k: $v");
+                if ($k == 'location') {
+                    $this->_response->setRedirect($v);
+                } else {
+                    $this->_response->setHeader($k, $v);
+                }
             }
 
-            header('Connection: close');
-            echo $webresponse->body;
+            $this->_response->setHeader('Connection', 'close');
+            $this->_response->appendBody($webresponse->body);
         } elseif ($this->_getParam('deny')) {
             if ($this->_getParam('forever')) {
                 $sites = new Model_Sites();
@@ -281,10 +285,7 @@ class OpenidController extends CommunityID_Controller_Action
 
             $this->_saveHistory($request->trust_root, Model_History::DENIED);
 
-            header('HTTP/1.1 302 Found');
-            header('Content-Type: text/plain; charset=us-ascii');
-            header('Connection: close');
-            header('Location: ' . $request->getCancelUrl());
+            return $this->_sendResponse($server, $request->answer(false));
         }
     }
 
@@ -317,16 +318,20 @@ class OpenidController extends CommunityID_Controller_Action
         $webresponse = $server->encodeResponse($response);
 
         if ($webresponse->code != AUTH_OPENID_HTTP_OK) {
-            header(sprintf("HTTP/1.1 %d ", $webresponse->code), true, $webresponse->code);
+            $this->_response->setRawHeader(sprintf("HTTP/1.1 %d ", $webresponse->code), true, $webresponse->code);
         }
 
         foreach ($webresponse->headers as $k => $v) {
-            header("$k: $v");
+            if ($k == 'location') {
+                $this->_response->setRedirect($v);
+            } else {
+                $this->_response->setHeader($k, $v);
+            }
         }
 
-        header('Connection: close');
+        $this->_response->setHeader('Connection', 'close');
 
-        echo $webresponse->body;
+        $this->_response->appendBody($webresponse->body);
     }
 
 

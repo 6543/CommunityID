@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
 * @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
@@ -61,6 +61,7 @@ class Users_UserslistController extends CommunityID_Controller_Action
             $jsonObjUser->registration = $user->registration_date;
             $jsonObjUser->role = $user->role;
             $jsonObjUser->status = $status;
+            $jsonObjUser->reminders = $user->reminders;
             $jsonObj->records[] = $jsonObjUser;
         }
 

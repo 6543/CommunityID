@@ -31,7 +31,7 @@ YAHOO.util.Event.onDOMReady(function () {
         <?php echo $this->translate('Total unconfirmed users:') ?> <span id="totalUnconfirmedUsers"></span><br />
     </div>
     <div style="margin-top:10px">
-        <input type="button" id="addUser" value="<?php echo $this->translate('Add User') ?>" onclick="location.href='<?= $this->base ?>/users/profile?userid=0'" />
+        <input type="button" id="addUser" value="<?php echo $this->translate('Add User') ?>" onclick="location.href='<?php echo $this->base ?>/users/profile?userid=0'" />
         <span id="deleteUnconfirmedSpan">
             <input type="button" id="deleteUnconfirmed" value="<?php echo $this->translate('Delete Unconfirmed Users') ?>" />
         </span>

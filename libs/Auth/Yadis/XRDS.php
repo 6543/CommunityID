@@ -351,10 +351,14 @@ class Auth_Yadis_XRDS {
 
         $services = $this->parser->evalXPath('xrd:Service', $this->xrdNode);
 
+        /*
+        * Keyboard Monkeys modification:
+        * Assigning the return value of new by reference is deprecated
+        */
         foreach ($services as $node) {
-            $s =& new Auth_Yadis_Service();
+            $s = new Auth_Yadis_Service();
             $s->element = $node;
-            $s->parser =& $this->parser;
+            $s->parser = $this->parser;
 
             $priority = $s->getPriority();
 

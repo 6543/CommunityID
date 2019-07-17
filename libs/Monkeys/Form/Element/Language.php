@@ -35,7 +35,7 @@ class Monkeys_Form_Element_Language extends Zend_Form_Element_Select
 
         translate('-- Select a Language --');
         $this->addMultiOption(0, '-- Select a Language --');
-        $this->addMultiOptions(Zend_Locale::getLanguageTranslationList(Zend_Registry::get('Zend_Locale')));
+        $this->addMultiOptions(Zend_Locale::getTranslationList('language', Zend_Registry::get('Zend_Locale')));
         asort($this->options);
     }
 }

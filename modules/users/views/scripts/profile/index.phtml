@@ -34,9 +34,11 @@ YAHOO.util.Event.onDOMReady(function () {
     <?php if ($this->targetUser->id && $this->targetUser->id == $this->user->id): ?>
     <div class="accountForm">
         <div class="linksTopRight" >
-            <a href="<?php echo $this->base ?>/users/profilegeneral/confirmdelete">
-                <?php echo $this->translate('Delete Account') ?>
-            </a>
+            <?php if ($this->user->role == Users_Model_User::ROLE_REGISTERED): ?>
+                <a href="<?php echo $this->base ?>/users/profilegeneral/confirmdelete">
+                    <?php echo $this->translate('Delete Account') ?>
+                </a>
+            <?php endif ?>
             <img id="loadingAccountInfoDummy" src="<?php echo $this->base ?>/images/progress.gif" style="visibility:hidden" /><!-- just for layout -->
         </div>
     </div>

@@ -28,13 +28,17 @@ class IdentityControllerTests extends PHPUnit_Framework_TestCase
         Zend_Registry::set('user', $user);
     }
 
-    /**
-    * @expectedException Monkeys_BadUrlException
-    */
     public function testIndexNoIdentityAction()
     {
         Application::$front->setRequest(new TestRequest('/identity'));
-        Application::dispatch();
+        try {
+            Application::dispatch();
+        } catch (Monkeys_BadUrlException $e) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->fail('Expected Monkeys_BadUrlException was not raised');
     }
 
     public function testIdAction()

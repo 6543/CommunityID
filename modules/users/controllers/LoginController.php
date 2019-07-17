@@ -80,6 +80,7 @@ class Users_LoginController extends CommunityID_Controller_Action
     public function logoutAction()
     {
         Zend_Auth::getInstance()->clearIdentity();
+        Zend_Session::forgetMe();
 
         $this->_redirect('');
     }

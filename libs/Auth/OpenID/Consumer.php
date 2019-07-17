@@ -267,10 +267,14 @@ class Auth_OpenID_Consumer {
 
         $this->session =& $session;
 
+        /*
+        * Keyboard Monkeys modification:
+        * Assigning the return value of new by reference is deprecated
+        */
         if ($consumer_cls !== null) {
-            $this->consumer =& new $consumer_cls($store);
+            $this->consumer = new $consumer_cls($store);
         } else {
-            $this->consumer =& new Auth_OpenID_GenericConsumer($store);
+            $this->consumer = new Auth_OpenID_GenericConsumer($store);
         }
 
         $this->_token_key = $this->session_key_prefix . $this->_token_suffix;

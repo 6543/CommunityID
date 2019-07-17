@@ -12,12 +12,9 @@ CREATE TABLE `users` (
   `email` varchar(50) NOT NULL,
   `role` varchar(50) NOT NULL,
   `token` char(32) NOT NULL,
+  `reminders` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB;
-
-INSERT INTO `users` (`id`, `test`, `username`, `accepted_eula`, `registration_date`, `password`, `password_changed`, `firstname`, `lastname`, `email`, `role`, `token`) VALUES
-(1, 0, 'admin', 1, '', '21232f297a57a5a743894a0e4a801fc3', '2008-10-28', 'Admin', 'User', 'whateva@mailinator.com', 'admin', '');
-
 
 CREATE TABLE `associations` (
   `server_url` blob NOT NULL,
@@ -103,7 +100,7 @@ CREATE TABLE `settings` (
  ) ENGINE = MYISAM ;
 
 INSERT INTO `settings` (`name`, `value`) VALUES ('maintenance_mode', '0');
-INSERT INTO `settings` (`name`, `value`) VALUES ('version', '1.1.0.beta1');
+INSERT INTO `settings` (`name`, `value`) VALUES ('version', '1.1.0.RC2');
 
 CREATE TABLE `news` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,

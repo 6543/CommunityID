@@ -30,7 +30,7 @@ class Model_Field extends Zend_Db_Table_Row_Abstract
                 break;
             case self::TYPE_DATE:
                 $el = new Monkeys_Form_Element_Date($varname);
-                 $el->addValidator('date')
+                 $el->addValidator('date', false, array('format_type' => 'Y-m-d'))
                     ->setShowEmptyValues(true)
                     ->setStartEndYear(1900, date('Y') - 7)
                     ->setReverseYears(true);

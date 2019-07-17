@@ -25,20 +25,24 @@ class HistoryControllerTests extends PHPUnit_Framework_TestCase
         $users = new Users_Model_Users();
         $user = $users->createRow();
         $user->id = 23;
-        $user->role = Users_Model_User::ROLE_ADMIN;
+        $user->role = Users_Model_User::ROLE_REGISTERED;
         $user->username = 'testuser';
         Zend_Registry::set('user', $user);
     }
 
-    /**
-    * @expectedException Monkeys_AccessDeniedException
-    */
     public function testIndexGuestUserAction()
     {
         Zend_Registry::get('user')->role = Users_Model_User::ROLE_GUEST;
 
         Application::$front->setRequest(new TestRequest('/history'));
-        Application::dispatch();
+        try {
+            Application::dispatch();
+        } catch (Monkeys_AccessDeniedException $e) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->fail('Expected Monkeys_AccessDeniedException was not raised');
     }
 
     public function testIndexAction()
@@ -76,5 +80,12 @@ class HistoryControllerTests extends PHPUnit_Framework_TestCase
             '{"code":200}',
             $this->_response->getBody()
         );
+    }
+
+    public function tearDown()
+    {
+        // I know this is done again in setUp(), but if I don't do it here too,
+        // hell breaks appart
+        Application::cleanUp();
     }
 }

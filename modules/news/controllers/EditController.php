@@ -57,7 +57,7 @@ class News_EditController extends CommunityID_Controller_Action
         $news = new News_Model_News();
         if ($this->_getParam('id')) {
             if (!$article = $news->getRowInstance($this->_getParam('id'))) {
-                $this->_helper->FlashMessenger->addMessage('Article doesn\'t exist.');
+                $this->_helper->FlashMessenger->addMessage($this->view->translate('The article doesn\'t exist.'));
                 $this->_redirect('/news');
                 return;
             }
@@ -78,7 +78,7 @@ class News_EditController extends CommunityID_Controller_Action
         $article->content = $cleanHtml;
         $article->save();
 
-        $this->_helper->FlashMessenger->addMessage('The article has been saved.');
+        $this->_helper->FlashMessenger->addMessage($this->view->translate('The article has been saved.'));
 
         $this->_redirect('/news');
     }
@@ -87,10 +87,10 @@ class News_EditController extends CommunityID_Controller_Action
     {
         $news = new News_Model_News();
         if (!$article = $news->getRowInstance($this->_getParam('id'))) {
-            $this->_helper->FlashMessenger->addMessage('The article doesn\'t exist.');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('The article doesn\'t exist.'));
         } else {
             $article->delete();
-            $this->_helper->FlashMessenger->addMessage('The article has been deleted.');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('The article has been deleted.'));
         }
 
         $this->_redirect('/news');

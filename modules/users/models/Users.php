@@ -27,7 +27,7 @@ class Users_Model_Users extends Monkeys_Db_Table_Gateway
         'status'        => array('accepted_eula', 'registration_date', 'firstname', 'lastname'),
     );
 
-    public function createRow()
+    public function createRow(array $data = array(), $defaultSource = null)
     {
         return parent::createRow(array(
             'openid'                 => '',
@@ -176,7 +176,7 @@ class Users_Model_Users extends Monkeys_Db_Table_Gateway
 
     public function getUnconfirmedUsers($olderThanDays)
     {
-        $date = date('Y-m-d', strtotime("$olderThanDays days ago"));
+        $date = date('Y-m-d 23:59:59', strtotime("$olderThanDays days ago"));
         $select = $this->select()
                        ->where('accepted_eula=0')
                        ->where('registration_date < ?', $date);
@@ -184,7 +184,7 @@ class Users_Model_Users extends Monkeys_Db_Table_Gateway
         return $this->fetchAll($select);
     }
 
-    public function deleteUser(User $user)
+    public function deleteUser(Users_Model_User $user)
     {
         $where = $this->getAdapter()->quoteInto('id=?', $user->id);
         $this->delete($where);
@@ -417,6 +417,23 @@ class Users_Model_Users extends Monkeys_Db_Table_Gateway
             'DEFAULT' => NULL,
             'NULLABLE' => false,
             'LENGTH' => '32',
+            'SCALE' => NULL,
+            'PRECISION' => NULL,
+            'UNSIGNED' => NULL,
+            'PRIMARY' => false,
+            'PRIMARY_POSITION' => NULL,
+            'IDENTITY' => false,
+          ),
+      'reminders' => 
+          array (
+            'SCHEMA_NAME' => NULL,
+            'TABLE_NAME' => 'users',
+            'COLUMN_NAME' => 'reminders',
+            'COLUMN_POSITION' => 14,
+            'DATA_TYPE' => 'int',
+            'DEFAULT' => '0',
+            'NULLABLE' => false,
+            'LENGTH' => NULL,
             'SCALE' => NULL,
             'PRECISION' => NULL,
             'UNSIGNED' => NULL,

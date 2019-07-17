@@ -20,7 +20,7 @@
     <label for="reason_comments"><?php echo $this->translate('Additional comments:') ?></label>
     <textarea id="reason_comments" name="reason_comments"></textarea><br />
     <input type="submit" id="delete" value="<?php echo $this->translate('Delete Account') ?>" />
-    <input type="button" id="cancel" value="<?php echo $this->translate('Cancel') ?>" onclick="location.href='<?= $this->base ?>/users/profile'" />
+    <input type="button" id="cancel" value="<?php echo $this->translate('Cancel') ?>" onclick="location.href='<?php echo $this->base ?>/users/profile'" />
     <script type="text/javascript">
         var oButton = new YAHOO.widget.Button("delete");
         var oButton = new YAHOO.widget.Button(

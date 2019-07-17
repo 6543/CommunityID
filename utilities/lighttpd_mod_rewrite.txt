@@ -1,7 +1,7 @@
 If using Lighttpd as your web server, add the following to Lighttpd's main config file:
 
 url.rewrite-once = (
-   "(.*\.(js|ico|gif|jpg|png|css|html|php))(\?v=.*)?$" => "$1",
+   "(.*\.(js|ico|gif|jpg|png|css|html|php|xml))(\?.*)?$" => "$1",
    ".*\?(.*)$" => "/index.php?$1",
    "" => "/index.php"
 )

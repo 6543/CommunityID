@@ -71,6 +71,11 @@ class Install_UpgradeController extends CommunityID_Controller_Action
         $upgradedVersion = $this->_runUpgrades(false);
 
         $this->_helper->FlashMessenger->addMessage($this->view->translate('Upgrade was successful. You are now on version %s', $upgradedVersion));
+
+        // we need to logout user in case the user table changed
+        Zend_Auth::getInstance()->clearIdentity();
+        Zend_Session::forgetMe();
+
         $this->_redirect('/');
     }
 

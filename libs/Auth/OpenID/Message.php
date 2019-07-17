@@ -55,13 +55,10 @@ define('Auth_OpenID_NO_DEFAULT', 'NO DEFAULT ALLOWED');
 define('Auth_OpenID_OPENID1_URL_LIMIT', 2047);
 
 // All OpenID protocol fields.  Used to check namespace aliases.
-global $Auth_OpenID_OPENID_PROTOCOL_FIELDS;
-$Auth_OpenID_OPENID_PROTOCOL_FIELDS = array(
-    'ns', 'mode', 'error', 'return_to', 'contact', 'reference',
-    'signed', 'assoc_type', 'session_type', 'dh_modulus', 'dh_gen',
-    'dh_consumer_public', 'claimed_id', 'identity', 'realm',
-    'invalidate_handle', 'op_endpoint', 'response_nonce', 'sig',
-    'assoc_handle', 'trust_root', 'openid');
+/*
+* Keyboard Monkeys modification: global var moved next to its usage
+* because it was breaking unit tests
+*/
 
 // Global namespace / alias registration map.  See
 // Auth_OpenID_registerNamespaceAlias.
@@ -315,11 +312,19 @@ class Auth_OpenID_NamespaceMap {
 
     function addAlias($namespace_uri, $desired_alias, $implicit=false)
     {
-        // Add an alias from this namespace URI to the desired alias
-        global $Auth_OpenID_OPENID_PROTOCOL_FIELDS;
-
         // Check that desired_alias is not an openid protocol field as
         // per the spec.
+
+        /*
+        * Keyboard Monkeys modification: global var moved next to its usage
+        * because it was breaking unit tests
+        */
+        $Auth_OpenID_OPENID_PROTOCOL_FIELDS = array(
+            'ns', 'mode', 'error', 'return_to', 'contact', 'reference',
+            'signed', 'assoc_type', 'session_type', 'dh_modulus', 'dh_gen',
+            'dh_consumer_public', 'claimed_id', 'identity', 'realm',
+            'invalidate_handle', 'op_endpoint', 'response_nonce', 'sig',
+            'assoc_handle', 'trust_root', 'openid');
         if (in_array($desired_alias, $Auth_OpenID_OPENID_PROTOCOL_FIELDS)) {
             Auth_OpenID::log("\"%s\" is not an allowed namespace alias",
                             $desired_alias);

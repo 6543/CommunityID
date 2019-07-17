@@ -4,19 +4,21 @@
     </h3>
     <ul>
         <li>
-            <a href="<?php echo $this->base ?>/users/profile"><?= $this->translate('Account') ?></a>
+            <a href="<?php echo $this->base ?>/users/profile"><?php echo $this->translate('Account') ?></a>
         </li>
+        <?php if ($this->user->role == Users_Model_User::ROLE_REGISTERED): ?>
+            <li>
+                <a href="<?php echo $this->base ?>/users/personalinfo"><?php echo $this->translate('Personal Info') ?></a>
+            </li>
+            <li>
+                <a href="<?php echo $this->base ?>/sites"><?php echo $this->translate('Sites database') ?></a>
+            </li>
+            <li>
+                <a href="<?php echo $this->base ?>/history"><?php echo $this->translate('History Log') ?></a>
+            </li>
+        <?php endif ?>
         <li>
-            <a href="<?php echo $this->base ?>/users/personalinfo"><?= $this->translate('Personal Info') ?></a>
-        </li>
-        <li>
-            <a href="<?php echo $this->base ?>/sites"><?= $this->translate('Sites database') ?></a>
-        </li>
-        <li>
-            <a href="<?php echo $this->base ?>/history"><?= $this->translate('History Log') ?></a>
-        </li>
-        <li>
-            <a href="<?php echo $this->base ?>/users/login/logout"><?= $this->translate('Logout') ?></a>
+            <a href="<?php echo $this->base ?>/users/login/logout"><?php echo $this->translate('Logout') ?></a>
         </li>
     </ul>
     <?php if ($this->user->role == Users_Model_User::ROLE_ADMIN): ?>
@@ -24,23 +26,23 @@
         <h3><?php echo $this->translate('Admin options') ?></h3>
         <ul>
             <li>
-                <a href="<?php echo $this->base ?>/users/manageusers"><?= $this->translate('Manage Users') ?></a>
+                <a href="<?php echo $this->base ?>/users/manageusers"><?php echo $this->translate('Manage Users') ?></a>
             </li>
             <li>
-                <a href="<?php echo $this->base ?>/messageusers"><?= $this->translate('Message Users') ?></a>
+                <a href="<?php echo $this->base ?>/messageusers"><?php echo $this->translate('Message Users') ?></a>
             </li>
             <li>
                 <?php if ($this->maintenanceEnabled): ?>
-                    <a href="<?php echo $this->base ?>/maintenancemode/disable"><?= $this->translate('Disable Maintenance Mode') ?></a>
+                    <a href="<?php echo $this->base ?>/maintenancemode/disable"><?php echo $this->translate('Disable Maintenance Mode') ?></a>
                 <?php else: ?>
-                    <a href="<?php echo $this->base ?>/maintenancemode/enable"><?= $this->translate('Enable Maintenance Mode') ?></a>
+                    <a href="<?php echo $this->base ?>/maintenancemode/enable"><?php echo $this->translate('Enable Maintenance Mode') ?></a>
                 <?php endif ?>
             </li>
             <li>
-                <a href="<?php echo $this->base ?>/stats"><?= $this->translate('Statistics') ?></a>
+                <a href="<?php echo $this->base ?>/stats"><?php echo $this->translate('Statistics') ?></a>
             </li>
             <li>
-                <a href="<?php echo $this->base ?>/cid"><?= $this->translate('About Community-ID') ?></a>
+                <a href="<?php echo $this->base ?>/cid"><?php echo $this->translate('About Community-ID') ?></a>
             </li>
         </ul>
     <?php endif ?>
@@ -70,7 +72,7 @@
             </script> 
         </div>
         <p>
-            <a href="<?php echo $this->base ?>/users/recoverpassword" class="panel_link"><?= $this->translate('Forgot you password?') ?></a>
+            <a href="<?php echo $this->base ?>/users/recoverpassword" class="panel_link"><?php echo $this->translate('Forgot you password?') ?></a>
         </p>
     </form>
     <hr/>
@@ -78,7 +80,7 @@
         <p>
             <?php echo $this->translate('You don\'t have an account?') ?>
             <div>
-                <a href="<?php echo $this->base ?>/users/register"><?= $this->translate('REGISTER NOW!') ?></a>
+                <a href="<?php echo $this->base ?>/users/register"><?php echo $this->translate('REGISTER NOW!') ?></a>
             </div>
         </p>&nbsp;<!-- safari bug workaround -->
     </div>

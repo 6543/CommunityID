@@ -33,6 +33,7 @@ class TestHarness
 
         Application::cleanUp();
         Application::setConfig();
+        Zend_Registry::get('config')->environment->production = false;
         Application::setErrorReporting();
 
         Zend_Registry::get('config')->logging->level = Zend_Log::DEBUG;

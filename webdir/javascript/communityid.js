@@ -591,6 +591,12 @@ COMMID.usersList = function() {
         } else {
             elCell.innerHTML = oRecord.getData("status");
         }
+
+        if (oRecord.getData("reminders") == 1) {
+            elCell.innerHTML += "<br />1 " + COMMID.lang["reminder"];
+        } else if (oRecord.getData("reminders") > 1) {
+            elCell.innerHTML += "<br />" + oRecord.getData("reminders") + " " + COMMID.lang["reminders"];
+        }
     };
 
     var handleDataReturnPayload = function(oRequest, oResponse, oPayload) { 
@@ -621,7 +627,7 @@ COMMID.usersList = function() {
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
             myDataSource.responseSchema = {
                 resultsList: "records",
-                fields: ["id", "name", "registration", "status", "role"],
+                fields: ["id", "name", "registration", "status", "reminders", "role"],
                 metaFields : {
                     totalRecords            : 'totalRecords',
                     totalUsers              : 'totalUsers',
@@ -652,7 +658,7 @@ COMMID.usersList = function() {
             var myColumnDefs = [
                 {key: "name", label: COMMID.lang["Name"], sortable: true, formatter: formatNameColumn},
                 {key: "registration", label: COMMID.lang["Registration"], formatter: 'date', sortable: true},
-                {key: "status", label: COMMID.lang["Status"], sortable: true, hidden: (filter != 'all'), formatter: formatStatusColumn},
+                {key: "status", label: COMMID.lang["Status"], sortable: true, hidden: (filter == 'confirmed'), formatter: formatStatusColumn},
                 {key: "operations", label: "", formatter: formatOperationsColumn}
             ];
 
@@ -756,6 +762,7 @@ COMMID.usersList = function() {
         clearSearch: function () {
             $("search").value = "";
             searchString = "";
+            this.init(currentFilter);
         }
     };
 }();

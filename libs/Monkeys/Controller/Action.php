@@ -42,6 +42,7 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
         $this->view->controller = $this;
 
         $this->view->addHelperPath('libs/Monkeys/View/Helper', 'Monkeys_View_Helper');
+        $this->view->setUseStreamWrapper(true);
         $this->_setScriptPaths();
         $this->_setBase();
         $this->view->numCols = $this->_numCols;

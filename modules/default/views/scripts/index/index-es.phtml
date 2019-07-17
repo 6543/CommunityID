@@ -23,7 +23,7 @@
                 <ul>
                     <?php foreach ($this->news as $item): ?>
                             <div>
-                                <a href="<?php echo $this->base . '/news/' . $item->id ?>"><?= $item->title ?></a>
+                                <a href="<?php echo $this->base . '/news/' . $item->id ?>"><?php echo $item->title ?></a>
                             </div>
                             <div class="newsExcerpt">
                                 <?php echo $item->excerpt ?>

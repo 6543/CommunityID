@@ -25,7 +25,7 @@ class Stats_Model_Stats
     /**
     * @return Array
     */
-    public function getNumRegisteredUsersDays($unixDateStart, $unixDateEnd)
+    public function getNumRegisteredUsersDays($unixDateStart, $unixDateEnd, $countUnconfirmed = false)
     {
         $select = $this->_db->select()->from('users', array('registration_date' => 'registration_date', 'users' => 'COUNT(registration_date)'))
                                       ->where('registration_date >= ?', strftime('%Y-%m-%d', $unixDateStart))
@@ -33,13 +33,17 @@ class Stats_Model_Stats
                                       ->group('registration_date')
                                       ->order('registration_date');
 
+        if (!$countUnconfirmed) {
+            $select = $select->where('users.role != ?', Users_Model_User::ROLE_GUEST);
+        }
+
         return $this->_db->fetchAssoc($select);
     }
 
     /**
     * @return Array
     */
-    public function getNumRegisteredUsersYear($unixDateStart, $unixDateEnd)
+    public function getNumRegisteredUsersYear($unixDateStart, $unixDateEnd, $countUnconfirmed = false)
     {
         $select = $this->_db->select()->from('users', array('registration_date' => 'MONTH(registration_date)', 'users' => 'COUNT(MONTH(registration_date))'))
                                       ->where('registration_date >= ?', strftime('%Y-%m-%d', $unixDateStart))
@@ -47,16 +51,24 @@ class Stats_Model_Stats
                                       ->group('MONTH(registration_date)')
                                       ->order('registration_date');
 
+        if (!$countUnconfirmed) {
+            $select = $select->where('users.role != ?', Users_Model_User::ROLE_GUEST);
+        }
+
         return $this->_db->fetchAssoc($select);
     }
 
     /**
     * @return int
     */
-    public function getNumRegisteredUsers($unixDate)
+    public function getNumRegisteredUsers($unixDate, $countUnconfirmed = false)
     {
         $select = $this->_db->select()->from('users')
                                       ->where('registration_date < ?', strftime('%Y-%m-%d', $unixDate));
+
+        if (!$countUnconfirmed) {
+            $select = $select->where('users.role != ?', Users_Model_User::ROLE_GUEST);
+        }
 
 
         $statement = $this->_db->prepare($select);

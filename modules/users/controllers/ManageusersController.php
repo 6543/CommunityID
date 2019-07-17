@@ -42,6 +42,8 @@ class Users_ManageusersController extends CommunityID_Controller_Action
             $mail = self::getMail($user, $this->view->translate('Community-ID registration reminder'));
             try {
                 $mail->send();
+                $user->reminders++;
+                $user->save();
             } catch (Zend_Mail_Protocol_Exception $e) {
                 Zend_Registry::get('logger')->log($e->getMessage(), Zend_Log::ERR);
             }
@@ -52,7 +54,7 @@ class Users_ManageusersController extends CommunityID_Controller_Action
     * @return Zend_Mail
     * @throws Zend_Mail_Protocol_Exception
     */
-    public static function getMail(User $user, $subject)
+    public static function getMail(Users_Model_User $user, $subject)
     {
         $locale = Zend_Registry::get('Zend_Locale');
         $localeElements = explode('_', $locale);

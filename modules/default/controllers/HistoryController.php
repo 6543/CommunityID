@@ -11,6 +11,13 @@
 
 class HistoryController extends CommunityID_Controller_Action
 {
+    public function preDispatch()
+    {
+        if ($this->user->role == Users_Model_User::ROLE_ADMIN) {
+            throw new Monkeys_AccessDeniedException();
+        }
+    }
+
     public function indexAction()
     {
         $this->_helper->actionStack('index', 'login', 'users');
