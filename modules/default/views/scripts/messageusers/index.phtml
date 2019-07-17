@@ -1,0 +1,54 @@
+<!--[if IE]>
+<style>
+    /* avoid IE jumping when clearing float here */
+    #messageUsersForm #textareasWrapper dd {
+        clear       : none;
+    }
+</style>
+<![endif]-->
+<em><?= $this->translate('This message will be sent to all registered Community-ID users') ?></em>
+<form id="messageUsersForm" name="messageUsersForm" method="post" action="<?= $this->base ?>/messageusers/send">
+    <input type="hidden" name="messageType" value="rich" />
+    <dl class="shortLabelsForm">
+        <?= $this->messageUsersForm->subject ?>
+        <?= $this->messageUsersForm->cc ?>
+    </dl>
+    <div id="textareasWrapper">
+        <div id="linkSwitchToPlain">
+            <a href="#" onclick="COMMID.messageUsers.switchToPlainText()"><?= $this->translate('switch to Plain-Text') ?></a>
+        </div>
+        <div id="linkSwitchToRich">
+            <a href="#" onclick="COMMID.messageUsers.switchToRichText()"><?= $this->translate('switch to Rich-Text (HTML)') ?></a>
+        </div>
+        <dl class="shortLabelsForm">
+            <!-- can't use the Zend_Form here in order to overcome an IE bug -->
+            <dt id="bodyPlainDt">
+                <label for="bodyPlain" class="optional"><?= $this->translate('Body:') ?></label>
+            </dt>
+            <dd id="bodyPlainDd">
+                <textarea name="bodyPlain" id="bodyPlain" rows="24" cols="80"><?= $this->messageUsersForm->bodyPlain->getValue() ?></textarea>
+            </dd>
+            <dt id="bodyHTMLDt">
+                <label for="bodyHTML" class="optional"><?= $this->translate('Body:') ?></label>
+            </dt>
+            <dd id="bodyHTMLDd">
+                <textarea name="bodyHTML" id="bodyHTML" rows="24" cols="80"><?= $this->messageUsersForm->bodyHTML->getValue() ?></textarea>
+            </dd>
+        </dl>
+    </div>
+    <input type="submit" id="send" value="<?= $this->translate('Send') ?>" />
+    <script type="text/javascript">
+        var oButton = new YAHOO.widget.Button("send");
+    </script> 
+</form>
+<script type="text/javascript">
+YAHOO.util.Event.onDOMReady(function() {
+    COMMID.loader.insert(
+        ["resize", "menu", "editor"],
+        function() {
+            COMMID.editor.init('100%','500px', 'bodyHTML');
+            $("messageUsersForm").onsubmit = COMMID.messageUsers.send;
+        }
+    );
+});
+</script>

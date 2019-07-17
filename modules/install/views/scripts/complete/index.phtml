@@ -1,0 +1,20 @@
+<h3>
+    <?= $this->translate('The installation was performed successfully') ?>
+</h3>
+<div style="margin-top:20px">
+    <div>
+        You can login as the administrator with the username "admin" and the password "admin"<br />
+        Please note that this user is only meant for administrative tasks, and cannot have an OpenID credential.
+    </div>
+    <div style="margin-top:20px">
+        <input type="button" id="start" value="<?= $this->translate('Finish') ?>" />
+    <div>
+    <script type="text/javascript">
+        var oButton = new YAHOO.widget.Button(
+            "start",
+            {
+                onclick: {fn: function() {location.href="<?= $this->base ?>"}}
+            }
+        );
+    </script> 
+</div>

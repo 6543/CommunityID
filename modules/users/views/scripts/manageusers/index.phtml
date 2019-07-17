@@ -1,0 +1,53 @@
+<script>
+YAHOO.util.Event.onDOMReady(function () {
+    COMMID.loader.insert(
+        ["datasource", "datatable", "paginator", "json", "connection", "dragdrop"],
+        function() {COMMID.usersList.init('all')}
+    );
+});
+</script>
+<div class="links_topright">
+    <a href="#" id="links_topright_all" onclick="COMMID.usersList.init('all'); return false;">
+        <?= $this->translate('All') ?>
+    </a>
+    | <a href="#" id="links_topright_confirmed"  onclick="COMMID.usersList.init('confirmed'); return false;">
+        <?= $this->translate('Confirmed') ?>
+    </a>
+    | <a href="#" id="links_topright_unconfirmed"  onclick="COMMID.usersList.init('unconfirmed'); return false;">
+        <?= $this->translate('Unconfirmed') ?>
+    </a>
+</div>
+<div id="paging"></div>
+<div id="dt"></div>
+<? if ($this->user->role == User::ROLE_ADMIN): ?>
+    <div style="margin-top:10px">
+        <?= $this->translate('Total users:') ?> <span id="totalUsers"></span><br />
+        <?= $this->translate('Total confirmed users:') ?> <span id="totalConfirmedUsers"></span><br />
+        <?= $this->translate('Total unconfirmed users:') ?> <span id="totalUnconfirmedUsers"></span><br />
+    </div>
+    <div style="margin-top:10px">
+        <input type="button" id="addUser" value="<?= $this->translate('Add User') ?>" onclick="location.href='<?= $this->base ?>/users/profile?userid=0'" />
+        <span id="deleteUnconfirmedSpan">
+            <input type="button" id="deleteUnconfirmed" value="<?= $this->translate('Delete Unconfirmed Users') ?>" />
+        </span>
+        <script type="text/javascript">
+            new YAHOO.widget.Button(
+                "addUser",
+                {
+                    type    : "push",
+                    onclick : {fn: function() {
+                                        location.href='<?= $this->base ?>/users/profile?userid=0'
+                                   }
+                              }
+                }
+            );
+            new YAHOO.widget.Button(
+                "deleteUnconfirmed",
+                {
+                    type    : "push",
+                    onclick : {fn: function() {COMMID.usersList.deleteUnconfirmed()}}
+                }
+            );
+        </script>
+    </div>
+<? endif ?>

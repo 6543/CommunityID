@@ -1,0 +1,35 @@
+<form name="accountInfoForm" class="formGrid">
+    <?= $this->accountInfoForm->username ?>
+    <?= $this->accountInfoForm->firstname ?>
+    <?= $this->accountInfoForm->lastname ?>
+    <?= $this->accountInfoForm->email ?>
+    <? if (!$this->targetUser->id) {
+            echo $this->accountInfoForm->password1;
+            echo $this->accountInfoForm->password2;
+    } ?>
+    <div class="yui-gf">
+        <div class="yui-u first">&nbsp;</div>
+        <div class="yui-u">
+            <input type="button" id="save" value="<?= $this->translate('Save') ?>" onclick="COMMID.editAccountInfo.save()" />
+            <input type="button" id="cancel" value="<?= $this->translate('Cancel') ?>" onclick="COMMID.editAccountInfo.cancel()" />
+            <script type="text/javascript">
+                YAHOO.util.Event.onDOMReady(function () {
+                    new YAHOO.widget.Button(
+                        "save",
+                        {
+                            type    : "push",
+                            onclick : {fn: function() {COMMID.editAccountInfo.save()}}
+                        }
+                    );
+                    new YAHOO.widget.Button(
+                        "cancel",
+                        {
+                            type    : "push",
+                            onclick : {fn: function() {COMMID.editAccountInfo.cancel()}}
+                        }
+                    );
+                });
+            </script> 
+        </div>
+    </div>
+</form>

@@ -1,0 +1,10 @@
+<div id="article">
+    <form action="authenticate?<?= $this->queryString ?>" method="post">
+        <?= $this->form->openIdIdentity ?>
+        <?= $this->form->password ?>
+        <input type="submit" id="login" value="<?= $this->translate('Login') ?>" />
+        <script type="text/javascript">
+            var oButton = new YAHOO.widget.Button("login");
+        </script> 
+    </form>
+</div>

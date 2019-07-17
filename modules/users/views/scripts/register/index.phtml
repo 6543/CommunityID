@@ -1,0 +1,14 @@
+<h2><?= $this->translate('Registration Form') ?></h2>
+<form name="registration" method="post" action="<?= $this->base ?>/users/register/save" class="formGrid" >
+    <?= $this->form->firstname ?>
+    <?= $this->form->lastname ?>
+    <?= $this->form->email ?>
+    <?= $this->form->username ?>
+    <?= $this->form->password1 ?>
+    <?= $this->form->password2 ?>
+    <?= $this->form->captcha ?>
+    <input type="submit" id="send" value="<?= $this->translate('Send') ?>" />
+    <script type="text/javascript">
+        var oButton = new YAHOO.widget.Button("send");
+    </script> 
+</form>

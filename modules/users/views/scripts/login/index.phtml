@@ -1,0 +1,79 @@
+<? if ($this->user->role != User::ROLE_GUEST ): ?>
+    <h3>
+        <?= $this->translate('Hello, %s', Zend_Filter::get($this->user->username, 'HtmlEntities')) ?>
+    </h3>
+    <ul>
+        <li>
+            <a href="<?= $this->base ?>/users/profile"><?= $this->translate('Account') ?></a>
+        </li>
+        <li>
+            <a href="<?= $this->base ?>/users/personalinfo"><?= $this->translate('Personal Info') ?></a>
+        </li>
+        <li>
+            <a href="<?= $this->base ?>/sites"><?= $this->translate('Sites database') ?></a>
+        </li>
+        <li>
+            <a href="<?= $this->base ?>/history"><?= $this->translate('History Log') ?></a>
+        </li>
+        <li>
+            <a href="<?= $this->base ?>/users/login/logout"><?= $this->translate('Logout') ?></a>
+        </li>
+    </ul>
+    <? if ($this->user->role == User::ROLE_ADMIN): ?>
+        <hr />
+        <h3><?= $this->translate('Admin options') ?></h3>
+        <ul>
+            <li>
+                <a href="<?= $this->base ?>/users/manageusers"><?= $this->translate('Manage Users') ?></a>
+            </li>
+            <li>
+                <a href="<?= $this->base ?>/messageusers"><?= $this->translate('Message Users') ?></a>
+            </li>
+            <li>
+                <? if ($this->maintenanceEnabled): ?>
+                    <a href="<?= $this->base ?>/maintenancemode/disable"><?= $this->translate('Disable Maintenance Mode') ?></a>
+                <? else: ?>
+                    <a href="<?= $this->base ?>/maintenancemode/enable"><?= $this->translate('Enable Maintenance Mode') ?></a>
+                <? endif ?>
+            </li>
+            <li>
+                <a href="<?= $this->base ?>/stats"><?= $this->translate('Statistics') ?></a>
+            </li>
+        </ul>
+    <? endif ?>
+<? else: ?>
+    <? if ($this->underMaintenance): ?>
+        <div class="messages_small">
+            <?= $this->translate('User access is currently disabled for system maintenance.<br />Please try again later') ?>
+        </div>
+    <? endif ?>
+    <form id="loginForm" action="<?= $this->loginTargetBase ?>/users/login/authenticate" method="post">
+        <dl id="credentials">
+            <?= $this->loginForm->username ?>
+            <?= $this->loginForm->password ?>
+        </dl>
+        <dl id="rememberMe">
+            <!-- to hard to do in the ZF -->
+            <input type="checkbox" name="rememberme" style="top:0" />
+            <label><?= $this->translate('Remember me') ?></label>
+        </dl>
+        <div id="loginButton">
+            <input type="submit" id="login" value="<?= $this->translate('Log in') ?>" />
+            <script type="text/javascript">
+                var oButton = new YAHOO.widget.Button("login");
+            </script> 
+        </div>
+        <p>
+            <a href="<?= $this->base ?>/users/recoverpassword" class="panel_link"><?= $this->translate('Forgot you password?') ?></a>
+        </p>
+    </form>
+    <hr/>
+    <div id="registerNow">
+        <p>
+            <?= $this->translate('You don\'t have an account?') ?>
+            <div>
+                <a href="<?= $this->base ?>/users/register"><?= $this->translate('REGISTER NOW!') ?></a>
+            </div>
+        </p>&nbsp;<!-- safari bug workaround -->
+    </div>
+<? endif; ?>

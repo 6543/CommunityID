@@ -1,0 +1,40 @@
+<div id="home">
+    <h2>
+        Community ID: Free OpenID Authentication<br />
+        Backed 100% with Open Source Technologies
+    </h2>
+    <div class="yui-g"> 
+        <div class="yui-u first">
+            <p>
+                Since its inception Community-ID has been built with security as the foremost concern. Every element in our technology stack has been chosen looking at its security record, and most importantly, everything is Open Source.
+            </p>
+            <p>
+                This means we're open to scrutiny by the entire world. It is already a proven fact that security by obscurity doesn't work, and when you use a product or service whose underlying mechanism is kept as a secret, you're putting your data (and therefore yourself) into great risk. 
+            </p>
+            <p style="font-weight: bold; text-align:center">
+                What are you waiting for?<br />
+                Simplify your life and reduce your risk exposure.<br /><br />
+                <a href="<?= $this->base ?>/users/register">OPEN AN ACCOUNT NOW</a>
+            </p>
+        </div> 
+        <div class="yui-u">
+            <div id="homeNews">
+                <h3>Latest News</h3>
+                <ul>
+                    <? foreach ($this->news as $item): ?>
+                        <li>
+                            <div>
+                                <a href="<?= $item->link['href'] ?>"><?= $item->title ?></a>
+                            </div>
+                            <div class="newsExcerpt">
+                                <?= $item->content ?>
+                            </div>
+                        </li>
+                    <? endforeach ?>
+                </ul>&nbsp; <!-- FF bug -->
+            </div>
+            <div class="borderFadingLeft">
+            </div>
+        </div> 
+    </div> 
+</div>

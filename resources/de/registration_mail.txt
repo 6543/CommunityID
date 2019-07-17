@@ -1,0 +1,12 @@
+Sehr geehrte(r) {userName},
+
+Vielen Dank fur die Registrierung mit community-id.org
+
+Um mit der Registrierung fortzufahren klicken Sie bitte auf den folgenden
+Link:
+
+{registrationURL}
+
+
+Vielen Dank,
+Das Community-ID Team

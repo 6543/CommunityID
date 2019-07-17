@@ -1,0 +1,10 @@
+<h3><?= $this->translate('Top 10 Trusted Sites') ?></h3>
+<table id="topTenTable">
+    <? foreach ($this->sites as $num => $siteInfo): ?>
+    <tr>
+        <td><?= $num + 1 ?></td>
+        <td><?= $siteInfo['site'] ?></td>
+        <td>(<?= $this->translate('%s users', $siteInfo['num']) ?>)</td>
+    </tr>
+    <? endforeach ?>
+</table>

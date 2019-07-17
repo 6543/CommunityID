@@ -1,0 +1,37 @@
+<form id="confirmDeleteForm" method="post" action="<?= $this->base ?>/users/profilegeneral/delete">
+    <p>
+        <?= $this->translate('Why do you want to delete your Community-ID account?') ?><br />
+        <?= $this->translate('Please check all that apply:') ?>
+    </p>
+    <ul>
+        <li>
+            <input type="checkbox" name="reason_test" style="top:0" /><?= $this->translate('This was just a test account') ?>
+        </li>
+        <li>
+            <input type="checkbox" name="reason_foundbetter" style="top:0" /><?= $this->translate('I found a better service') ?>
+        </li>
+        <li>
+            <input type="checkbox" name="reason_lackedfeatures" style="top:0" /><?= $this->translate('Service lacked some key features I needed') ?>
+        </li>
+        <li>
+            <input type="checkbox" name="reason_none" style="top:0" /><?= $this->translate('No particular reason') ?>
+        </li>
+    </ul>
+    <label for="reason_comments"><?= $this->translate('Additional comments:') ?></label>
+    <textarea id="reason_comments" name="reason_comments"></textarea><br />
+    <input type="submit" id="delete" value="<?= $this->translate('Delete Account') ?>" />
+    <input type="button" id="cancel" value="<?= $this->translate('Cancel') ?>" onclick="location.href='<?= $this->base ?>/users/profile'" />
+    <script type="text/javascript">
+        var oButton = new YAHOO.widget.Button("delete");
+        var oButton = new YAHOO.widget.Button(
+            "cancel",
+            {
+                type    : "push",
+                onclick : {fn: function() {
+                                    location.href='<?= $this->base ?>/users/profile'
+                               }
+                          }
+            }
+        );
+    </script> 
+</form>

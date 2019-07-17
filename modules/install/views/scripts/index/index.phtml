@@ -1,0 +1,14 @@
+<h3>
+    <?= $this->translate('This Community-ID instance hasn\'t been installed yet') ?>
+</h3>
+<div style="margin-top:20px">
+    <input type="button" id="start" value="<?= $this->translate('Proceed with installation')?>" />
+    <script type="text/javascript">
+        var oButton = new YAHOO.widget.Button(
+            "start",
+            {
+                onclick: {fn: function() {location.href="<?= $this->base ?>/install/credentials"}}
+            }
+        );
+    </script> 
+</div>

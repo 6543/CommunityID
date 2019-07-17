@@ -1,0 +1,10 @@
+<h3><?= $this->translate('Registrations per day') ?></h3>
+<div>
+    <?= $this->translate('Select view') ?>:
+    <select name="view" onchange="COMMID.stats.loadReport('registrations', 'statsRegs', 'type=' + this.value)">
+        <option value="week" <?= $this->weekSelected ?>><?= $this->translate('Last Week') ?></option>
+        <option value="month" <?= $this->monthSelected ?>><?= $this->translate('Last Month') ?></option>
+        <option value="year" <?= $this->yearSelected ?>><?= $this->translate('Last Year') ?></option>
+    </select>
+</div>
+<img src="<?= $this->base ?>/stats/registrations/graph?rand=<?= $this->rand ?>&type=<?= $this->type ?>" />

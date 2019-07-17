@@ -1,0 +1,5 @@
+Modifications to the jpgraph lib:
+    - this is just the src directory
+    - copied the README, VERSION and QPL.txt files
+    - removed the Examples dir
+    - removed the flags* files

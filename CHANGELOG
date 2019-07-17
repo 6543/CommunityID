@@ -1,0 +1,16 @@
+2009-04-21 Reiner Jung <reiner@kb-m.com>
+
+New features:
+- Added configuration directives to support OpenID URLs using subdomains.
+- Add a configuration directives to set the number of news items to show.
+- When in maintenance mode, have a warning message explaining, and disable the login section.
+- Improved installation procedure.
+- Improved error handling and logging.
+- Return 404 and 401 status on page not found and access denied scenarios, respectively.
+- Don't send email on Access Denied Exceptions, as these may be caused by session timeouts.
+- Check if set_include_path() is supported by the current PHP configuration.
+- Moved from PDO Mysql to MySQLi database back-end, to avoid problems under Windows servers.
+
+Bug fixes:
+- Was throwing an exception when logging in during an openid authentication.
+- Wasn't showing 'denied' or 'authorized' in the history list

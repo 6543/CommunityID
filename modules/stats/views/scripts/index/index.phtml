@@ -1,0 +1,24 @@
+<script>
+YAHOO.util.Event.onDOMReady(function () {
+    COMMID.loader.insert(
+        ["connection"],
+        function() {
+            COMMID.stats.loadReport("registrations", "statsRegs");
+            COMMID.stats.loadReport("authorizations", "statsAuths");
+            COMMID.stats.loadReport("sites", "statsNumTrustedSites");
+            COMMID.stats.loadReport("top", "statsTopTen");
+        }
+    );
+});
+</script>
+
+<div class="yui-g">
+    <div class="yui-u first">
+        <div id="statsRegs"></div>
+        <div id="statsNumTrustedSites"></div>
+    </div>
+    <div class="yui-u">
+        <div id="statsAuths"></div>
+        <div id="statsTopTen"></div>
+    </div>
+</div>

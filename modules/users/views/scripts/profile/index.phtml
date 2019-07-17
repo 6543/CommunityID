@@ -1,0 +1,44 @@
+<script>
+YAHOO.util.Event.onDOMReady(function () {
+    COMMID.loader.insert(
+        // "connection" is required by COMMID.general methods
+        ["connection"],
+        null
+    );
+});
+</script>
+
+<div class="accountForm">
+    <div>
+        <h2><?= $this->translate('Account info') ?></h2>
+        <? if ($this->targetUser->id == $this->user->id): ?>
+        <div class="profileLinks">
+            <a href="javascript:void(0);" onclick="COMMID.general.editAccountInfo();">
+                <?= $this->translate('Edit') ?>
+            </a>&nbsp;|&nbsp;
+            <a href="javascript:void(0);" onclick="COMMID.general.changePassword()" >
+                <?= $this->translate('Change Password') ?>
+            </a>
+            <img id="loadingAccountInfo" src="<?= $this->base ?>/images/progress.gif" style="visibility:hidden" />
+        </div>
+        <? endif ?>
+    </div>
+    <div id="accountInfo">
+        <? if ($this->targetUser->id) {
+            echo $this->action('accountinfo', 'profilegeneral', 'users', array('userid' => $this->targetUser->id));
+        } else {
+            // user id == 0 means we're entering info for a new user
+            echo $this->action('editaccountinfo', 'profilegeneral', 'users', array('userid' => $this->targetUser->id));
+        } ?>
+    </div>
+    <? if ($this->targetUser->id && $this->targetUser->id == $this->user->id): ?>
+    <div class="accountForm">
+        <div class="profileLinks" >
+            <a href="<?= $this->base ?>/users/profilegeneral/confirmdelete">
+                <?= $this->translate('Delete Account') ?>
+            </a>
+            <img id="loadingAccountInfoDummy" src="<?= $this->base ?>/images/progress.gif" style="visibility:hidden" /><!-- just for layout -->
+        </div>
+    </div>
+    <? endif ?>
+</div>

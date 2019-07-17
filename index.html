@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Community-ID</title>
+        <link rel="shortcut icon" href="webdir/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.7.0/build/assets/reset-fonts-grids/reset-fonts-grids.css"> 
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css"> 
+	    <link rel="stylesheet" href="webdir/styles/style.css?v=<?= $this->version ?>" type="text/css" media="screen" charset="utf-8"/>
+    </head>
+    <body class="yui-skin-sam">
+        <div id="doc4">
+            <div id="hd">
+                <div id="logoAndLinks">
+                    <img id="logo" src="webdir/images/logo.gif" />
+                </div>
+            </div>
+            <div id="bd">
+                <div id="yui-main">
+                    <div class="yui-b singleColumn" id="content">
+                        <h2>
+                            Your Community-ID installation is not properly set up
+                        </h2>
+                        <p>
+                            The root directory of Community-ID must be placed outside the web root directory.
+                        </p>
+                        <p>
+                            After you do that, make a symlink under your web root directory where you want to serve Community-ID, pointing to the "webdir" subdirectory of the Community-ID directory.
+                        </p>
+                        <p>
+                            If for some reason you can't make symlinks, or you can't have your web server follow them, then just make a copy of the "webdir" directory, and then edit the index.php file, setting the APP_DIR constant to the location of the Community-ID root directory.
+                        </p>
+                    </div>
+                </div>
+            </div>
+           <div id="ft">
+                <div id="copyright">
+                    <p>Copyright &#169; 2008-2009 Keyboard Monkeys Ltd. Community as a service &#x2122;</p>
+                </div>
+           </div> 
+        </div>
+    </body>
+</html>

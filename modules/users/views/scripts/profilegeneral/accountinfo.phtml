@@ -1,0 +1,34 @@
+<div class="formGrid">
+    <div class="yui-gf">
+        <div class="yui-u first">
+            <?= $this->translate('Username') ?>:
+        </div>
+        <div class="yui-u">
+            <?= $this->targetUser->username ?>
+        </div>
+    </div>
+    <div class="yui-gf">
+        <div class="yui-u first">
+            <?= $this->translate('Name') ?>:
+        </div>
+        <div class="yui-u">
+            <?= $this->targetUser->getfullName() ?>
+        </div>
+    </div>
+    <div class="yui-gf">
+        <div class="yui-u first">
+            <?= $this->translate('E-mail') ?>:
+        </div>
+        <div class="yui-u">
+            <?= $this->targetUser->email ?>
+        </div>
+    </div>
+    <div class="yui-gf">
+        <div class="yui-u first">
+            <?= $this->translate('OpenID') ?>:
+        </div>
+        <div class="yui-u">
+            <?= $this->targetUser->openid ?>
+        </div>
+    </div>
+</div>
