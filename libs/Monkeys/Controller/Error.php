@@ -109,7 +109,7 @@ EOD;
 
         $mail = new Zend_Mail();
         $mail->setBodyText($body);
-        $mail->setFrom('support@community-id.org');
+        $mail->setFrom($this->_config->email->supportemail);
         $mail->addTo($configEmail->adminemail);
         $mail->setSubject('Community-ID error report');
 

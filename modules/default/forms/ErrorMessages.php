@@ -19,6 +19,9 @@ class ErrorMessages
     {
         translate('Value is empty, but a non-empty value is required');
         translate('\'%value%\' is not a valid email address in the basic format local-part@hostname');
+        translate('\'%hostname%\' is not a valid hostname for email address \'%value%\'');
+        translate('\'%value%\' appears to be a DNS hostname but cannot match TLD against known list');
+        translate('\'%value%\' appears to be a local network name but local network names are not allowed');
         translate('Captcha value is wrong');
         translate('Password confirmation does not match');
     }

@@ -122,7 +122,7 @@ class MessageusersController extends Monkeys_Controller_Action
         }
 
         $mail = new Zend_Mail('UTF-8');
-        $mail->setFrom('support@community-id.org');
+        $mail->setFrom($this->_config->email->supportemail);
 
         return $mail;
     }

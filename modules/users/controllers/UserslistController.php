@@ -38,7 +38,7 @@ class Users_UserslistController extends Monkeys_Controller_Action
 
         $jsonObj = new StdClass();
         $jsonObj->recordsReturned = count($usersRows);
-        $jsonObj->totalRecords = $users->getNumUsers($where);
+        $jsonObj->totalRecords = $users->getNumUsers();
         $jsonObj->totalUnconfirmedUsers = $users->getNumUnconfirmedUsers();
         $jsonObj->startIndex = $_GET['startIndex'];
         $jsonObj->sort = $this->_getParam('sort');

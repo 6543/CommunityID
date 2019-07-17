@@ -1,0 +1,50 @@
+<div id="home">
+    <h2>
+        Community ID: Gratis OpenID-identitet<br />
+        till 100% baserad på öppen källkod
+    </h2>
+    <div class="yui-g"> 
+        <div class="yui-u first">
+            <p>
+				Redan från början har Community-ID byggts med säkerhet som största ledstjärna. Varje del i vår teknik
+				har valts med tanke på dess säkerhet och viktigast av allt - allting är baserat på öppen källkod.
+<!--
+                Since its inception Community-ID has been built with security as the foremost concern. 
+				Every element in our technology stack has been chosen looking at its security record, 
+				and most importantly, everything is Open Source.
+-->
+            </p>
+            <p>
+				Det betyder att vi är öppna för granskning från hela världen. Det är redan bevisat att säkerhet
+				genom att undanhålla hela eller delar av en produkt inte fungerar, så när du använder en sådan 
+				produkt utsätts dina data (och därför ockå du själv) för en stor risk. 
+<!--                This means we're open to scrutiny by the entire world. It is already a proven fact that security by obscurity doesn't work, and when you use a product or service whose underlying mechanism is kept as a secret, you're putting your data (and therefore yourself) into great risk. 
+-->
+            </p>
+            <p style="font-weight: bold; text-align:center">
+                Vad väntar du på?<br />
+                Förenkla livet och minska riskerna.<br /><br />
+                <a href="<?= $this->base ?>/users/register">SKAFFA GRATIS OpenID NU</a>
+            </p>
+        </div> 
+        <div class="yui-u">
+            <div id="homeNews">
+                <h3>Senaste nytt</h3>
+                <ul>
+                    <? foreach ($this->news as $item): ?>
+                        <li>
+                            <div>
+                                <a href="<?= $item->link['href'] ?>"><?= $item->title ?></a>
+                            </div>
+                            <div class="newsExcerpt">
+                                <?= $item->content ?>
+                            </div>
+                        </li>
+                    <? endforeach ?>
+                </ul>&nbsp; <!-- FF bug -->
+            </div>
+            <div class="borderFadingLeft">
+            </div>
+        </div> 
+    </div> 
+</div>

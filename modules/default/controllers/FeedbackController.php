@@ -102,7 +102,7 @@ Feedback:
 $feedback
 EOD
 );
-        $mail->setFrom('support@community-id.org');
+        $mail->setFrom($this->_config->email->supportemail);
         $mail->addTo($configEmail->supportemail);
         $mail->setSubject('Community-ID feedback form');
 

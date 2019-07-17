@@ -116,6 +116,10 @@ class OpenidController extends Monkeys_Controller_Action
 
     private function _proceed()
     {
+        if ($this->user->role == User::ROLE_GUEST) {
+            throw new Monkeys_AccessDeniedException();
+        }
+
         // needed for unit tests
         $this->_helper->layout->disableLayout();
         $this->_helper->viewRenderer->setNeverRender(true);
@@ -156,6 +160,11 @@ class OpenidController extends Monkeys_Controller_Action
     }
     private function _saveHistory(Zend_OpenId_Provider $server, $result)
     {
+        // only log if user exists
+        if ($this->user->role == User::ROLE_GUEST) {
+            return;
+        }
+
         $histories = new Histories();
         $history = $histories->createRow();
         $history->user_id = $this->user->id;

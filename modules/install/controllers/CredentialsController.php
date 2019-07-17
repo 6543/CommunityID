@@ -187,6 +187,9 @@ class Install_CredentialsController extends Monkeys_Controller_Action
         if (!is_writable(WEB_DIR . '/captchas')) {
             $errors[] = $this->view->translate('The directory "captchas" under the web directory for Community-ID must be writable by the web server user (%s)', $webServerUser);
         }
+        if (!extension_loaded('mysqli')) {
+            $errors[] = $this->view->translate('You need to have the %s extension installed', '<a href="http://www.php.net/manual/en/mysqli.installation.php">MySQLi</a>');
+        }
 
         return $errors;
     }

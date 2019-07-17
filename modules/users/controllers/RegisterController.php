@@ -118,7 +118,7 @@ class Users_RegisterController extends Monkeys_Controller_Action
         $users = new Users();
         if ($this->_request->getParam('token') == ''
                 || !($user = $users->getUserWithToken($this->_request->getParam('token')))) {
-            $this->_helper->FlashMessenger->addMessage('Invalid token');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid token'));
             $this->_redirect('');
         }
 
@@ -142,22 +142,25 @@ class Users_RegisterController extends Monkeys_Controller_Action
     public function declineeulaAction()
     {
         $users = new Users();
-        if (!($user = $users->getUserWithToken($this->_request->getParam('token'))) || $this->_request->getParam('token') == '') {
+
+        if ($this->_request->getParam('token') == ''
+                || !($user = $users->getUserWithToken($this->_request->getParam('token')))) {
             Zend_Registry::get('logger')->log('invalid token', Zend_Log::DEBUG);
-            $this->_helper->FlashMessenger->addMessage('Invalid token');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid token'));
             $this->_redirect('');
         }
 
         $user->delete();
-        $this->_helper->FlashMessenger->addMessage('Your account has been deleted');
+        $this->_helper->FlashMessenger->addMessage($this->view->translate('Your account has been deleted'));
         $this->_redirect('');
     }
 
     public function accepteulaAction()
     {
         $users = new Users();
-        if (!($user = $users->getUserWithToken($this->_request->getParam('token'))) || $this->_request->getParam('token') == '') {
-            $this->_helper->FlashMessenger->addMessage('Invalid token');
+        if ($this->_request->getParam('token') == ''
+                || !($user = $users->getUserWithToken($this->_request->getParam('token')))) {
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid token'));
             $this->_redirect('');
         }
 
@@ -216,9 +219,9 @@ class Users_RegisterController extends Monkeys_Controller_Action
                 Zend_Mail::setDefaultTransport(new Zend_Mail_Transport_Sendmail());
         }
 
-        $mail = new Zend_Mail();
+        $mail = new Zend_Mail('UTF-8');
         $mail->setBodyText($emailTemplate);
-        $mail->setFrom('support@community-id.org');
+        $mail->setFrom($this->_config->email->supportemail);
         $mail->addTo($user->email);
         $mail->setSubject($this->view->translate('Community-ID registration confirmation'));
 

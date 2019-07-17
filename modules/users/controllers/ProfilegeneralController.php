@@ -188,7 +188,7 @@ class Users_ProfilegeneralController extends Monkeys_Controller_Action
     public function deleteAction()
     {
         $mail = self::getMail();
-        $mail->setFrom('support@community-id.org');
+        $mail->setFrom($this->_config->email->supportemail);
         $mail->addTo($this->_config->email->supportemail);
         $mail->setSubject('Community-ID user deletion');
 

@@ -1,0 +1,11 @@
+Hej {userName}!
+
+Tack för din registrering hos Community-ID.
+
+För att bekräfta registreringen, vänligen klicka på följande länk:
+
+{registrationURL}
+
+
+Vänliga hälsningar!
+Community-ID-teamet
