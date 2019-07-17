@@ -18,12 +18,12 @@ class IdentityControllerTests extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         TestHarness::setUp();
-        Setup::$front->returnResponse(true);
+        Application::$front->returnResponse(true);
         $this->_response = new Zend_Controller_Response_Http();
-        Setup::$front->setResponse($this->_response);
+        Application::$front->setResponse($this->_response);
         
         // guest user
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->createRow();
         Zend_Registry::set('user', $user);
     }
@@ -33,15 +33,15 @@ class IdentityControllerTests extends PHPUnit_Framework_TestCase
     */
     public function testIndexNoIdentityAction()
     {
-        Setup::$front->setRequest(new TestRequest('/identity'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/identity'));
+        Application::dispatch();
     }
 
     public function testIdAction()
     {
-        Setup::$front->setRequest(new TestRequest('/identity/whateva'));
+        Application::$front->setRequest(new TestRequest('/identity/whateva'));
         $_SERVER['SCRIPT_URI'] = 'http://localhost/communityid/identity/whateva';
-        Setup::dispatch();
+        Application::dispatch();
         $this->assertContains('<link href="http://localhost/communityid/openid/provider" rel="openid2.provider" />',
                               $this->_response->getBody());
         $this->assertContains('<h2 style="text-align:center">http://localhost/communityid/identity/whateva</h2>',

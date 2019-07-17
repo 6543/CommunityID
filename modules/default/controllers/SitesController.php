@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class SitesController extends Monkeys_Controller_Action
+class SitesController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
@@ -20,8 +20,8 @@ class SitesController extends Monkeys_Controller_Action
     {
         $this->_helper->viewRenderer->setNeverRender(true);
 
-        $fields = new Fields();
-        $sites = new Sites();
+        $fields = new Model_Fields();
+        $sites = new Model_Sites();
         $sitesRows = $sites->get(
             $this->user,
             $this->_getParam('startIndex'),
@@ -67,7 +67,7 @@ class SitesController extends Monkeys_Controller_Action
     {
         $this->_helper->viewRenderer->setNeverRender(true);
 
-        $sites = new Sites();
+        $sites = new Model_Sites();
         $site = $sites->getRowInstance($this->_getParam('id'));
         if ($site->user_id != $this->user->id) {
             throw new Monkeys_AccessDeniedException();
@@ -86,7 +86,7 @@ class SitesController extends Monkeys_Controller_Action
     {
         $this->_helper->viewRenderer->setNeverRender(true);
 
-        $sites = new Sites();
+        $sites = new Model_Sites();
         $site = $sites->getRowInstance($this->_getParam('id'));
         if ($site->user_id != $this->user->id) {
             throw new Monkeys_AccessDeniedException();
@@ -105,7 +105,7 @@ class SitesController extends Monkeys_Controller_Action
     {
         $this->_helper->viewRenderer->setNeverRender(true);
 
-        $sites = new Sites();
+        $sites = new Model_Sites();
         $site = $sites->getRowInstance($this->_getParam('id'));
         if ($site->user_id != $this->user->id) {
             throw new Monkeys_AccessDeniedException();

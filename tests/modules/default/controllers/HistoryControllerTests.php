@@ -18,14 +18,14 @@ class HistoryControllerTests extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         TestHarness::setUp();
-        Setup::$front->returnResponse(true);
+        Application::$front->returnResponse(true);
         $this->_response = new Zend_Controller_Response_Http();
-        Setup::$front->setResponse($this->_response);
+        Application::$front->setResponse($this->_response);
 
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->createRow();
         $user->id = 23;
-        $user->role = User::ROLE_ADMIN;
+        $user->role = Users_Model_User::ROLE_ADMIN;
         $user->username = 'testuser';
         Zend_Registry::set('user', $user);
     }
@@ -35,16 +35,16 @@ class HistoryControllerTests extends PHPUnit_Framework_TestCase
     */
     public function testIndexGuestUserAction()
     {
-        Zend_Registry::get('user')->role = User::ROLE_GUEST;
+        Zend_Registry::get('user')->role = Users_Model_User::ROLE_GUEST;
 
-        Setup::$front->setRequest(new TestRequest('/history'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/history'));
+        Application::dispatch();
     }
 
     public function testIndexAction()
     {
-        Setup::$front->setRequest(new TestRequest('/history'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/history'));
+        Application::dispatch();
 
         $this->assertContains('COMMID.history', $this->_response->getBody());
     }
@@ -53,8 +53,8 @@ class HistoryControllerTests extends PHPUnit_Framework_TestCase
     {
         $request = new TestRequest('/history/list?startIndex=0&results=15');
         $request->setHeader('X_REQUESTED_WITH', 'XMLHttpRequest');
-        Setup::$front->setRequest($request);
-        Setup::dispatch();
+        Application::$front->setRequest($request);
+        Application::dispatch();
 
         $this->assertRegExp(
             '#\{("__className":"stdClass",)?"recordsReturned":\d+,"totalRecords":\d+,"startIndex":"\d+",("sort":null,)?"dir":"asc","records":\[.*\]\}#',
@@ -69,8 +69,8 @@ class HistoryControllerTests extends PHPUnit_Framework_TestCase
     {
         $request = new TestRequest('/history/clear');
         $request->setHeader('X_REQUESTED_WITH', 'XMLHttpRequest');
-        Setup::$front->setRequest($request);
-        Setup::dispatch();
+        Application::$front->setRequest($request);
+        Application::dispatch();
 
         $this->assertRegExp(
             '{"code":200}',

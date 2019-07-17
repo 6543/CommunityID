@@ -21,13 +21,6 @@ $config['environment']['news_feed']         = '{environment.news_feed}';
 
 
 #
-#  -------  HOME NEWS FEED ------------
-#
-$config['news_feed']['url']                 = '{news_feed.url}';
-$config['news_feed']['num_items']           = {news_feed.num_items};
-
-
-#
 #  -------  LOGGING ------------
 #
 # Enter a path relative to the installation's root dir, or an absolute path.

@@ -80,125 +80,6 @@ COMMID.loader = function() {
     };
 }();
 
-/**
- * Rich-text editor
- */
-COMMID.editor = function() {
-    var myEditor;
-    var state = 'off';
-    var resize = null;
-
-    return {
-
-        init: function(width, height, element) {
-            YAHOO.log('Create the Editor..', 'info', 'example');
-            myEditor = new YAHOO.widget.Editor(element, {
-                    width: width,
-                    height: height,
-                    dompath: true, //Turns on the bar at the bottom
-                    animate: true, //Animates the opening, closing and moving of Editor windows
-                    handleSubmit: true
-            });
-
-            myEditor.on('toolbarLoaded', function() {
-                this.toolbar.addButtonGroup({
-                    group: 'editcodeGroup',
-                    label: '&nbsp;',
-                    buttons: [
-                        {
-                            type: 'separator'
-                        },
-                        {
-                            type: 'push',
-                            label: 'Edit HTML Code',
-                            value: 'editcode'
-                        }]
-                });
-
-                this.toolbar.on('editcodeClick', function() {
-                    var ta = this.get('element');
-                    var iframe = this.get('iframe').get('element');
-
-                    if (state == 'on') {
-                        state = 'off';
-                        this.toolbar.set('disabled', false);
-                        YAHOO.log('Inject the HTML from the textarea into the editor', 'info', 'example');
-                        this.setEditorHTML(ta.value);
-                        if (!this.browser.ie) {
-                            this._setDesignMode('on');
-                        }
-
-                        YAHOO.util.Dom.removeClass(iframe, 'editor-hidden');
-                        YAHOO.util.Dom.addClass(ta, 'editor-hidden');
-                        this.show();
-                        this._focusWindow();
-                    } else {
-                        state = 'on';
-                        YAHOO.log('Show the Code Editor', 'info', 'example');
-                        this.cleanHTML();
-                        YAHOO.log('Save the Editors HTML', 'info', 'example'); 
-                        YAHOO.util.Dom.addClass(iframe, 'editor-hidden');
-                        YAHOO.util.Dom.removeClass(ta, 'editor-hidden');
-                        this.toolbar.set('disabled', true);
-                        this.toolbar.getButtonByValue('editcode').set('disabled', false);
-                        this.toolbar.selectButton('editcode');
-                        this.dompath.innerHTML = 'Editing HTML Code';
-                        this.hide();
-                    }
-                    return false;
-                }, this, true);
-
-                this.on('cleanHTML', function(ev) {
-                    YAHOO.log('cleanHTML callback fired..', 'info', 'example'); 
-                    this.get('element').value = ev.html;
-                }, this, true);
-
-                this.on('afterRender', function() {
-                    var wrapper = this.get('editor_wrapper');
-                    wrapper.appendChild(this.get('element'));
-                    this.setStyle('width', '100%');
-                    this.setStyle('height', '100%');
-                    this.setStyle('visibility', '');
-                    this.setStyle('top', '');
-                    this.setStyle('left', '');
-                    this.setStyle('position', '');
-
-                    this.addClass('editor-hidden');
-                }, this, true);
-
-            }, myEditor, true);
-
-            myEditor.on('editorContentLoaded', function() {
-                resize = new YAHOO.util.Resize(myEditor.get('element_cont').get('element'), {
-                    handles: ['br'],
-                    autoRatio: true,
-                    status: true,
-                    proxy: true,
-                    setSize: false
-                });
-
-                resize.on('startResize', function() {
-                    this.hide();
-                    this.set('disabled', true);
-                }, myEditor, true);
-
-                resize.on('resize', function(args) {
-                    var h = args.height;
-                    var th = (this.toolbar.get('element').clientHeight + 2); // it has a 1px border
-                    var dh = (this.dompath.clientHeight + 1); // it has a 1px top border
-                    var newH = (h - th - dh);
-                    this.set('width', args.width + 'px');
-                    this.set('height', newH + 'px');
-                    this.set('disabled', false);
-                    this.show();
-                }, myEditor, true);
-            });
-
-            myEditor._defaultToolbar.titlebar = false;
-            myEditor.render();
-        }
-    }
-}();
 
 /**
 * MessageUsers
@@ -210,30 +91,25 @@ COMMID.messageUsers = function() {
                 return false;
             }
 
-            document.messageUsersForm.messageType.value = $('bodyPlainDt').style.display == "block"? "plain" : "rich";
+            document.messageUsersForm.messageType.value = $('bodyPlainWrapper').style.display == "block"? "plain" : "rich";
 
             return true;
         },
 
-        /* gotta hide/show dt and dd's independently, to overcome an IE bug */
         switchToPlainText: function() {
             $('linkSwitchToPlain').style.display = "none";
             $('linkSwitchToRich').style.display = "block";
 
-            $('bodyPlainDt').style.display = "block";
-            $('bodyPlainDd').style.display = "block";
-            $('bodyHTMLDt').style.display = "none";
-            $('bodyHTMLDd').style.display = "none";
+            $('bodyPlainWrapper').style.display = "block";
+            $('bodyHTMLWrapper').style.display = "none";
         },
 
         switchToRichText: function() {
             $('linkSwitchToPlain').style.display = "block";
             $('linkSwitchToRich').style.display = "none";
 
-            $('bodyPlainDt').style.display = "none";
-            $('bodyPlainDd').style.display = "none";
-            $('bodyHTMLDt').style.display = "block";
-            $('bodyHTMLDd').style.display = "block";
+            $('bodyPlainWrapper').style.display = "none";
+            $('bodyHTMLWrapper').style.display = "block";
         }
     };
 }();
@@ -287,10 +163,61 @@ COMMID.personalInfo = function() {
                     failure: COMMID.utils.asyncFailed
                 }
             );
+        },
+
+        save: function() {
+            YAHOO.util.Connect.setForm("personalInfoForm");
+            YAHOO.util.Connect.asyncRequest(
+                'POST',
+                'personalinfo/save',
+                {
+                    success: function (responseObj) {COMMID.utils.replaceContent(responseObj, "personalInfo")},
+                    failure: COMMID.utils.asyncFailed
+                },
+                null
+            );
+        },
+
+        cancel: function() {
+            var transaction = YAHOO.util.Connect.asyncRequest(
+                'GET',
+                'personalinfo/show',
+                {
+                    success: function (responseObj) {COMMID.utils.replaceContent(responseObj, "personalInfo")},
+                    failure: COMMID.utils.asyncFailed
+                }
+            );
         }
     };
 }();
 
+COMMID.changePassword = function() {
+    return {
+        save: function(userId) {
+            YAHOO.util.Connect.setForm("changePasswordForm");
+            YAHOO.util.Connect.asyncRequest(
+                "POST",
+                "profilegeneral/savepassword?userid=" + userId,
+                {
+                    success: function (responseObj) {COMMID.utils.replaceContent(responseObj, "accountInfo")},
+                    failure: COMMID.utils.asyncFailed
+                },
+                null
+            );
+        },
+
+        cancel: function(userId) {
+            var transaction = YAHOO.util.Connect.asyncRequest(
+                'GET',
+                'profilegeneral/accountinfo?userid=' + userId,
+                {
+                    success: function (responseObj) {COMMID.utils.replaceContent(responseObj, "accountInfo")},
+                    failure: COMMID.utils.asyncFailed
+                }
+            );
+        }
+    }
+}();
 
 COMMID.sitesList = function() {
     var myDataSource;
@@ -500,8 +427,16 @@ COMMID.historyList = function() {
     var myTableConfig;
 
     var buildQueryString = function (state,dt) { 
-        return "startIndex=" + state.pagination.recordOffset + 
-               "&results=" + state.pagination.rowsPerPage;
+        var request = "";
+        if (state.sortedBy) {
+            request += "sort=" + state.sortedBy.key + "&dir="
+              + (state.sortedBy.dir === YAHOO.widget.DataTable.CLASS_ASC? 0 : 1) + "&";
+        }
+
+        request += "startIndex=" + state.pagination.recordOffset
+                + "&results=" + state.pagination.rowsPerPage;
+
+        return request;
     }; 
 
     var formatResultsColumn = function(elCell, oRecord, oColumn, oData) {
@@ -516,11 +451,16 @@ COMMID.historyList = function() {
     };
 
     var myColumnDefs = [
-        {key: "date", label: COMMID.lang["Date"]},
-        {key: "site", label: COMMID.lang["Site"]},
-        {key: "ip", label: COMMID.lang["IP"]},
-        {key: "result", label: COMMID.lang["Result"], formatter: formatResultsColumn}
+        {key: "date", label: COMMID.lang["Date"], sortable: true},
+        {key: "site", label: COMMID.lang["Site"], sortable: true},
+        {key: "ip", label: COMMID.lang["IP"], sortable: true},
+        {key: "result", label: COMMID.lang["Result"], formatter: formatResultsColumn, sortable: true}
     ];
+
+    var handleDataReturnPayload = function(oRequest, oResponse, oPayload) { 
+        oPayload.totalRecords = oResponse.meta.totalRecords; 
+        return oPayload; 
+    };
 
     return {
         init: function() {
@@ -550,11 +490,13 @@ COMMID.historyList = function() {
             myTableConfig = {
                 initialRequest         : 'startIndex=0&results=15',
                 generateRequest        : buildQueryString,
+                dynamicData            : true,
                 paginator              : myPaginator
             };
             COMMID.utils.addDatatableTranslations(myTableConfig);
 
             myDataTable = new YAHOO.widget.DataTable("dt", myColumnDefs, myDataSource, myTableConfig);
+            myDataTable.handleDataReturnPayload = handleDataReturnPayload;
             myDataTable.subscribe('renderEvent', this.showClearHistoryBtn, this, true);
         },
 
@@ -601,6 +543,9 @@ COMMID.usersList = function() {
     var myDataTable;
     var myPaginator;
     var myTableConfig;
+    var currentFilter;
+    var clickedOnSearchString = false;
+    var searchString = "";
 
     var buildQueryString = function (state,dt) { 
         var request = "";
@@ -650,9 +595,9 @@ COMMID.usersList = function() {
 
     var handleDataReturnPayload = function(oRequest, oResponse, oPayload) { 
         oPayload.totalRecords = oResponse.meta.totalRecords; 
-        $("totalUsers").innerHTML = oResponse.meta.totalRecords;
+        $("totalUsers").innerHTML = oResponse.meta.totalUsers;
         $("totalUnconfirmedUsers").innerHTML = oResponse.meta.totalUnconfirmedUsers;
-        $("totalConfirmedUsers").innerHTML = oResponse.meta.totalRecords - oResponse.meta.totalUnconfirmedUsers;
+        $("totalConfirmedUsers").innerHTML = oResponse.meta.totalUsers - oResponse.meta.totalUnconfirmedUsers;
         return oPayload; 
     };
 
@@ -667,7 +612,11 @@ COMMID.usersList = function() {
 
     return {
         init: function(filter) {
+            currentFilter = filter;
             myDataSourceURL = COMMID.baseDir + "/users/userslist?filter=" + filter + "&";
+            if (searchString != "") {
+                myDataSourceURL += "search=" + encodeURIComponent(searchString) + "&";
+            }
             myDataSource = new YAHOO.util.DataSource(myDataSourceURL);
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
             myDataSource.responseSchema = {
@@ -675,6 +624,7 @@ COMMID.usersList = function() {
                 fields: ["id", "name", "registration", "status", "role"],
                 metaFields : {
                     totalRecords            : 'totalRecords',
+                    totalUsers              : 'totalUsers',
                     totalUnconfirmedUsers   : 'totalUnconfirmedUsers'
                 }
             };
@@ -711,22 +661,25 @@ COMMID.usersList = function() {
 
             switch (filter) {
                 case 'all': 
-                    $("links_topright_all").className = "disabledLink";
-                    $("links_topright_confirmed").className = "enabledLink";
-                    $("links_topright_unconfirmed").className = "enabledLink";
+                    $("links_topleft_all").className = "disabledLink";
+                    $("links_topleft_confirmed").className = "enabledLink";
+                    $("links_topleft_unconfirmed").className = "enabledLink";
                     $("deleteUnconfirmedSpan").style.display = "none";
+                    $("sendReminderSpan").style.display = "none";
                     break;
                 case 'confirmed':
-                    $("links_topright_all").className = "enabledLink";
-                    $("links_topright_confirmed").className = "disabledLink";
-                    $("links_topright_unconfirmed").className = "enabledLink";
+                    $("links_topleft_all").className = "enabledLink";
+                    $("links_topleft_confirmed").className = "disabledLink";
+                    $("links_topleft_unconfirmed").className = "enabledLink";
                     $("deleteUnconfirmedSpan").style.display = "none";
+                    $("sendReminderSpan").style.display = "none";
                     break;
                 case 'unconfirmed':
-                    $("links_topright_all").className = "enabledLink";
-                    $("links_topright_confirmed").className = "enabledLink";
-                    $("links_topright_unconfirmed").className = "disabledLink";
+                    $("links_topleft_all").className = "enabledLink";
+                    $("links_topleft_confirmed").className = "enabledLink";
+                    $("links_topleft_unconfirmed").className = "disabledLink";
                     $("deleteUnconfirmedSpan").style.display = "inline";
+                    $("sendReminderSpan").style.display = "inline";
                     break;
             }
         },
@@ -746,8 +699,13 @@ COMMID.usersList = function() {
         },
 
         deleteUnconfirmed: function() {
-            if (!confirm(COMMID.lang["Are you sure you wish to delete all the unconfirmed accounts?"])) {
+            var olderThan = prompt(COMMID.lang["Delete unconfirmed accounts older than how many days?"], "5");
+            if (olderThan === null) {
                 return;
+            }
+            olderThan = parseInt(olderThan);
+            if (isNaN(olderThan)) {
+                alert(COMMID.lang["The value entered is incorrect"]);
             }
 
             YAHOO.util.Connect.asyncRequest(
@@ -758,7 +716,46 @@ COMMID.usersList = function() {
                     failure : function() {alert(COMMID.lang['operation failed'])},
                     scope   : this
                 },
-                null);
+                "olderthan=" + olderThan);
+        },
+
+        sendReminder: function() {
+            var olderThan = prompt(COMMID.lang["Send reminder to accounts older than how many days?"], "5");
+            if (olderThan === null) {
+                return;
+            }
+            olderThan = parseInt(olderThan);
+            if (isNaN(olderThan)) {
+                alert(COMMID.lang["The value entered is incorrect"]);
+            }
+
+            YAHOO.util.Connect.asyncRequest(
+                "POST",
+                COMMID.baseDir + "/users/manageusers/sendreminder",
+                {
+                    success : deleteUnconfirmedCompleted,
+                    failure : function() {alert(COMMID.lang['operation failed'])},
+                    scope   : this
+                },
+                "olderthan=" + olderThan);
+        },
+
+        clickOnSearch: function () {
+            if (!clickedOnSearchString) {
+                // only erase field when first clicked
+                $("search").value = "";
+                clickedOnSearchString = true;
+            }
+        },
+
+        submitSearch: function () {
+            searchString = $("search").value;
+            this.init(currentFilter);
+        },
+
+        clearSearch: function () {
+            $("search").value = "";
+            searchString = "";
         }
     };
 }();
@@ -812,4 +809,24 @@ COMMID.stats = function() {
                 });
         }
     }
+}();
+
+COMMID.editArticle = function () {
+    return {
+        cancel: function (articleId) {
+            if (articleId) {
+                location.href = COMMID.baseDir + "/news/" + articleId;
+            } else {
+                location.href = COMMID.baseDir + "/news";
+            }
+        },
+
+        remove: function (articleId) {
+            if (!confirm(COMMID.lang['Are you sure you wish to delete this article?'])) {
+                return;
+            }
+
+            location.href = COMMID.baseDir + "/news/edit/delete/id/" + articleId;
+        }
+    };
 }();

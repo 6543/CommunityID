@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class Users_PersonalinfoController extends Monkeys_Controller_Action
+class Users_PersonalinfoController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
@@ -18,7 +18,7 @@ class Users_PersonalinfoController extends Monkeys_Controller_Action
 
     public function showAction()
     {
-        $fields = new Fields();
+        $fields = new Model_Fields();
         $this->view->fields = $fields->getValues($this->user);
     }
 
@@ -29,14 +29,14 @@ class Users_PersonalinfoController extends Monkeys_Controller_Action
             $this->view->fields = $appSession->personalInfoForm->getElements();
             unset($appSession->personalInfoForm);
         } else {
-            $personalInfoForm = new PersonalInfoForm(null, $this->user);
+            $personalInfoForm = new Users_Form_PersonalInfo(null, $this->user);
             $this->view->fields = $personalInfoForm->getElements();
         }
     }
 
     public function saveAction()
     {
-        $form = new PersonalInfoForm(null, $this->user);
+        $form = new Users_Form_PersonalInfo(null, $this->user);
         $formData = $this->_request->getPost();
 
         $form->populate($formData);
@@ -47,7 +47,7 @@ class Users_PersonalinfoController extends Monkeys_Controller_Action
             return;
         }
 
-        $fieldsValues = new FieldsValues();
+        $fieldsValues = new Model_FieldsValues();
         $fieldsValues->deleteForUser($this->user);
 
         foreach ($form->getValues() as $fieldName => $fieldValue) {

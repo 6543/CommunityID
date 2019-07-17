@@ -1,14 +1,5 @@
 <?
 
-/*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
-* @license http://creativecommons.org/licenses/BSD/ BSD License
-* @author Keyboard Monkey Ltd
-* @since  CommunityID 0.9
-* @package CommunityID
-* @packager Keyboard Monkeys
-*/
-
 abstract class Monkeys_Controller_Error extends Monkeys_Controller_Action
 {
     protected $_numCols = 1;
@@ -114,5 +105,9 @@ EOD;
         $mail->setSubject('Community-ID error report');
 
         return $mail;
+    }
+
+    protected function _validateTargetUser()
+    {
     }
 }

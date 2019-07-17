@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class MessageusersController extends Monkeys_Controller_Action
+class MessageusersController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
@@ -18,7 +18,7 @@ class MessageusersController extends Monkeys_Controller_Action
             $this->view->messageUsersForm = $appSession->messageUsersForm;
             unset($appSession->messageUsersForm);
         } else {
-            $this->view->messageUsersForm = new MessageUsersForm();
+            $this->view->messageUsersForm = new Form_MessageUsers();
         }
 
         $this->_helper->actionStack('index', 'login', 'users');
@@ -26,7 +26,7 @@ class MessageusersController extends Monkeys_Controller_Action
 
     public function sendAction()
     {
-        $form = new MessageUsersForm();
+        $form = new Form_MessageUsers();
         $formData = $this->_request->getPost();
 
         $form->populate($formData);
@@ -35,13 +35,13 @@ class MessageusersController extends Monkeys_Controller_Action
         }
 
         $cc = $form->getValue('cc');
-        $ccArr = array();
+        $bccArr = array();
         if (trim($cc) != '') {
             $validator = new Zend_Validate_EmailAddress();
-            $ccArr = explode(',', $cc);
-            for ($i = 0; $i < count($ccArr); $i++) {
-                $ccArr[$i] = trim($ccArr[$i]);
-                if (!$validator->isValid($ccArr[$i])) {
+            $bccArr = explode(',', $cc);
+            for ($i = 0; $i < count($bccArr); $i++) {
+                $bccArr[$i] = trim($bccArr[$i]);
+                if (!$validator->isValid($bccArr[$i])) {
                     foreach ($validator->getMessages() as $messageId => $message) {
                         $form->cc->addError($this->view->translate('CC field must be a comma-separated list of valid E-mails'));
                         return $this->_redirectFaultyForm($form);
@@ -65,13 +65,17 @@ class MessageusersController extends Monkeys_Controller_Action
             $mail->setBodyHtml($form->getValue('bodyHTML'));
         }
 
-        $users = new Users();
+        $users = new Users_Model_Users();
         foreach ($users->getUsers() as $user) {
-            $mail->addTo($user->email);
+            if ($user->role == ROLE_ADMIN) {
+                continue;
+            }
+
+            $mail->addBcc($user->email);
         }
 
-        foreach ($ccArr as $cc) {
-            $mail->addCC($cc);
+        foreach ($bccArr as $bcc) {
+            $mail->addBcc($bcc);
         }
 
         try {
@@ -122,7 +126,10 @@ class MessageusersController extends Monkeys_Controller_Action
         }
 
         $mail = new Zend_Mail('UTF-8');
-        $mail->setFrom($this->_config->email->supportemail);
+        $mail->setFrom($configEmail->supportemail);
+
+        // all recipients will be in BCC, but I need at least one in the To header
+        $mail->addTo($configEmail->supportemail);
 
         return $mail;
     }

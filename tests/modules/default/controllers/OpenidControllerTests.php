@@ -32,15 +32,15 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
     {
         TestHarness::setUp();
 
-        Setup::$front->returnResponse(true);
+        Application::$front->returnResponse(true);
         $this->_response = new Zend_Controller_Response_Http();
-        Setup::$front->setResponse($this->_response);
+        Application::$front->setResponse($this->_response);
 
-        $users = new Users();
+        $users = new Users_Model_Users();
         $this->_user = $users->createRow();
         $this->_user->test = 1;
         $this->_user->username = 'testuser';
-        $this->_user->role = User::ROLE_REGISTERED;
+        $this->_user->role = Users_Model_User::ROLE_REGISTERED;
         $this->_user->openid = 'http://localhost/communityid/identity/'.$this->_user->username;
         $this->_user->accepted_eula = 1;
         $this->_user->firstname = 'firstnametest';
@@ -56,8 +56,8 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
     */
     public function testIndexAction()
     {
-        Setup::$front->setRequest(new TestRequest('/openid'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid'));
+        Application::dispatch();
     }
 
     public function testProviderAssociateAction()
@@ -75,8 +75,8 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
         // needed by Zend_OpenId_Provider
         $_SERVER["REQUEST_METHOD"] = 'POST';
 
-        Setup::$front->setRequest(new TestRequest('/openid/provider'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/provider'));
+        Application::dispatch();
 
         $this->assertEquals(
             preg_match(
@@ -104,8 +104,8 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
         Zend_OpenId::$exitOnRedirect = false;
 
-        Setup::$front->setRequest(new TestRequest('/openid/provider?openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.mode=checkid_setup&openid.identity=http%3A%2F%2Flocalhost%2Fcommunityid%2Fidentity%2Ftestuser&openid.claimed_id=http%3A%2F%2Flocalhost%2Fcommunityid%2Fidentity%2Ftestuser&openid.assoc_handle='.self::$assocHandle.'&openid.return_to=http%3A%2F%2Fwww%2Eexample%2Ecom&openid.realm=http%3A%2F%2Fwww%2Eexample%2Ecom'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/provider?openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.mode=checkid_setup&openid.identity=http%3A%2F%2Flocalhost%2Fcommunityid%2Fidentity%2Ftestuser&openid.claimed_id=http%3A%2F%2Flocalhost%2Fcommunityid%2Fidentity%2Ftestuser&openid.assoc_handle='.self::$assocHandle.'&openid.return_to=http%3A%2F%2Fwww%2Eexample%2Ecom&openid.realm=http%3A%2F%2Fwww%2Eexample%2Ecom'));
+        Application::dispatch();
 
         $this->assertEquals(
             preg_match(
@@ -130,10 +130,10 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
     {
         $_SERVER['QUERY_STRING'] = sprintf(self::CHECKID_QUERY, self::$assocHandle);
 
-        Setup::$front->setRequest(new TestRequest('/openid/login?' . $_SERVER['QUERY_STRING']));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/login?' . $_SERVER['QUERY_STRING']));
+        Application::dispatch();
 
-        $this->assertContains('<form action="authenticate?'.$_SERVER['QUERY_STRING'].'" method="post">', $this->_response->getBody());
+        $this->assertContains('<form action="authenticate?'.$_SERVER['QUERY_STRING'].'" method="post" class="formGrid">', $this->_response->getBody());
     }
     
     public function testAuthenticateEmptyUsernameAction()
@@ -145,10 +145,10 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
             'password'          => 'whateva',
         );
 
-        Setup::$front->setRequest(new TestRequest('/openid/authenticate?' . $_SERVER['QUERY_STRING']));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/authenticate?' . $_SERVER['QUERY_STRING']));
+        Application::dispatch();
 
-        $this->assertContains('Value is empty, but a non-empty value is required', $this->_response->getBody());
+        $this->assertContains('Login', $this->_response->getBody());
     }
 
     public function testAuthenticateBadUsernameAction()
@@ -162,8 +162,8 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
         Zend_OpenId::$exitOnRedirect = false;
 
-        Setup::$front->setRequest(new TestRequest('/openid/authenticate?' . $_SERVER['QUERY_STRING']));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/authenticate?' . $_SERVER['QUERY_STRING']));
+        Application::dispatch();
 
         $this->assertEquals(
             preg_match(
@@ -195,8 +195,8 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
         Zend_OpenId::$exitOnRedirect = false;
 
-        Setup::$front->setRequest(new TestRequest('/openid/authenticate?' . $_SERVER['QUERY_STRING']));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/authenticate?' . $_SERVER['QUERY_STRING']));
+        Application::dispatch();
 
         $this->assertEquals(
             preg_match(
@@ -228,8 +228,8 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
         Zend_OpenId::$exitOnRedirect = false;
 
-        Setup::$front->setRequest(new TestRequest('/openid/authenticate?' . $_SERVER['QUERY_STRING']));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/authenticate?' . $_SERVER['QUERY_STRING']));
+        Application::dispatch();
 
         $this->assertEquals(
             preg_match(
@@ -252,7 +252,7 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
     public function testTrustAction1()
     {
-        $openIdUser = new OpenIdUser();
+        $openIdUser = new Users_Model_OpenIdUser();
         $openIdUser->setLoggedInUser($this->_user->openid);
 
         $_SERVER['QUERY_STRING'] = sprintf(self::CHECKID_QUERY, self::$assocHandle);
@@ -262,8 +262,8 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
         Zend_OpenId::$exitOnRedirect = false;
 
-        Setup::$front->setRequest(new TestRequest('/openid/provider?' . $_SERVER['QUERY_STRING']));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/provider?' . $_SERVER['QUERY_STRING']));
+        Application::dispatch();
 
         $this->assertEquals(
             preg_match(
@@ -286,13 +286,13 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
     public function testTrustAction2()
     {
-        $openIdUser = new OpenIdUser();
+        $openIdUser = new Users_Model_OpenIdUser();
         $openIdUser->setLoggedInUser($this->_user->openid);
 
         $_SERVER['QUERY_STRING'] = sprintf(self::CHECKID_QUERY, self::$assocHandle);
 
-        Setup::$front->setRequest(new TestRequest('/openid/trust?' . $_SERVER['QUERY_STRING']));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/trust?' . $_SERVER['QUERY_STRING']));
+        Application::dispatch();
 
         $this->assertContains(
             'A site identifying as <a href="http://www.example.com/">http://www.example.com/</a> has asked for confirmation that <a href="'.$this->_user->openid.'">'.$this->_user->openid.'</a> is your identity URL.',
@@ -302,7 +302,7 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
     public function testProviderProceedAction()
     {
-        $openIdUser = new OpenIdUser();
+        $openIdUser = new Users_Model_OpenIdUser();
         $openIdUser->setLoggedInUser($this->_user->openid);
 
         $_SERVER['QUERY_STRING'] = sprintf(self::CHECKID_QUERY, self::$assocHandle);
@@ -316,8 +316,8 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
             'action'    => 'proceed',
             'allow'     => 'Allow',
         );
-        Setup::$front->setRequest(new TestRequest('/openid/provider?' . $_SERVER['QUERY_STRING']));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/provider?' . $_SERVER['QUERY_STRING']));
+        Application::dispatch();
 
         $this->assertEquals(
             preg_match(
@@ -351,7 +351,7 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
         $sreg = new Zend_OpenId_Extension_Sreg($sregData);
         $storage = new Monkeys_OpenId_Provider_Storage_Database();
         $storage->addSite($this->_user->openid, 'http://www.example.com', array('Zend_OpenId_Extension_Sreg' => $sregData));
-        $openIdUser = new OpenIdUser();
+        $openIdUser = new Users_Model_OpenIdUser();
         $openIdUser->setLoggedInUser($this->_user->openid);
 
         $queryString = self::CHECKID_QUERY . "&openid.ns.sreg=http%%3A%%2F%%2Fopenid.net%%2Fextensions%%2Fsreg%%2F1.1&openid.sreg.required=nickname&openid.sreg.optional=email%%2Cfullname";
@@ -366,8 +366,8 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
         Zend_OpenId::$exitOnRedirect = false;
 
-        Setup::$front->setRequest(new TestRequest('/openid/provider?' . $_SERVER['QUERY_STRING']));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/openid/provider?' . $_SERVER['QUERY_STRING']));
+        Application::dispatch();
 
         $this->assertEquals(
             preg_match(
@@ -397,7 +397,7 @@ class OpenidControllerTests extends PHPUnit_Framework_TestCase
 
     public function tearDown()
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         $this->_user->delete();
     }
 }

@@ -63,11 +63,15 @@ dt {
 	float: left;
 }
 
-input {
+input, textarea {
     position: relative;
     top: -5px;
 	padding: 5px;
 	width: 13em;
+}
+
+strong {
+    font-weight : bold;
 }
 
 .formGrid .yui-gf {
@@ -111,13 +115,9 @@ input {
     width   : 142px;
 }
 
-#credentials dt {
-    float       : none;
-    text-align  : left; 
-}
-
 #rememberMe {
-    width   : 100%;
+    width           : 100%;
+    margin-bottom   : 25px;
 }
 
 .formRadio {
@@ -179,6 +179,12 @@ input {
 
 #hd #logoAndLinks #topNav li a:hover {
     border-top          : 14px solid #41bdd9;
+}
+
+#hd #logoAndLinks #openid {
+    position    : absolute;
+    right       : 20px;
+    bottom      : 10px;
 }
 
 #bd {
@@ -299,18 +305,24 @@ input {
     position    : relative;
 }
 
-.profileLinks {
+.linksTopRightContainer {
+    position        : relative;
+}
+
+.linksTopRight {
     position    : absolute;
     right       : 0;
     top         : 0;
+    font-style  : normal;
 }
 
-.profileLinks a {
+.linksTopRight a {
     font-size   : 10px;
     font-weight : normal;
+    font-style  : normal;
 }
 
-.profileLinks img {
+.linksTopRight img {
     margin-left : 20px;
 }
 
@@ -345,11 +357,13 @@ input {
     right       : 0;
 }
 
+#messageUsersForm {
+    margin-top  : 30px;
+}
 
-/* gotta hide both separately in order to overcome an IE bug */
-#messageUsersForm #bodyPlainDt,
-#messageUsersForm #bodyPlainDd {
+#messageUsersForm #bodyPlainWrapper {
     display : none;
+    width   : 510px;
 }
 
 #messageUsersForm textarea {
@@ -360,9 +374,22 @@ input {
     clear       : both;
 }
 
-.links_topright {
-    text-align      : right;
-    margin-bottom   : 10px;
+.links_topleft {
+    position        : relative;
+    margin-bottom   : 20px;
+}
+
+.links_topleft div {
+    position    : absolute;
+    right       : 0;
+}
+
+.links_topleft div #search {
+    padding             : 0;
+    background-image    : url(../images/search_icon.png);
+    background-position : left center;
+    background-repeat   : no-repeat;
+    padding-left        : 23px;
 }
 
 .enabledLink {
@@ -375,6 +402,24 @@ input {
     text-decoration : none;
     color           : #000;
     font-weight     : bold;
+}
+
+.article_date {
+    position        : relative;
+    color           : #65707A;
+    font-size       : 93%;
+    font-style      : italic;
+    margin-bottom   : 20px; 
+}
+
+.more {
+    text-align      : right;
+    margin-bottom   : 30px;
+}
+
+.paginationControl {
+    text-align  : center;
+    font-size   : 116%;
 }
 
 

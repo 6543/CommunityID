@@ -9,11 +9,11 @@
 * @packager Keyboard Monkeys
 */
 
-class Users_ProfileController extends Monkeys_Controller_Action
+class Users_ProfileController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
-        if (!$this->targetUser->id && $this->user->role != User::ROLE_ADMIN) {
+        if (!$this->targetUser->id && $this->user->role != Users_Model_User::ROLE_ADMIN) {
             throw new Monkeys_AccessDeniedException();
         }
 

@@ -4,8 +4,8 @@
 * @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkeys Ltd.
-* @since Textroller 0.9
-* @package TextRoller
+* @since CommunityID 0.9
+* @package CommunityID
 * @packager Keyboard Monkeys
 */
 
@@ -16,35 +16,36 @@
 */
 
 define('APP_DIR', dirname(__FILE__) . '/..');
-define('WEB_DIR', dirname(__FILE__) . '/webdir');
+define('WEB_DIR', APP_DIR . '/webdir');
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
-require_once APP_DIR . '/Setup.php';
+require_once APP_DIR . '/Application.php';
 
 class TestHarness
 {
     public static function setUp()
     {
-        Setup::setIncludePath();
-        Setup::setAutoLoader();
+        Application::setIncludePath();
+        Application::setAutoLoader();
 
         // need the autoloader before requiring anything
         require_once 'tests/TestRequest.php';
 
-        Setup::cleanUp();
-        Setup::setConfig();
-        Setup::setErrorReporting();
+        Application::cleanUp();
+        Application::setConfig();
+        Application::setErrorReporting();
 
         Zend_Registry::get('config')->logging->level = Zend_Log::DEBUG;
-        Setup::setLogger(true);
+        Application::setLogger(true);
 
-        Setup::logRequest();
-        Setup::setDatabase();
-        Setup::setSession();
-        Setup::setAcl();
-        Setup::setI18N();
-        Setup::setLayout();
-        Setup::setFrontController();
-        Setup::$front->throwExceptions(true);
+        Application::logRequest();
+        Application::setDatabase();
+        Application::setSession();
+        Application::setAcl();
+        Application::setI18N();
+        Application::setLayout();
+        Application::setFrontController();
+        Application::$front->throwExceptions(true);
 
         // disable e-mailing
         require_once 'tests/Zend_Mail_Transport_Mock.php';

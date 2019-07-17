@@ -10,102 +10,115 @@
 */
 
 
-self::$acl->addRole(new Zend_Acl_Role(User::ROLE_GUEST))
-          ->addRole(new Zend_Acl_Role(User::ROLE_REGISTERED), User::ROLE_GUEST)
-          ->addRole(new Zend_Acl_Role(User::ROLE_ADMIN), User::ROLE_REGISTERED);
+self::$acl->addRole(new Zend_Acl_Role(Users_Model_User::ROLE_GUEST))
+          ->addRole(new Zend_Acl_Role(Users_Model_User::ROLE_REGISTERED), Users_Model_User::ROLE_GUEST)
+          ->addRole(new Zend_Acl_Role(Users_Model_User::ROLE_ADMIN), Users_Model_User::ROLE_REGISTERED);
 
 /**************************
 * ACTION CONTROLLER PRIVILEGES
 *
 * format: $privileges[module][controller][action] = role;
 **************************/
-$privileges['default']['index']['index']               = User::ROLE_GUEST;
-$privileges['default']['identity']['index']            = User::ROLE_GUEST;
-$privileges['default']['identity']['id']               = User::ROLE_GUEST;
+$privileges['default']['index']['index']               = Users_Model_User::ROLE_GUEST;
+$privileges['default']['identity']['index']            = Users_Model_User::ROLE_GUEST;
+$privileges['default']['identity']['id']               = Users_Model_User::ROLE_GUEST;
 
-$privileges['default']['error']['error']               = User::ROLE_GUEST;
+$privileges['default']['error']['error']               = Users_Model_User::ROLE_GUEST;
 
-$privileges['default']['openid']['provider']               = User::ROLE_GUEST;
-$privileges['default']['openid']['login']                  = User::ROLE_GUEST;
-$privileges['default']['openid']['authenticate']           = User::ROLE_GUEST;
-$privileges['default']['openid']['trust']                  = User::ROLE_GUEST;
+$privileges['default']['openid']['provider']               = Users_Model_User::ROLE_GUEST;
+$privileges['default']['openid']['login']                  = Users_Model_User::ROLE_GUEST;
+$privileges['default']['openid']['authenticate']           = Users_Model_User::ROLE_GUEST;
+$privileges['default']['openid']['trust']                  = Users_Model_User::ROLE_REGISTERED;
+$privileges['default']['openid']['proceed']                = Users_Model_User::ROLE_REGISTERED;
 
-$privileges['default']['sites']['index']                  = User::ROLE_REGISTERED;
-$privileges['default']['sites']['list']                  = User::ROLE_REGISTERED;
-$privileges['default']['sites']['deny']                  = User::ROLE_REGISTERED;
-$privileges['default']['sites']['allow']                  = User::ROLE_REGISTERED;
-$privileges['default']['sites']['delete']                  = User::ROLE_REGISTERED;
+$privileges['default']['sites']['index']                  = Users_Model_User::ROLE_REGISTERED;
+$privileges['default']['sites']['list']                  = Users_Model_User::ROLE_REGISTERED;
+$privileges['default']['sites']['deny']                  = Users_Model_User::ROLE_REGISTERED;
+$privileges['default']['sites']['allow']                  = Users_Model_User::ROLE_REGISTERED;
+$privileges['default']['sites']['delete']                  = Users_Model_User::ROLE_REGISTERED;
 
-$privileges['default']['history']['index']                  = User::ROLE_REGISTERED;
-$privileges['default']['history']['list']                   = User::ROLE_REGISTERED;
-$privileges['default']['history']['clear']                  = User::ROLE_REGISTERED;
+$privileges['default']['history']['index']                  = Users_Model_User::ROLE_REGISTERED;
+$privileges['default']['history']['list']                   = Users_Model_User::ROLE_REGISTERED;
+$privileges['default']['history']['clear']                  = Users_Model_User::ROLE_REGISTERED;
 
-$privileges['default']['messageusers']['index']  = User::ROLE_ADMIN;
-$privileges['default']['messageusers']['send']   = User::ROLE_ADMIN;
+$privileges['default']['messageusers']['index']  = Users_Model_User::ROLE_ADMIN;
+$privileges['default']['messageusers']['send']   = Users_Model_User::ROLE_ADMIN;
 
-$privileges['default']['maintenancemode']['enable']    = User::ROLE_ADMIN;
-$privileges['default']['maintenancemode']['disable']   = User::ROLE_ADMIN;
+$privileges['default']['maintenancemode']['enable']    = Users_Model_User::ROLE_ADMIN;
+$privileges['default']['maintenancemode']['disable']   = Users_Model_User::ROLE_ADMIN;
 
-$privileges['default']['feedback']['index']       = User::ROLE_GUEST;
-$privileges['default']['feedback']['send']        = User::ROLE_GUEST;
+$privileges['default']['feedback']['index']       = Users_Model_User::ROLE_GUEST;
+$privileges['default']['feedback']['send']        = Users_Model_User::ROLE_GUEST;
 
-$privileges['default']['privacy']['index']        = User::ROLE_GUEST;
+$privileges['default']['privacy']['index']        = Users_Model_User::ROLE_GUEST;
 
-$privileges['default']['about']['index']          = User::ROLE_GUEST;
+$privileges['default']['about']['index']          = Users_Model_User::ROLE_GUEST;
 
-$privileges['default']['learnmore']['index']      = User::ROLE_GUEST;
+$privileges['default']['learnmore']['index']      = Users_Model_User::ROLE_GUEST;
 
-$privileges['install']['index']['index']                = User::ROLE_GUEST;
-$privileges['install']['permissions']['index']          = User::ROLE_GUEST;
-$privileges['install']['credentials']['index']          = User::ROLE_GUEST;
-$privileges['install']['credentials']['save']           = User::ROLE_GUEST;
-$privileges['install']['complete']['index']             = User::ROLE_GUEST;
+$privileges['default']['cid']['index']            = Users_Model_User::ROLE_ADMIN;
 
-$privileges['users']['login']['index']            = User::ROLE_GUEST;
-$privileges['users']['login']['logout']           = User::ROLE_GUEST;
-$privileges['users']['login']['authenticate']     = User::ROLE_GUEST;
+$privileges['install']['index']['index']                = Users_Model_User::ROLE_GUEST;
+$privileges['install']['permissions']['index']          = Users_Model_User::ROLE_GUEST;
+$privileges['install']['credentials']['index']          = Users_Model_User::ROLE_GUEST;
+$privileges['install']['credentials']['save']           = Users_Model_User::ROLE_GUEST;
+$privileges['install']['complete']['index']             = Users_Model_User::ROLE_GUEST;
+$privileges['install']['upgrade']['index']              = Users_Model_User::ROLE_GUEST;
+$privileges['install']['upgrade']['proceed']            = Users_Model_User::ROLE_GUEST;
 
-$privileges['users']['userlist']['index']       = User::ROLE_ADMIN;
+$privileges['users']['login']['index']            = Users_Model_User::ROLE_GUEST;
+$privileges['users']['login']['logout']           = Users_Model_User::ROLE_GUEST;
+$privileges['users']['login']['authenticate']     = Users_Model_User::ROLE_GUEST;
 
-$privileges['users']['register']['index']         = User::ROLE_GUEST;
-$privileges['users']['register']['save']          = User::ROLE_GUEST;
-$privileges['users']['register']['eula']          = User::ROLE_GUEST;
-$privileges['users']['register']['declineeula']   = User::ROLE_GUEST;
-$privileges['users']['register']['accepteula']    = User::ROLE_GUEST;
+$privileges['users']['userlist']['index']       = Users_Model_User::ROLE_ADMIN;
 
-$privileges['users']['profile']['index']          = User::ROLE_REGISTERED;
-$privileges['users']['profile']['edit']           = User::ROLE_REGISTERED;
-$privileges['users']['profile']['save']           = User::ROLE_REGISTERED;
+$privileges['users']['register']['index']         = Users_Model_User::ROLE_GUEST;
+$privileges['users']['register']['save']          = Users_Model_User::ROLE_GUEST;
+$privileges['users']['register']['eula']          = Users_Model_User::ROLE_GUEST;
+$privileges['users']['register']['declineeula']   = Users_Model_User::ROLE_GUEST;
+$privileges['users']['register']['accepteula']    = Users_Model_User::ROLE_GUEST;
 
-$privileges['users']['personalinfo']['index']           = User::ROLE_REGISTERED;
-$privileges['users']['personalinfo']['show']           = User::ROLE_REGISTERED;
-$privileges['users']['personalinfo']['edit']           = User::ROLE_REGISTERED;
-$privileges['users']['personalinfo']['save']           = User::ROLE_REGISTERED;
+$privileges['users']['profile']['index']          = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['profile']['edit']           = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['profile']['save']           = Users_Model_User::ROLE_REGISTERED;
 
-$privileges['users']['profilegeneral']['accountinfo']     = User::ROLE_REGISTERED;
-$privileges['users']['profilegeneral']['editaccountinfo']     = User::ROLE_REGISTERED;
-$privileges['users']['profilegeneral']['saveaccountinfo']     = User::ROLE_REGISTERED;
-$privileges['users']['profilegeneral']['changepassword']     = User::ROLE_REGISTERED;
-$privileges['users']['profilegeneral']['savepassword']     = User::ROLE_REGISTERED;
-$privileges['users']['profilegeneral']['confirmdelete']     = User::ROLE_REGISTERED;
-$privileges['users']['profilegeneral']['delete']            = User::ROLE_REGISTERED;
+$privileges['users']['personalinfo']['index']           = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['personalinfo']['show']           = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['personalinfo']['edit']           = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['personalinfo']['save']           = Users_Model_User::ROLE_REGISTERED;
 
-$privileges['users']['recoverpassword']['index']  = User::ROLE_GUEST;
-$privileges['users']['recoverpassword']['send']  = User::ROLE_GUEST;
-$privileges['users']['recoverpassword']['reset']  = User::ROLE_GUEST;
+$privileges['users']['profilegeneral']['accountinfo']     = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['profilegeneral']['editaccountinfo']     = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['profilegeneral']['saveaccountinfo']     = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['profilegeneral']['changepassword']     = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['profilegeneral']['savepassword']     = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['profilegeneral']['confirmdelete']     = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['profilegeneral']['delete']            = Users_Model_User::ROLE_REGISTERED;
 
-$privileges['users']['manageusers']['index']  = User::ROLE_ADMIN;
-$privileges['users']['manageusers']['delete']  = User::ROLE_ADMIN;
-$privileges['users']['manageusers']['deleteunconfirmed']  = User::ROLE_ADMIN;
+$privileges['users']['recoverpassword']['index']  = Users_Model_User::ROLE_GUEST;
+$privileges['users']['recoverpassword']['send']  = Users_Model_User::ROLE_GUEST;
+$privileges['users']['recoverpassword']['reset']  = Users_Model_User::ROLE_GUEST;
 
-$privileges['users']['userslist']['index']  = User::ROLE_ADMIN;
+$privileges['users']['manageusers']['index']  = Users_Model_User::ROLE_ADMIN;
+$privileges['users']['manageusers']['delete']  = Users_Model_User::ROLE_ADMIN;
+$privileges['users']['manageusers']['deleteunconfirmed']  = Users_Model_User::ROLE_ADMIN;
+$privileges['users']['manageusers']['sendreminder']  = Users_Model_User::ROLE_ADMIN;
 
-$privileges['stats']['index']['index']          = User::ROLE_ADMIN;
-$privileges['stats']['registrations']['index']  = User::ROLE_ADMIN;
-$privileges['stats']['registrations']['graph']  = User::ROLE_ADMIN;
-$privileges['stats']['authorizations']['index'] = User::ROLE_ADMIN;
-$privileges['stats']['authorizations']['graph'] = User::ROLE_ADMIN;
-$privileges['stats']['sites']['index']          = User::ROLE_ADMIN;
-$privileges['stats']['sites']['graph']          = User::ROLE_ADMIN;
-$privileges['stats']['top']['index']            = User::ROLE_ADMIN;
-$privileges['stats']['top']['graph']            = User::ROLE_ADMIN;
+$privileges['users']['userslist']['index']  = Users_Model_User::ROLE_ADMIN;
+
+$privileges['stats']['index']['index']          = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['registrations']['index']  = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['registrations']['graph']  = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['authorizations']['index'] = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['authorizations']['graph'] = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['sites']['index']          = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['sites']['graph']          = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['top']['index']            = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['top']['graph']            = Users_Model_User::ROLE_ADMIN;
+
+$privileges['news']['index']['index']           = Users_Model_User::ROLE_GUEST;
+$privileges['news']['view']['index']            = Users_Model_User::ROLE_GUEST;
+$privileges['news']['edit']['add']              = Users_Model_User::ROLE_ADMIN;
+$privileges['news']['edit']['index']            = Users_Model_User::ROLE_ADMIN;
+$privileges['news']['edit']['save']             = Users_Model_User::ROLE_ADMIN;
+$privileges['news']['edit']['delete']           = Users_Model_User::ROLE_ADMIN;

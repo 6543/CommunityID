@@ -1,12 +1,12 @@
 <div class="formGrid">
-    <? foreach ($this->fields as $field): ?>
+    <?php foreach ($this->fields as $field): ?>
         <div class="yui-gf">
             <div class="yui-u first">
-                <?= $this->translate($field->name) ?>:
+                <?php echo $this->translate($field->name) ?>:
             </div>
             <div class="yui-u">
-                <?= is_null($field->value)? $this->translate('Not Entered') : $field->value  ?>
+                <?php echo is_null($field->value)? $this->translate('Not Entered') : $field->value  ?>
             </div>
         </div>
-    <? endforeach ?>
+    <?php endforeach ?>
 </div>

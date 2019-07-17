@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class HistoryController extends Monkeys_Controller_Action
+class HistoryController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
@@ -20,11 +20,13 @@ class HistoryController extends Monkeys_Controller_Action
     {
         $this->_helper->viewRenderer->setNeverRender(true);
 
-        $histories = new Histories();
+        $histories = new Model_Histories();
         $historiesRows = $histories->get(
             $this->user,
             $this->_getParam('startIndex'),
-            $this->_getParam('results')
+            $this->_getParam('results'),
+            $this->_getParam('sort', 'date'),
+            $this->_getParam('dir', Model_Histories::DIR_DESC)
         );
 
         $jsonObj = new StdClass();
@@ -53,7 +55,7 @@ class HistoryController extends Monkeys_Controller_Action
     {
         $this->_helper->viewRenderer->setNeverRender(true);
 
-        $histories = new Histories();
+        $histories = new Model_Histories();
         $histories->clear($this->user);
 
         $json = new StdClass();

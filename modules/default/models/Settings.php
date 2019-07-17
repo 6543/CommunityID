@@ -9,12 +9,13 @@
 * @packager Keyboard Monkeys
 */
 
-class Settings extends Monkeys_Db_Table_Gateway
+class Model_Settings extends Monkeys_Db_Table_Gateway
 {
     protected $_name = 'settings';
     protected $_primary = 'name';
 
     const MAINTENANCE_MODE = 'maintenance_mode';
+    const VERSION = 'version';
 
     public function get($name)
     {
@@ -22,6 +23,10 @@ class Settings extends Monkeys_Db_Table_Gateway
                        ->where('name=?', $name);
 
         $row = $this->fetchRow($select);
+
+        if (!$row) {
+            return null;
+        }
 
         return $row->value;
     }
@@ -34,5 +39,10 @@ class Settings extends Monkeys_Db_Table_Gateway
     public function isMaintenanceMode()
     {
         return $this->get(self::MAINTENANCE_MODE);
+    }
+
+    public function getVersion()
+    {
+        return $this->get(self::VERSION);
     }
 }

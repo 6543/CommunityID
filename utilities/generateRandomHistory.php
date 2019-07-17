@@ -20,13 +20,13 @@ define('APP_DIR', dirname(__FILE__) . '/..');
 */
 define('NUM_ENTRIES', 3000);
 
-require APP_DIR . '/Setup.php';
+require APP_DIR . '/Application.php';
 
-Setup::setIncludePath();
-Setup::setAutoLoader();
-Setup::setConfig();
-Setup::setLogger();
-Setup::setDatabase();
+Application::setIncludePath();
+Application::setAutoLoader();
+Application::setConfig();
+Application::setLogger();
+Application::setDatabase();
 
 class GenerateRandomHistory
 {
@@ -41,9 +41,9 @@ class GenerateRandomHistory
 
     public function generate()
     {
-        $histories = new Histories();
+        $histories = new Model_Histories();
 
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $userIds = $stats->getAllTestUsersIds();
         $numUsers = count($userIds);
 
@@ -55,7 +55,7 @@ class GenerateRandomHistory
             $history->site = 'http://' . strtolower(trim($this->_words[rand(0, $this->_numWords)])) . '.com/'
                              . strtolower(trim($this->_words[rand(0, $this->_numWords)]));
             $history->ip = rand(1, 255) . '.' . rand(1, 255) . '.' . rand(1, 255) . '.' . rand(1, 255);
-            $history->result = History::AUTHORIZED;
+            $history->result = Model_History::AUTHORIZED;
             $history->save();
         }
     }

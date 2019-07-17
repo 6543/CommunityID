@@ -415,6 +415,13 @@ class Zend_View_Helper_HeadScript extends Zend_View_Helper_Placeholder_Container
         }
         $html .= '</script>';
 
+        if (isset($item->attributes['conditional'])
+            && !empty($item->attributes['conditional'])
+            && is_string($item->attributes['conditional']))
+        {
+            $html = '<!--[if ' . $item->attributes['conditional'] . ']> ' . $html . '<![endif]-->';
+        }
+
         return $html;
     }
 
@@ -439,6 +446,7 @@ class Zend_View_Helper_HeadScript extends Zend_View_Helper_Placeholder_Container
         $escapeEnd   = ($useCdata) ? '//]]>'       : '//-->';
 
         $items = array();
+        $this->getContainer()->ksort();
         foreach ($this as $item) {
             if (!$this->_isValid($item)) {
                 continue;

@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class Stats_SitesController extends Monkeys_Controller_Action
+class Stats_SitesController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
@@ -85,7 +85,7 @@ class Stats_SitesController extends Monkeys_Controller_Action
 
     private function _populateWeekData(&$labelsy, &$datay, &$datay2)
     {
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $initialTrustedSites = $stats->getNumTrustedSites(strtotime('-1 week'));
         $initialRegisteredUsers = $stats->getNumRegisteredUsers(strtotime('-1 week'));
 
@@ -95,7 +95,7 @@ class Stats_SitesController extends Monkeys_Controller_Action
         for ($i = -7; $i < 0; $i++) {
             $time = strtotime("$i days");
             $date = date('Y-m-d', $time);
-            $labelsy[] = Stats::$weekDays[date('w', $time)];
+            $labelsy[] = Stats_Model_Stats::$weekDays[date('w', $time)];
 
             if (isset($sites[$date])) {
                 $sitesPeriod = $sites[$date]['site'];
@@ -125,7 +125,7 @@ class Stats_SitesController extends Monkeys_Controller_Action
 
     private function _populateYearData(&$labelsy, &$datay, &$datay2)
     {
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $initialTrustedSites = $stats->getNumTrustedSites(strtotime('-1 week'));
         $initialRegisteredUsers = $stats->getNumRegisteredUsers(strtotime('-1 week'));
 
@@ -137,7 +137,7 @@ class Stats_SitesController extends Monkeys_Controller_Action
         for ($i = -11; $i <= 0; $i++) {
             $time = strtotime("$i months");
             $monthNumber = date('n', $time);
-            $labelsy[] = Stats::$months[$monthNumber];
+            $labelsy[] = Stats_Model_Stats::$months[$monthNumber];
 
             if (isset($sites[$monthNumber])) {
                 $sitesPeriod = $sites[$monthNumber]['site'];

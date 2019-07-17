@@ -10,35 +10,35 @@ YAHOO.util.Event.onDOMReady(function () {
 
 <div class="accountForm">
     <div>
-        <h2><?= $this->translate('Account info') ?></h2>
-        <? if ($this->targetUser->id == $this->user->id): ?>
-        <div class="profileLinks">
+        <h2><?php echo $this->translate('Account info') ?></h2>
+        <?php if ($this->targetUser->id == $this->user->id): ?>
+        <div class="linksTopRight">
             <a href="javascript:void(0);" onclick="COMMID.general.editAccountInfo();">
-                <?= $this->translate('Edit') ?>
+                <?php echo $this->translate('Edit') ?>
             </a>&nbsp;|&nbsp;
             <a href="javascript:void(0);" onclick="COMMID.general.changePassword()" >
-                <?= $this->translate('Change Password') ?>
+                <?php echo $this->translate('Change Password') ?>
             </a>
-            <img id="loadingAccountInfo" src="<?= $this->base ?>/images/progress.gif" style="visibility:hidden" />
+            <img id="loadingAccountInfo" src="<?php echo $this->base ?>/images/progress.gif" style="visibility:hidden" />
         </div>
-        <? endif ?>
+        <?php endif ?>
     </div>
     <div id="accountInfo">
-        <? if ($this->targetUser->id) {
+        <?php if ($this->targetUser->id) {
             echo $this->action('accountinfo', 'profilegeneral', 'users', array('userid' => $this->targetUser->id));
         } else {
             // user id == 0 means we're entering info for a new user
             echo $this->action('editaccountinfo', 'profilegeneral', 'users', array('userid' => $this->targetUser->id));
         } ?>
     </div>
-    <? if ($this->targetUser->id && $this->targetUser->id == $this->user->id): ?>
+    <?php if ($this->targetUser->id && $this->targetUser->id == $this->user->id): ?>
     <div class="accountForm">
-        <div class="profileLinks" >
-            <a href="<?= $this->base ?>/users/profilegeneral/confirmdelete">
-                <?= $this->translate('Delete Account') ?>
+        <div class="linksTopRight" >
+            <a href="<?php echo $this->base ?>/users/profilegeneral/confirmdelete">
+                <?php echo $this->translate('Delete Account') ?>
             </a>
-            <img id="loadingAccountInfoDummy" src="<?= $this->base ?>/images/progress.gif" style="visibility:hidden" /><!-- just for layout -->
+            <img id="loadingAccountInfoDummy" src="<?php echo $this->base ?>/images/progress.gif" style="visibility:hidden" /><!-- just for layout -->
         </div>
     </div>
-    <? endif ?>
+    <?php endif ?>
 </div>

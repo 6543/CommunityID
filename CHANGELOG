@@ -1,6 +1,56 @@
+2009-08-21 Reiner Jung <reiner@kb-m.com>
+
+NEW FEATURES:
+
+- Community-ID news feed has been moved to a new About section, visible 
+only by admins.
+- News in the home page are now manageable by the admin.
+- Brute-force login attempts are now mitigated through the appearance of 
+a captcha after the third failed attempt, in both the main page login 
+section, and when trying to log-in while during an OpenID authentication.
+- Removed requirement of having short_open_tag php.ini directive to be On.
+- The user's OpenID URL is now visible in all pages when he's logged in.
+- The Manage Users section now has a search field.
+- You're able to delete unconfirmed users that have not confirmed their 
+account for a given number of days.
+- You're able to send a reminder to unconfirmed users that have not 
+confirmed their account for a given number of days.
+- Added sorting ability for the History Log table. Have it sort from 
+latest to oldest by default.
+- Replaced rich-text editor in the Message Users section with the more 
+capable FCK Editor.
+- Rich-text editor messages are filtered through the HTMLPurifier lib, 
+that filters out XSS and other malignous content.
+- Upgraded Zend Framework to version 1.8.4PL1
+
+
+FIXED BUGS:
+
+- Fixed compatibility with OpenID relays that send their info through 
+POST instead of GET.
+- Fixed support for relays not sending the OpenID identifier. This fixes 
+Facebook compatibility.
+- Fixed clashes with other Zend Frameworks located in PHP's include path.
+- Now only ascii characters will be allowed in the usernames, to avoid 
+problems in the OpenID URL.
+- Fixed pagination issues in the Manage Users section.
+- Fixed pagination issues in the History Log section.
+- Fixed problems in the Feedback and Message Users forms.
+- Mass-mailing to users will have the recipients in BCC instead of TO, 
+to avoid revealing E-mails to all recipients.
+- Fixed layout issue of the login checkbox "Remember me", under IE and 
+Opera.
+- Fixed some javascript error messages under IE.
+
+
+NEW REQUIREMENTS:
+
+- Minimal supported PHP version is 5.2.4
+
 2009-04-21 Reiner Jung <reiner@kb-m.com>
 
-New features:
+NEW FEATURES:
+
 - Added configuration directives to support OpenID URLs using subdomains.
 - Add a configuration directives to set the number of news items to show.
 - When in maintenance mode, have a warning message explaining, and disable the login section.
@@ -11,6 +61,7 @@ New features:
 - Check if set_include_path() is supported by the current PHP configuration.
 - Moved from PDO Mysql to MySQLi database back-end, to avoid problems under Windows servers.
 
-Bug fixes:
+FIXED BUGS:
+
 - Was throwing an exception when logging in during an openid authentication.
 - Wasn't showing 'denied' or 'authorized' in the history list

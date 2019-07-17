@@ -9,13 +9,13 @@
 * @packager Keyboard Monkeys
 */
 
-class Users_ProfilegeneralController extends Monkeys_Controller_Action
+class Users_ProfilegeneralController extends CommunityID_Controller_Action
 {
     private $_users;
 
     public function preDispatch()
     {
-        if ($this->user->role != User::ROLE_ADMIN
+        if ($this->user->role != Users_Model_User::ROLE_ADMIN
             && $this->targetUser->id != $this->user->id)
         {
             throw new Monkeys_AccessDeniedException();
@@ -30,7 +30,7 @@ class Users_ProfilegeneralController extends Monkeys_Controller_Action
     {
         if ($this->targetUser->id != $this->user->id
             // this condition checks for an non-admin trying to add a new user
-            && ($this->targetUser->id != 0 || $this->user->role != User::ROLE_ADMIN))
+            && ($this->targetUser->id != 0 || $this->user->role != Users_Model_User::ROLE_ADMIN))
         {
             throw new Monkeys_AccessDeniedException();
         }
@@ -40,7 +40,7 @@ class Users_ProfilegeneralController extends Monkeys_Controller_Action
             $this->view->accountInfoForm = $appSession->accountInfoForm;
             unset($appSession->accountInfoForm);
         } else {
-            $this->view->accountInfoForm = new AccountInfoForm(null, $this->targetUser);
+            $this->view->accountInfoForm = new Users_Form_AccountInfo(null, $this->targetUser);
             $this->view->accountInfoForm->populate(array(
                 'username'      => $this->targetUser->username,
                 'firstname'     => $this->targetUser->firstname,
@@ -59,7 +59,7 @@ class Users_ProfilegeneralController extends Monkeys_Controller_Action
             throw new Monkeys_AccessDeniedException();
         }
 
-        $form = new AccountInfoForm(null, $this->targetUser);
+        $form = new Users_Form_AccountInfo(null, $this->targetUser);
         $formData = $this->_request->getPost();
 
         $form->populate($formData);
@@ -98,7 +98,7 @@ class Users_ProfilegeneralController extends Monkeys_Controller_Action
             $this->targetUser->accepted_eula = 1;
             $this->targetUser->registration_date = date('Y-m-d');
             $this->targetUser->openid = $this->_generateOpenId($this->targetUser->username);
-            $this->targetUser->role = User::ROLE_REGISTERED;
+            $this->targetUser->role = Users_Model_User::ROLE_REGISTERED;
             $this->targetUser->setClearPassword($form->getValue('password1'));
         }
         $this->targetUser->save();
@@ -115,7 +115,7 @@ class Users_ProfilegeneralController extends Monkeys_Controller_Action
     private function _usernameAlreadyExists($username)
     {
         $users = $this->_getUsers();
-        return $users->getUser($username);
+        return $users->getUserWithUsername($username);
     }
 
     private function _emailAlreadyExists($email)
@@ -154,7 +154,7 @@ class Users_ProfilegeneralController extends Monkeys_Controller_Action
             $this->view->changePasswordForm = $appSession->changePasswordForm;
             unset($appSession->changePasswordForm);
         } else {
-            $this->view->changePasswordForm = new ChangePasswordForm();
+            $this->view->changePasswordForm = new Users_Form_ChangePassword();
         }
     }
 
@@ -165,7 +165,7 @@ class Users_ProfilegeneralController extends Monkeys_Controller_Action
             throw new Monkeys_AccessDeniedException();
         }
 
-        $form = new ChangePasswordForm();
+        $form = new Users_Form_ChangePassword();
         $formData = $this->_request->getPost();
         $form->populate($formData);
         if (!$form->isValid($formData)) {
@@ -252,7 +252,7 @@ EOT;
         }
 
         if ($this->_config->subdomain->enabled) {
-            $openid = $this->_getProtocol() . '://' . $username . '.' . $this->_config->subdomain->hostname;
+            $openid = $this->getProtocol() . '://' . $username . '.' . $this->_config->subdomain->hostname;
         } else {
             $openid = $matches[1] . "/identity/$username";
         }
@@ -299,7 +299,7 @@ EOT;
     private function _getUsers()
     {
         if (!isset($this->_users)) {
-            $this->_users = new Users();
+            $this->_users = new Users_Model_Users();
         }
 
         return $this->_users;

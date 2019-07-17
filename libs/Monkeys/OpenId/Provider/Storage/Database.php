@@ -13,7 +13,7 @@ class Monkeys_OpenId_Provider_Storage_Database extends Zend_OpenId_Provider_Stor
 {
     public function addAssociation($handle, $macFunc, $secret, $expires)
     {
-        $associations = new Associations();
+        $associations = new Model_Associations();
         $association = $associations->createRow();
         $association->handle = $handle;
         $association->macfunc = $macFunc;
@@ -26,7 +26,7 @@ class Monkeys_OpenId_Provider_Storage_Database extends Zend_OpenId_Provider_Stor
 
     public function getAssociation($handle, &$macFunc, &$secret, &$expires)
     {
-        $associations = new Associations();
+        $associations = new Model_Associations();
         $association = $associations->getAssociationGivenHandle($handle);
         if (!$association) {
             return false;
@@ -52,7 +52,7 @@ class Monkeys_OpenId_Provider_Storage_Database extends Zend_OpenId_Provider_Stor
 
     public function hasUser($id)
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->getUserWithOpenId($id);
 
         return $user? true : false;
@@ -86,10 +86,10 @@ class Monkeys_OpenId_Provider_Storage_Database extends Zend_OpenId_Provider_Stor
      */
     public function getTrustedSites($id)
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->getUserWithOpenId($id);
 
-        $sites = new Sites();
+        $sites = new Model_Sites();
 
         $trustedSites = array();
         foreach ($sites->getTrusted($user) as $site) {
@@ -109,10 +109,10 @@ class Monkeys_OpenId_Provider_Storage_Database extends Zend_OpenId_Provider_Stor
      */
     public function addSite($id, $site, $trusted)
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->getUserWithOpenId($id);
 
-        $sites = new Sites();
+        $sites = new Model_Sites();
         $sites->deleteForUserSite($user, $site);
 
         if (!is_null($trusted)) {

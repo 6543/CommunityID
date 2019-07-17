@@ -1,7 +1,7 @@
-<?= $this->translate('Please enter your E-mail below to receive a link to reset your password') ?>
-<form method="post" action="<?= $this->base ?>/users/recoverpassword/send">
-    <?= $this->form->email ?>
-    <input type="submit" id="send" value="<?= $this->translate('Send') ?>" />
+<?php echo $this->translate('Please enter your E-mail below to receive a link to reset your password') ?>
+<form method="post" action="<?php echo $this->base ?>/users/recoverpassword/send">
+    <?php echo $this->form->email ?>
+    <input type="submit" id="send" value="<?php echo $this->translate('Send') ?>" />
     <script type="text/javascript">
         var oButton = new YAHOO.widget.Button("send");
     </script> 

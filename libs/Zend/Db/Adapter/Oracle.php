@@ -20,11 +20,6 @@
  */
 
 /**
- * @see Zend_Loader
- */
-require_once 'Zend/Loader.php';
-
-/**
  * @see Zend_Db_Adapter_Abstract
  */
 require_once 'Zend/Db/Adapter/Abstract.php';
@@ -94,6 +89,14 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
     protected $_defaultStmtClass = 'Zend_Db_Statement_Oracle';
 
     /**
+     * Check if LOB field are returned as string
+     * instead of OCI-Lob object
+     *
+     * @var boolean
+     */
+    protected $_lobAsString = null;
+
+    /**
      * Creates a connection resource.
      *
      * @return void
@@ -114,16 +117,11 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
             throw new Zend_Db_Adapter_Oracle_Exception('The OCI8 extension is required for this adapter but the extension is not loaded');
         }
 
-        if (isset($this->_config['dbname'])) {
-            $this->_connection = @oci_connect(
+        $this->_connection = @oci_connect(
                 $this->_config['username'],
                 $this->_config['password'],
-                $this->_config['dbname']);
-        } else {
-            $this->_connection = oci_connect(
-                $this->_config['username'],
-                $this->_config['password']);
-        }
+                $this->_config['dbname'],
+                $this->_config['charset']);
 
         // check the connection
         if (!$this->_connection) {
@@ -136,16 +134,58 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
     }
 
     /**
+     * Test if a connection is active
+     *
+     * @return boolean
+     */
+    public function isConnected()
+    {
+        return ((bool) (is_resource($this->_connection)
+                     && get_resource_type($this->_connection) == 'oci8 connection'));
+    }
+
+    /**
      * Force the connection to close.
      *
      * @return void
      */
     public function closeConnection()
     {
-        if (is_resource($this->_connection)) {
+        if ($this->isConnected()) {
             oci_close($this->_connection);
         }
         $this->_connection = null;
+    }
+
+    /**
+     * Activate/deactivate return of LOB as string
+     *
+     * @param string $lob_as_string
+     * @return Zend_Db_Adapter_Oracle
+     */
+    public function setLobAsString($lobAsString)
+    {
+        $this->_lobAsString = (bool) $lobAsString;
+        return $this;
+    }
+
+    /**
+     * Return whether or not LOB are returned as string
+     *
+     * @return boolean
+     */
+    public function getLobAsString()
+    {
+        if ($this->_lobAsString === null) {
+            // if never set by user, we use driver option if it exists otherwise false
+            if (isset($this->_config['driver_options']) &&
+                isset($this->_config['driver_options']['lob_as_string'])) {
+                $this->_lobAsString = (bool) $this->_config['driver_options']['lob_as_string'];
+            } else {
+                $this->_lobAsString = false;
+            }
+        }
+        return $this->_lobAsString;
     }
 
     /**
@@ -158,8 +198,14 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
     {
         $this->_connect();
         $stmtClass = $this->_defaultStmtClass;
-        Zend_Loader::loadClass($stmtClass);
+        if (!class_exists($stmtClass)) {
+            require_once 'Zend/Loader.php';
+            Zend_Loader::loadClass($stmtClass);
+        }
         $stmt = new $stmtClass($this, $sql);
+        if ($stmt instanceof Zend_Db_Statement_Oracle) {
+            $stmt->setLobAsString($this->getLobAsString());
+        }
         $stmt->setFetchMode($this->_fetchMode);
         return $stmt;
     }
@@ -301,21 +347,46 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      */
     public function describeTable($tableName, $schemaName = null)
     {
-        $sql = "SELECT TC.TABLE_NAME, TB.OWNER, TC.COLUMN_NAME, TC.DATA_TYPE,
-                TC.DATA_DEFAULT, TC.NULLABLE, TC.COLUMN_ID, TC.DATA_LENGTH,
-                TC.DATA_SCALE, TC.DATA_PRECISION, C.CONSTRAINT_TYPE, CC.POSITION
-            FROM ALL_TAB_COLUMNS TC
-            LEFT JOIN (ALL_CONS_COLUMNS CC JOIN ALL_CONSTRAINTS C
-                ON (CC.CONSTRAINT_NAME = C.CONSTRAINT_NAME AND CC.TABLE_NAME = C.TABLE_NAME AND C.CONSTRAINT_TYPE = 'P'))
-              ON TC.TABLE_NAME = CC.TABLE_NAME AND TC.COLUMN_NAME = CC.COLUMN_NAME
-            JOIN ALL_TABLES TB ON (TB.TABLE_NAME = TC.TABLE_NAME AND TB.OWNER = TC.OWNER)
-            WHERE UPPER(TC.TABLE_NAME) = UPPER(:TBNAME)";
-        $bind[':TBNAME'] = $tableName;
-        if ($schemaName) {
-            $sql .= ' AND UPPER(TB.OWNER) = UPPER(:SCNAME)';
-            $bind[':SCNAME'] = $schemaName;
+        $version = $this->getServerVersion();
+        if (($version === null) || version_compare($version, '9.0.0', '>=')) {
+            $sql = "SELECT TC.TABLE_NAME, TC.OWNER, TC.COLUMN_NAME, TC.DATA_TYPE,
+                    TC.DATA_DEFAULT, TC.NULLABLE, TC.COLUMN_ID, TC.DATA_LENGTH,
+                    TC.DATA_SCALE, TC.DATA_PRECISION, C.CONSTRAINT_TYPE, CC.POSITION
+                FROM ALL_TAB_COLUMNS TC
+                LEFT JOIN (ALL_CONS_COLUMNS CC JOIN ALL_CONSTRAINTS C
+                    ON (CC.CONSTRAINT_NAME = C.CONSTRAINT_NAME AND CC.TABLE_NAME = C.TABLE_NAME AND C.CONSTRAINT_TYPE = 'P'))
+                  ON TC.TABLE_NAME = CC.TABLE_NAME AND TC.COLUMN_NAME = CC.COLUMN_NAME
+                WHERE UPPER(TC.TABLE_NAME) = UPPER(:TBNAME)";
+            $bind[':TBNAME'] = $tableName;
+            if ($schemaName) {
+                $sql .= ' AND UPPER(TC.OWNER) = UPPER(:SCNAME)';
+                $bind[':SCNAME'] = $schemaName;
+            }
+            $sql .= ' ORDER BY TC.COLUMN_ID';
+        } else {
+            $subSql="SELECT AC.OWNER, AC.TABLE_NAME, ACC.COLUMN_NAME, AC.CONSTRAINT_TYPE, ACC.POSITION
+                from ALL_CONSTRAINTS AC, ALL_CONS_COLUMNS ACC
+                  WHERE ACC.CONSTRAINT_NAME = AC.CONSTRAINT_NAME
+                    AND ACC.TABLE_NAME = AC.TABLE_NAME
+                    AND ACC.OWNER = AC.OWNER
+                    AND AC.CONSTRAINT_TYPE = 'P'
+                    AND UPPER(AC.TABLE_NAME) = UPPER(:TBNAME)";
+            $bind[':TBNAME'] = $tableName;
+            if ($schemaName) {
+                $subSql .= ' AND UPPER(ACC.OWNER) = UPPER(:SCNAME)';
+                $bind[':SCNAME'] = $schemaName;
+            }
+            $sql="SELECT TC.TABLE_NAME, TC.OWNER, TC.COLUMN_NAME, TC.DATA_TYPE,
+                    TC.DATA_DEFAULT, TC.NULLABLE, TC.COLUMN_ID, TC.DATA_LENGTH,
+                    TC.DATA_SCALE, TC.DATA_PRECISION, CC.CONSTRAINT_TYPE, CC.POSITION
+                FROM ALL_TAB_COLUMNS TC, ($subSql) CC
+                WHERE UPPER(TC.TABLE_NAME) = UPPER(:TBNAME)
+                  AND TC.OWNER = CC.OWNER(+) AND TC.TABLE_NAME = CC.TABLE_NAME(+) AND TC.COLUMN_NAME = CC.COLUMN_NAME(+)";
+            if ($schemaName) {
+                $sql .= ' AND UPPER(TC.OWNER) = UPPER(:SCNAME)';
+            }
+            $sql .= ' ORDER BY TC.COLUMN_ID';
         }
-        $sql .= ' ORDER BY TC.COLUMN_ID';
 
         $stmt = $this->query($sql, $bind);
 
@@ -486,12 +557,12 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
          */
         $limit_sql = "SELECT z2.*
             FROM (
-                SELECT ROWNUM AS zend_db_rownum, z1.*
+                SELECT z1.*, ROWNUM AS \"zend_db_rownum\"
                 FROM (
                     " . $sql . "
                 ) z1
             ) z2
-            WHERE z2.zend_db_rownum BETWEEN " . ($offset+1) . " AND " . ($offset+$count);
+            WHERE z2.\"zend_db_rownum\" BETWEEN " . ($offset+1) . " AND " . ($offset+$count);
         return $limit_sql;
     }
 
@@ -566,48 +637,6 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
     }
 
     /**
-     * Updates table rows with specified data based on a WHERE clause.
-     *
-     * @param  mixed        $table The table to update.
-     * @param  array        $bind  Column-value pairs.
-     * @param  array|string $where UPDATE WHERE clause(s).
-     * @return int          The number of affected rows.
-     */
-    public function update($table, array $bind, $where = '')
-    {
-        $i = 0;
-        // build "col = ?" pairs for the statement
-        $set = array();
-        foreach ($bind as $col => $val) {
-            if ($val instanceof Zend_Db_Expr) {
-                $val = $val->__toString();
-                unset($bind[$col]);
-            } else {
-                unset($bind[$col]);
-                $bind[':'.$col.$i] = $val;
-                $val = ':'.$col.$i;
-            }
-            $set[] = $this->quoteIdentifier($col, true) . ' = ' . $val;
-            $i++;
-        }
-
-        if (is_array($where)) {
-            $where = implode(' AND ', $where);
-        }
-
-        // build the statement
-        $sql = "UPDATE "
-             . $this->quoteIdentifier($table, true)
-             . ' SET ' . implode(', ', $set)
-             . (($where) ? " WHERE $where" : '');
-
-        // execute the statement and return the number of affected rows
-        $stmt = $this->query($sql, $bind);
-        $result = $stmt->rowCount();
-        return $result;
-    }
-
-    /**
      * Check if the adapter supports real SQL parameters.
      *
      * @param string $type 'positional' or 'named'
@@ -624,5 +653,24 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
         }
     }
 
+    /**
+     * Retrieve server version in PHP style
+     *
+     * @return string
+     */
+    public function getServerVersion()
+    {
+        $this->_connect();
+        $version = oci_server_version($this->_connection);
+        if ($version !== false) {
+            $matches = null;
+            if (preg_match('/((?:[0-9]{1,2}\.){1,3}[0-9]{1,2})/', $version, $matches)) {
+                return $matches[1];
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
 }
-

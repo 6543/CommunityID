@@ -9,18 +9,18 @@
 * @packager Keyboard Monkeys
 */
 
-require 'Setup.php';
+require 'Application.php';
 
-Setup::setIncludePath();
-Setup::setAutoLoader();
-Setup::setConfig();
-Setup::setErrorReporting();
-Setup::setLogger();
-Setup::logRequest();
-Setup::setDatabase();
-Setup::setSession();
-Setup::setAcl();
-Setup::setI18N();
-Setup::setLayout();
-Setup::setFrontController();
-Setup::dispatch();
+Application::setIncludePath();
+Application::setAutoLoader();
+Application::setConfig();
+Application::setErrorReporting();
+Application::setLogger();
+Application::logRequest();
+Application::setDatabase();
+Application::setSession();
+Application::setAcl();
+Application::setI18N();
+Application::setLayout();
+Application::setFrontController();
+Application::dispatch();

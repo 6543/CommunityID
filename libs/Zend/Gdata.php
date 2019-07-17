@@ -15,6 +15,7 @@
  *
  * @category   Zend
  * @package    Zend_Gdata
+ * @subpackage Gdata
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
@@ -35,6 +36,7 @@ require_once 'Zend/Gdata/App.php';
  *
  * @category   Zend
  * @package    Zend_Gdata
+ * @subpackage Gdata
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
@@ -73,9 +75,11 @@ class Zend_Gdata extends Zend_Gdata_App
      * @var array
      */
     public static $namespaces = array(
-        'openSearch' => 'http://a9.com/-/spec/opensearchrss/1.0/',
-        'rss' => 'http://blogs.law.harvard.edu/tech/rss',
-        'gd' => 'http://schemas.google.com/g/2005');
+        array('gd', 'http://schemas.google.com/g/2005', 1, 0),
+        array('openSearch', 'http://a9.com/-/spec/opensearchrss/1.0/', 1, 0),
+        array('openSearch', 'http://a9.com/-/spec/opensearch/1.1/', 2, 0),
+        array('rss', 'http://blogs.law.harvard.edu/tech/rss', 1, 0)
+    );
 
     /**
      * Client object used to communicate
@@ -110,15 +114,20 @@ class Zend_Gdata extends Zend_Gdata_App
      * @param  Zend_Http_Client $client The client used for communication
      * @param  string $className The class which is used as the return type
      * @throws Zend_Gdata_App_Exception
-     * @return Zend_Gdata_App_Feed
+     * @return string|Zend_Gdata_App_Feed Returns string only if the object
+     *                                    mapping has been disabled explicitly
+     *                                    by passing false to the
+     *                                    useObjectMapping() function.
      */
-    public static function import($uri, $client = null, $className='Zend_Gdata_Feed')
+    public static function import($uri, $client = null,
+        $className='Zend_Gdata_Feed')
     {
         $app = new Zend_Gdata($client);
         $requestData = $app->decodeRequest('GET', $uri);
         $response = $app->performHttpRequest($requestData['method'], $requestData['url']);
 
         $feedContent = $response->getBody();
+
         $feed = self::importString($feedContent, $className);
         if ($client != null) {
             $feed->setHttpClient($client);
@@ -127,12 +136,15 @@ class Zend_Gdata extends Zend_Gdata_App
     }
 
     /**
-     * Retreive feed object
+     * Retrieve feed as string or object
      *
      * @param mixed $location The location as string or Zend_Gdata_Query
      * @param string $className The class type to use for returning the feed
      * @throws Zend_Gdata_App_InvalidArgumentException
-     * @return Zend_Gdata_Feed
+     * @return string|Zend_Gdata_App_Feed Returns string only if the object
+     *                                    mapping has been disabled explicitly
+     *                                    by passing false to the
+     *                                    useObjectMapping() function.
      */
     public function getFeed($location, $className='Zend_Gdata_Feed')
     {
@@ -150,10 +162,14 @@ class Zend_Gdata extends Zend_Gdata_App
     }
 
     /**
-     * Retreive entry object
+     * Retrieve entry as string or object
      *
      * @param mixed $location The location as string or Zend_Gdata_Query
-     * @return Zend_Gdata_Feed
+     * @throws Zend_Gdata_App_InvalidArgumentException
+     * @return string|Zend_Gdata_App_Entry Returns string only if the object
+     *                                     mapping has been disabled explicitly
+     *                                     by passing false to the
+     *                                     useObjectMapping() function.
      */
     public function getEntry($location, $className='Zend_Gdata_Entry')
     {
@@ -220,4 +236,5 @@ class Zend_Gdata extends Zend_Gdata_App
 
         return false;
     }
+
 }

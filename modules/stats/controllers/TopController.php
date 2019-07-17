@@ -9,11 +9,11 @@
 * @packager Keyboard Monkeys
 */
 
-class Stats_TopController extends Monkeys_Controller_Action
+class Stats_TopController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $this->view->sites = $stats->getTopTenSites();
     }
 }

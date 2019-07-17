@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Community-ID English translation\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-05-12 16:08-0500\n"
-"PO-Revision-Date: 2009-05-12 16:09-0500\n"
-"Last-Translator: Alejandro Pedraza <alejandro.pedraza@gmail.com>\n"
+"POT-Creation-Date: 2009-08-20 19:39-0500\n"
+"PO-Revision-Date: 2009-08-20 19:42-0500\n"
+"Last-Translator: Alejandro Pedraza <alejandro@kb-m.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -16,42 +16,115 @@ msgstr ""
 "X-Poedit-SearchPath-1: views\n"
 "X-Poedit-SearchPath-2: webdir/javascript\n"
 
-#: modules/default/models/Fields.php:32
+#: modules/default/controllers/CidController.php:29
+msgid "Could not retrieve news items"
+msgstr "Could not retrieve news items"
+
+#: modules/default/controllers/CidController.php:47
+msgid "Read More"
+msgstr "Read More"
+
+#: modules/default/controllers/MessageusersController.php:46
+msgid "CC field must be a comma-separated list of valid E-mails"
+msgstr "CC field must be a comma-separated list of valid E-mails"
+
+#: modules/default/forms/ErrorMessages.php:20
+msgid "Value is empty, but a non-empty value is required"
+msgstr "Value is empty, but a non-empty value is required"
+
+#: modules/default/forms/ErrorMessages.php:21
+msgid "'%value%' is not a valid email address in the basic format local-part@hostname"
+msgstr "'%value%' is not a valid email address in the basic format name@domain"
+
+#: modules/default/forms/ErrorMessages.php:22
+msgid "'%hostname%' is not a valid hostname for email address '%value%'"
+msgstr "'%hostname%' is not a valid hostname for email address '%value%'"
+
+#: modules/default/forms/ErrorMessages.php:23
+msgid "'%value%' appears to be a DNS hostname but cannot match TLD against known list"
+msgstr "'%value%' appears to be a DNS hostname but cannot match TLD against known list"
+
+#: modules/default/forms/ErrorMessages.php:24
+msgid "'%value%' appears to be a local network name but local network names are not allowed"
+msgstr "'%value%' appears to be a local network name but local network names are not allowed"
+
+#: modules/default/forms/ErrorMessages.php:25
+msgid "Captcha value is wrong"
+msgstr "Captcha value is wrong"
+
+#: modules/default/forms/ErrorMessages.php:26
+msgid "Password confirmation does not match"
+msgstr "Password confirmation does not match"
+
+#: modules/default/forms/ErrorMessages.php:27
+msgid "Username can only contain US-ASCII alphanumeric characters, plus any of the symbols $-_.+!*'(), and \""
+msgstr "Username can only contain US-ASCII alphanumeric characters, plus any of the symbols $-_.+!*'(), and \""
+
+#: modules/default/forms/OpenidLogin.php:27
+msgid "OpenID URL"
+msgstr "OpenID URL"
+
+#: modules/default/forms/OpenidLogin.php:34
+msgid "Password"
+msgstr "Password"
+
+#: modules/default/forms/MessageUsers.php:17
+msgid "Subject:"
+msgstr "Subject:"
+
+#: modules/default/forms/MessageUsers.php:22
+msgid "CC:"
+msgstr "CC:"
+
+#: modules/default/forms/Feedback.php:25
+msgid "Enter your name"
+msgstr "Enter your name"
+
+#: modules/default/forms/Feedback.php:30
+msgid "Enter your E-mail"
+msgstr "Enter your E-mail"
+
+#: modules/default/forms/Feedback.php:37
+msgid "Enter your questions or comments"
+msgstr "Enter your questions or comments"
+
+#: modules/default/forms/Feedback.php:44
+msgid "Please enter the text below"
+msgstr "Please enter the text below"
+
+#: modules/default/models/Fields.php:45
 msgid "Nickname"
 msgstr "Nickname"
 
-#: modules/default/models/Fields.php:33
-#: modules/users/forms/AccountInfoForm.php:40
-#: modules/users/forms/RegisterForm.php:36
-#: modules/users/views/scripts/profilegeneral/accountinfo.phtml:20
+#: modules/default/models/Fields.php:46
 msgid "E-mail"
 msgstr "E-mail"
 
-#: modules/default/models/Fields.php:34
+#: modules/default/models/Fields.php:47
 msgid "Full Name"
 msgstr "Full Name"
 
-#: modules/default/models/Fields.php:35
+#: modules/default/models/Fields.php:48
 msgid "Date of Birth"
 msgstr "Date of Birth"
 
-#: modules/default/models/Fields.php:36
+#: modules/default/models/Fields.php:49
 msgid "Gender"
 msgstr "Gender"
 
-#: modules/default/models/Fields.php:37
+#: modules/default/models/Fields.php:50
 msgid "Postal Code"
 msgstr "Postal Code"
 
-#: modules/default/models/Fields.php:38
+#: modules/default/models/Fields.php:51
 msgid "Country"
 msgstr "Country"
 
-#: modules/default/models/Fields.php:39
+#: modules/default/models/Fields.php:52
 msgid "Language"
 msgstr "Language"
 
-#: modules/default/models/Fields.php:40
+#: modules/default/models/Fields.php:53
 msgid "Time Zone"
 msgstr "Time Zone"
 
@@ -63,103 +136,52 @@ msgstr "Male"
 msgid "Female"
 msgstr "Female"
 
-#: modules/default/controllers/IndexController.php:27
-msgid "Could not retrieve news items"
-msgstr "Could not retrieve news items"
-
-#: modules/default/controllers/IndexController.php:42
-msgid "Read More"
-msgstr "Read More"
-
-#: modules/default/controllers/MessageusersController.php:46
-msgid "CC field must be a comma-separated list of valid E-mails"
-msgstr "CC field must be a comma-separated list of valid E-mails"
-
-#: modules/default/forms/OpenidLoginForm.php:17
-#: modules/users/forms/AccountInfoForm.php:26
-#: modules/users/forms/RegisterForm.php:43
-#: modules/users/views/scripts/profilegeneral/accountinfo.phtml:4
-msgid "Username"
-msgstr "Username"
-
-#: modules/default/forms/OpenidLoginForm.php:22
-msgid "Password"
-msgstr "Password"
-
-#: modules/default/forms/MessageUsersForm.php:17
-msgid "Subject:"
-msgstr "Subject:"
-
-#: modules/default/forms/MessageUsersForm.php:22
-msgid "CC:"
-msgstr "CC:"
-
-#: modules/default/forms/MessageUsersForm.php:26
-#: modules/default/views/scripts/messageusers/index.phtml:26
-#: modules/default/views/scripts/messageusers/index.phtml:32
-msgid "Body:"
-msgstr "Body:"
-
-#: modules/default/forms/FeedbackForm.php:25
-msgid "Enter your name"
-msgstr "Enter your name"
-
-#: modules/default/forms/FeedbackForm.php:30
-msgid "Enter your E-mail"
-msgstr "Enter your E-mail"
-
-#: modules/default/forms/FeedbackForm.php:37
-msgid "Enter your questions or comments"
-msgstr "Enter your questions or comments"
-
-#: modules/default/forms/FeedbackForm.php:44
-#: modules/users/forms/RegisterForm.php:59
-msgid "Please enter the text below"
-msgstr "Please enter the text below"
-
-#: modules/default/forms/ErrorMessages.php:20
-msgid "Value is empty, but a non-empty value is required"
-msgstr "Value is empty, but a non-empty value is required"
-
-#: modules/default/forms/ErrorMessages.php:21
-msgid "'%value%' is not a valid email address in the basic format local-part@hostname"
-msgstr "'%value%' is not a valid email address in the basic format name@domain"
-
-#: modules/default/forms/ErrorMessages.php:22
-msgid "Captcha value is wrong"
-msgstr "Captcha value is wrong"
-
-#: modules/default/forms/ErrorMessages.php:23
-msgid "Password confirmation does not match"
-msgstr "Password confirmation does not match"
-
-#: modules/stats/controllers/SitesController.php:68
-msgid "Trusted sites"
-msgstr "Trusted sites"
-
-#: modules/stats/controllers/SitesController.php:75
-msgid "Sites per user"
-msgstr "Sites per user"
-
-#: modules/install/controllers/CredentialsController.php:185
+#: modules/install/controllers/CredentialsController.php:183
 #, php-format
 msgid "The directory where Community-ID is installed must be writable by the web server user (%s). Another option is to create an EMPTY config.php file that is writable by that user."
 msgstr "The directory where Community-ID is installed must be writable by the web server user (%s). Another option is to create an EMPTY config.php file that is writable by that user."
 
-#: modules/install/controllers/CredentialsController.php:188
+#: modules/install/controllers/CredentialsController.php:186
 #, php-format
 msgid "The directory \"captchas\" under the web directory for Community-ID must be writable by the web server user (%s)"
 msgstr "The directory \"captchas\" under the web directory for Community-ID must be writable by the web server user (%s)"
 
-#: modules/users/controllers/UserslistController.php:50
+#: modules/install/controllers/CredentialsController.php:189
+#, php-format
+msgid "You need to have the %s extension installed"
+msgstr "You need to have the %s extension installed"
+
+#: modules/install/controllers/UpgradeController.php:57
+#: modules/install/controllers/UpgradeController.php:65
+#: modules/users/controllers/LoginController.php:46
+#: modules/users/controllers/LoginController.php:74
+msgid "Invalid credentials"
+msgstr "Invalid credentials"
+
+#: modules/install/controllers/UpgradeController.php:73
+#, php-format
+msgid "Upgrade was successful. You are now on version %s"
+msgstr "Upgrade was successful. You are now on version %s"
+
+#: modules/install/controllers/UpgradeController.php:97
+#, php-format
+msgid "Correct before upgrading: File %s is required to proceed"
+msgstr "Correct before upgrading: File %s is required to proceed"
+
+#: modules/install/forms/UpgradeLogin.php:18
+#: modules/users/forms/AccountInfo.php:26
+msgid "Username"
+msgstr "Username"
+
+#: modules/users/controllers/UserslistController.php:52
 msgid "admin"
 msgstr "admin"
 
-#: modules/users/controllers/UserslistController.php:52
+#: modules/users/controllers/UserslistController.php:54
 msgid "confirmed"
 msgstr "confirmed"
 
-#: modules/users/controllers/UserslistController.php:54
+#: modules/users/controllers/UserslistController.php:56
 msgid "unconfirmed"
 msgstr "unconfirmed"
 
@@ -181,45 +203,108 @@ msgstr "Your acccount has been successfully deleted"
 msgid "Sorry, registrations are currently disabled"
 msgstr "Sorry, registrations are currently disabled"
 
+#: modules/users/controllers/RegisterController.php:101
+msgid "Community-ID registration confirmation"
+msgstr "Community-ID registration confirmation"
+
+#: modules/users/controllers/RegisterController.php:104
+msgid "Thank you."
+msgstr "Thank you."
+
+#: modules/users/controllers/RegisterController.php:105
+msgid "You will receive an E-mail with instructions to activate the account."
+msgstr "You will receive an E-mail with instructions to activate the account."
+
+#: modules/users/controllers/RegisterController.php:107
+msgid "The account was created but the E-mail could not be sent"
+msgstr "The account was created but the E-mail could not be sent"
+
+#: modules/users/controllers/RegisterController.php:121
+#: modules/users/controllers/RegisterController.php:149
+#: modules/users/controllers/RegisterController.php:163
+msgid "Invalid token"
+msgstr "Invalid token"
+
+#: modules/users/controllers/RegisterController.php:154
+msgid "Your account has been deleted"
+msgstr "Your account has been deleted"
+
 #: modules/users/controllers/ManageusersController.php:25
 msgid "User has been deleted successfully"
 msgstr "User has been deleted successfully"
 
-#: modules/users/forms/AccountInfoForm.php:30
-#: modules/users/forms/RegisterForm.php:26
-msgid "First Name"
-msgstr "First Name"
+#: modules/users/controllers/ManageusersController.php:42
+msgid "Community-ID registration reminder"
+msgstr "Community-ID registration reminder"
 
-#: modules/users/forms/AccountInfoForm.php:35
-#: modules/users/forms/RegisterForm.php:31
-msgid "Last Name"
-msgstr "Last Name"
+#: modules/users/controllers/RecoverpasswordController.php:51
+msgid "This E-mail is not registered in the system"
+msgstr "This E-mail is not registered in the system"
 
-#: modules/users/forms/AccountInfoForm.php:50
-#: modules/users/forms/ChangePasswordForm.php:18
-msgid "Enter password"
-msgstr "Enter password"
+#: modules/users/controllers/RecoverpasswordController.php:82
+#: modules/users/controllers/RecoverpasswordController.php:121
+msgid "Community-ID password reset"
+msgstr "Community-ID password reset"
 
-#: modules/users/forms/AccountInfoForm.php:56
-#: modules/users/forms/RegisterForm.php:54
-#: modules/users/forms/ChangePasswordForm.php:24
-msgid "Enter password again"
-msgstr "Enter password again"
+#: modules/users/controllers/RecoverpasswordController.php:84
+msgid "Password reset E-mail has been sent"
+msgstr "Password reset E-mail has been sent"
 
-#: modules/users/forms/LoginForm.php:8
+#: modules/users/controllers/RecoverpasswordController.php:123
+msgid "You'll receive your new password via E-mail"
+msgstr "You'll receive your new password via E-mail"
+
+#: modules/users/forms/Login.php:18
 msgid "USERNAME"
 msgstr "USERNAME"
 
-#: modules/users/forms/LoginForm.php:13
+#: modules/users/forms/Login.php:27
 msgid "PASSWORD"
 msgstr "PASSWORD"
 
-#: modules/users/forms/RegisterForm.php:48
+#: modules/users/forms/AccountInfo.php:32
+msgid "First Name"
+msgstr "First Name"
+
+#: modules/users/forms/AccountInfo.php:37
+msgid "Last Name"
+msgstr "Last Name"
+
+#: modules/users/forms/AccountInfo.php:52
+#: modules/users/forms/ChangePassword.php:18
+msgid "Enter password"
+msgstr "Enter password"
+
+#: modules/users/forms/AccountInfo.php:58
+#: modules/users/forms/ChangePassword.php:24
+msgid "Enter password again"
+msgstr "Enter password again"
+
+#: modules/users/forms/Register.php:49
 msgid "Enter desired password"
 msgstr "Enter desired password"
 
+#: modules/stats/controllers/SitesController.php:68
+msgid "Trusted sites"
+msgstr "Trusted sites"
+
+#: modules/stats/controllers/SitesController.php:75
+msgid "Sites per user"
+msgstr "Sites per user"
+
+#: modules/news/forms/Article.php:18
+msgid "Title"
+msgstr "Title"
+
+#: modules/news/forms/Article.php:24
+msgid "Publication date"
+msgstr "Publication date"
+
+#: modules/news/forms/Article.php:32
+msgid "Excerpt"
+msgstr "Excerpt"
+
 #: webdir/javascript/language.php:30
-#: modules/users/views/scripts/profilegeneral/accountinfo.phtml:12
 msgid "Name"
 msgstr "Name"
 
@@ -359,33 +444,25 @@ msgstr "prev"
 msgid "IP"
 msgstr "IP"
 
-#: modules/default/views/scripts/privacy/index.phtml:1
-msgid "Privacy Policy"
-msgstr "Privacy Policy"
+#: webdir/javascript/language.php:65
+msgid "Delete unconfirmed accounts older than how many days?"
+msgstr "Delete unconfirmed accounts older than how many days?"
 
-#: modules/default/views/scripts/messageusers/index.phtml:9
-msgid "This message will be sent to all registered Community-ID users"
-msgstr "This message will be sent to all registered Community-ID users"
+#: webdir/javascript/language.php:66
+msgid "The value entered is incorrect"
+msgstr "The value entered is incorrect"
 
-#: modules/default/views/scripts/messageusers/index.phtml:18
-msgid "switch to Plain-Text"
-msgstr "switch to Plain-Text"
+#: webdir/javascript/language.php:67
+msgid "Send reminder to accounts older than how many days?"
+msgstr "Send reminder to accounts older than how many days?"
 
-#: modules/default/views/scripts/messageusers/index.phtml:21
-msgid "switch to Rich-Text (HTML)"
-msgstr "switch to Rich-Text (HTML)"
+#: webdir/javascript/language.php:68
+msgid "Are you sure you wish to delete this article?"
+msgstr "Are you sure you wish to delete this article?"
 
-#: modules/default/views/scripts/messageusers/index.phtml:39
-#: modules/default/views/scripts/feedback/index.phtml:7
-#: modules/install/views/scripts/credentials/index.phtml:12
-#: modules/users/views/scripts/register/index.phtml:10
-#: modules/users/views/scripts/recoverpassword/index.phtml:4
-msgid "Send"
-msgstr "Send"
-
-#: modules/default/views/scripts/feedback/index.phtml:1
-msgid "In order to serve you better, we have provided the form below for your questions and comments"
-msgstr "In order to serve you better, we have provided the form below for your questions and comments"
+#: modules/default/views/scripts/openid/login.phtml:9
+msgid "Login"
+msgstr "Login"
 
 #: modules/default/views/scripts/openid/trust.phtml:3
 #, php-format
@@ -421,18 +498,6 @@ msgstr "Allow"
 msgid "Deny"
 msgstr "Deny"
 
-#: modules/default/views/scripts/openid/login.phtml:5
-msgid "Login"
-msgstr "Login"
-
-#: modules/default/views/scripts/index/index.phtml:17
-msgid "OPEN AN ACCOUNT NOW"
-msgstr "OPEN AN ACCOUNT NOW"
-
-#: modules/default/views/scripts/index/index.phtml:22
-msgid "Latest News"
-msgstr "Latest News"
-
 #: modules/default/views/scripts/sites/index.phtml:15
 msgid "Information Exchanged"
 msgstr "Information Exchanged"
@@ -449,56 +514,62 @@ msgstr "OK"
 msgid "Clear History"
 msgstr "Clear History"
 
-#: modules/default/views/scripts_monkeys/index/subheader.phtml:3
-msgid "Fed up with having to remember dozens of<br />usernames and passwords<br />for your favorite websites?"
-msgstr "Fed up with having to remember dozens of<br />usernames and passwords<br />for your favorite websites?"
+#: modules/default/views/scripts/index/index-es.phtml:37
+#: modules/default/views/scripts/index/index-de.phtml:39
+#: modules/default/views/scripts/index/index-en.phtml:39
+msgid "There are no news articles yet"
+msgstr "There are no news articles yet"
 
-#: modules/default/views/scripts_monkeys/index/subheader.phtml:4
-msgid "Starting today<br />you'll only have to remember one"
-msgstr "Starting today<br />you'll only have to remember one"
+#: modules/default/views/scripts/index/index-es.phtml:44
+#: modules/default/views/scripts/index/index-de.phtml:46
+#: modules/default/views/scripts/index/index-en.phtml:46
+msgid "View All"
+msgstr "View All"
 
-#: modules/stats/views/scripts/authorizations/index.phtml:1
-msgid "Authorizations per day"
-msgstr "Authorizations per day"
+#: modules/default/views/scripts/index/index-es.phtml:48
+#: modules/default/views/scripts/index/index-de.phtml:50
+#: modules/default/views/scripts/index/index-en.phtml:50
+msgid "Add New Article"
+msgstr "Add New Article"
 
-#: modules/stats/views/scripts/authorizations/index.phtml:3
-#: modules/stats/views/scripts/registrations/index.phtml:3
-#: modules/stats/views/scripts/sites/index.phtml:3
-msgid "Select view"
-msgstr "Select view"
+#: modules/default/views/scripts/cid/index.phtml:1
+msgid "About Community-id"
+msgstr "About Community-id"
 
-#: modules/stats/views/scripts/authorizations/index.phtml:5
-#: modules/stats/views/scripts/registrations/index.phtml:5
-#: modules/stats/views/scripts/sites/index.phtml:5
-msgid "Last Week"
-msgstr "Last Week"
+#: modules/default/views/scripts/cid/index.phtml:3
+msgid "Version installed:"
+msgstr "Version installed:"
 
-#: modules/stats/views/scripts/authorizations/index.phtml:6
-#: modules/stats/views/scripts/registrations/index.phtml:7
-#: modules/stats/views/scripts/sites/index.phtml:6
-msgid "Last Year"
-msgstr "Last Year"
+#: modules/default/views/scripts/cid/index.phtml:8
+msgid "Latest news from Community-ID:"
+msgstr "Latest news from Community-ID:"
 
-#: modules/stats/views/scripts/registrations/index.phtml:1
-msgid "Registrations per day"
-msgstr "Registrations per day"
+#: modules/default/views/scripts/messageusers/index.phtml:9
+msgid "This message will be sent to all registered Community-ID users"
+msgstr "This message will be sent to all registered Community-ID users"
 
-#: modules/stats/views/scripts/registrations/index.phtml:6
-msgid "Last Month"
-msgstr "Last Month"
+#: modules/default/views/scripts/messageusers/index.phtml:16
+msgid "switch to Plain-Text"
+msgstr "switch to Plain-Text"
 
-#: modules/stats/views/scripts/top/index.phtml:1
-msgid "Top 10 Trusted Sites"
-msgstr "Top 10 Trusted Sites"
+#: modules/default/views/scripts/messageusers/index.phtml:19
+msgid "switch to Rich-Text (HTML)"
+msgstr "switch to Rich-Text (HTML)"
 
-#: modules/stats/views/scripts/top/index.phtml:7
-#, php-format
-msgid "%s users"
-msgstr "%s users"
+#: modules/default/views/scripts/messageusers/index.phtml:29
+#: modules/default/views/scripts/feedback/index.phtml:7
+#: modules/install/views/scripts/credentials/index.phtml:12
+#: modules/install/views/scripts/upgrade/index.phtml:11
+msgid "Send"
+msgstr "Send"
 
-#: modules/stats/views/scripts/sites/index.phtml:1
-msgid "Trusted Sites"
-msgstr "Trusted Sites"
+#: modules/default/views/scripts/privacy/index.phtml:1
+msgid "Privacy Policy"
+msgstr "Privacy Policy"
+
+#: modules/default/views/scripts/feedback/index.phtml:1
+msgid "In order to serve you better, we have provided the form below for your questions and comments"
+msgstr "In order to serve you better, we have provided the form below for your questions and comments"
 
 #: modules/install/views/scripts/complete/index.phtml:2
 msgid "The installation was performed successfully"
@@ -508,6 +579,10 @@ msgstr "The installation was performed successfully"
 msgid "Finish"
 msgstr "Finish"
 
+#: modules/install/views/scripts/credentials/index.phtml:2
+msgid "Database and E-mail information"
+msgstr "Database and E-mail information"
+
 #: modules/install/views/scripts/permissions/index.phtml:2
 msgid "Please correct the following problems before proceeding:"
 msgstr "Please correct the following problems before proceeding:"
@@ -515,10 +590,6 @@ msgstr "Please correct the following problems before proceeding:"
 #: modules/install/views/scripts/permissions/index.phtml:10
 msgid "Check again"
 msgstr "Check again"
-
-#: modules/install/views/scripts/credentials/index.phtml:2
-msgid "Database and E-mail information"
-msgstr "Database and E-mail information"
 
 #: modules/install/views/scripts/index/index.phtml:2
 msgid "This Community-ID instance hasn't been installed yet"
@@ -528,58 +599,110 @@ msgstr "This Community-ID instance hasn't been installed yet"
 msgid "Proceed with installation"
 msgstr "Proceed with installation"
 
-#: modules/users/views/scripts/register/index.phtml:1
-msgid "Registration Form"
-msgstr "Registration Form"
+#: modules/install/views/scripts/upgrade/index.phtml:1
+msgid "New version detected"
+msgstr "New version detected"
 
-#: modules/users/views/scripts/personalinfo/edit.phtml:42
-#: modules/users/views/scripts/profilegeneral/editaccountinfo.phtml:13
-#: modules/users/views/scripts/profilegeneral/changepassword.phtml:36
-msgid "Save"
-msgstr "Save"
+#: modules/install/views/scripts/upgrade/index.phtml:3
+msgid "Enter the administrator credentials to proceed with the upgrade:"
+msgstr "Enter the administrator credentials to proceed with the upgrade:"
 
-#: modules/users/views/scripts/personalinfo/edit.phtml:43
-#: modules/users/views/scripts/profilegeneral/editaccountinfo.phtml:14
-#: modules/users/views/scripts/profilegeneral/changepassword.phtml:37
-#: modules/users/views/scripts/profilegeneral/confirmdelete.phtml:23
-msgid "Cancel"
-msgstr "Cancel"
-
-#: modules/users/views/scripts/personalinfo/show.phtml:8
-msgid "Not Entered"
-msgstr "Not Entered"
-
-#: modules/users/views/scripts/personalinfo/index.phtml:13
-#: modules/users/views/scripts/login/index.phtml:10
-#: modules/users/views/scripts_monkeys/login/index.phtml:10
-msgid "Personal Info"
-msgstr "Personal Info"
-
-#: modules/users/views/scripts/personalinfo/index.phtml:16
-#: modules/users/views/scripts/profile/index.phtml:17
-msgid "Edit"
-msgstr "Edit"
-
-#: modules/users/views/scripts/personalinfo/index.phtml:22
-msgid "This information will be used to automatically populate registration fields to any OpenID transaction that requires so"
-msgstr "This information will be used to automatically populate registration fields to any OpenID transaction that requires so"
-
-#: modules/users/views/scripts/recoverpassword/index.phtml:1
-msgid "Please enter your E-mail below to receive a link to reset your password"
-msgstr "Please enter your E-mail below to receive a link to reset your password"
+#: modules/install/views/scripts/upgrade/index.phtml:6
+msgid "Make sure you make a copy of the database before, just in case"
+msgstr "Make sure you make a copy of the database before, just in case"
 
 #: modules/users/views/scripts/profile/index.phtml:13
 msgid "Account info"
 msgstr "Account info"
+
+#: modules/users/views/scripts/profile/index.phtml:17
+msgid "Edit"
+msgstr "Edit"
 
 #: modules/users/views/scripts/profile/index.phtml:20
 msgid "Change Password"
 msgstr "Change Password"
 
 #: modules/users/views/scripts/profile/index.phtml:38
-#: modules/users/views/scripts/profilegeneral/confirmdelete.phtml:22
 msgid "Delete Account"
 msgstr "Delete Account"
+
+#: modules/users/views/scripts/manageusers/index.phtml:11
+msgid "Enter search string"
+msgstr "Enter search string"
+
+#: modules/users/views/scripts/manageusers/index.phtml:12
+msgid "Go"
+msgstr "Go"
+
+#: modules/users/views/scripts/manageusers/index.phtml:13
+msgid "Clear"
+msgstr "Clear"
+
+#: modules/users/views/scripts/manageusers/index.phtml:16
+msgid "All"
+msgstr "All"
+
+#: modules/users/views/scripts/manageusers/index.phtml:19
+msgid "Confirmed"
+msgstr "Confirmed"
+
+#: modules/users/views/scripts/manageusers/index.phtml:22
+msgid "Unconfirmed"
+msgstr "Unconfirmed"
+
+#: modules/users/views/scripts/manageusers/index.phtml:29
+msgid "Total users:"
+msgstr "Total users:"
+
+#: modules/users/views/scripts/manageusers/index.phtml:30
+msgid "Total confirmed users:"
+msgstr "Total confirmed users:"
+
+#: modules/users/views/scripts/manageusers/index.phtml:31
+msgid "Total unconfirmed users:"
+msgstr "Total unconfirmed users:"
+
+#: modules/users/views/scripts/manageusers/index.phtml:34
+msgid "Add User"
+msgstr "Add User"
+
+#: modules/users/views/scripts/manageusers/index.phtml:36
+msgid "Delete Unconfirmed Users"
+msgstr "Delete Unconfirmed Users"
+
+#: modules/users/views/scripts/manageusers/index.phtml:39
+msgid "Send Reminder"
+msgstr "Send Reminder"
+
+#: modules/users/views/scripts/register/eula.phtml:1
+msgid "Please read the following EULA in order to continue"
+msgstr "Please read the following EULA in order to continue"
+
+#: modules/users/views/scripts/register/eula.phtml:8
+msgid "I AGREE"
+msgstr "I AGREE"
+
+#: modules/users/views/scripts/register/eula.phtml:9
+msgid "I DISAGREE"
+msgstr "I DISAGREE"
+
+#: modules/users/views/scripts/register/index.phtml:1
+msgid "Registration Form"
+msgstr "Registration Form"
+
+#: modules/users/views/scripts/profilegeneral/changepassword.phtml:7
+#: modules/users/views/scripts/profilegeneral/editaccountinfo.phtml:13
+#: modules/users/views/scripts/personalinfo/edit.phtml:5
+msgid "Save"
+msgstr "Save"
+
+#: modules/users/views/scripts/profilegeneral/changepassword.phtml:8
+#: modules/users/views/scripts/profilegeneral/confirmdelete.phtml:23
+#: modules/users/views/scripts/profilegeneral/editaccountinfo.phtml:14
+#: modules/users/views/scripts/personalinfo/edit.phtml:6
+msgid "Cancel"
+msgstr "Cancel"
 
 #: modules/users/views/scripts/profilegeneral/confirmdelete.phtml:3
 msgid "Why do you want to delete your Community-ID account?"
@@ -613,152 +736,205 @@ msgstr "Additional comments:"
 msgid "OpenID"
 msgstr "OpenID"
 
+#: modules/users/views/scripts/recoverpassword/index.phtml:1
+msgid "Please enter your E-mail below to receive a link to reset your password"
+msgstr "Please enter your E-mail below to receive a link to reset your password"
+
+#: modules/users/views/scripts/personalinfo/show.phtml:8
+msgid "Not Entered"
+msgstr "Not Entered"
+
+#: modules/users/views/scripts/personalinfo/index.phtml:13
+#: modules/users/views/scripts/login/index.phtml:10
+msgid "Personal Info"
+msgstr "Personal Info"
+
+#: modules/users/views/scripts/personalinfo/index.phtml:22
+msgid "This information will be used to automatically populate registration fields to any OpenID transaction that requires so"
+msgstr "This information will be used to automatically populate registration fields to any OpenID transaction that requires so"
+
 #: modules/users/views/scripts/login/index.phtml:3
-#: modules/users/views/scripts_monkeys/login/index.phtml:3
 #, php-format
 msgid "Hello, %s"
 msgstr "Hello, %s"
 
 #: modules/users/views/scripts/login/index.phtml:7
-#: modules/users/views/scripts_monkeys/login/index.phtml:7
 msgid "Account"
 msgstr "Account"
 
 #: modules/users/views/scripts/login/index.phtml:13
-#: modules/users/views/scripts_monkeys/login/index.phtml:13
 msgid "Sites database"
 msgstr "Sites database"
 
 #: modules/users/views/scripts/login/index.phtml:16
-#: modules/users/views/scripts_monkeys/login/index.phtml:16
 msgid "History Log"
 msgstr "History Log"
 
 #: modules/users/views/scripts/login/index.phtml:19
-#: modules/users/views/scripts_monkeys/login/index.phtml:19
 msgid "Logout"
 msgstr "Logout"
 
 #: modules/users/views/scripts/login/index.phtml:24
-#: modules/users/views/scripts_monkeys/login/index.phtml:24
 msgid "Admin options"
 msgstr "Admin options"
 
 #: modules/users/views/scripts/login/index.phtml:27
-#: modules/users/views/scripts_monkeys/login/index.phtml:27
 msgid "Manage Users"
 msgstr "Manage Users"
 
 #: modules/users/views/scripts/login/index.phtml:30
-#: modules/users/views/scripts_monkeys/login/index.phtml:30
 msgid "Message Users"
 msgstr "Message Users"
 
 #: modules/users/views/scripts/login/index.phtml:34
-#: modules/users/views/scripts_monkeys/login/index.phtml:34
 msgid "Disable Maintenance Mode"
 msgstr "Disable Maintenance Mode"
 
 #: modules/users/views/scripts/login/index.phtml:36
-#: modules/users/views/scripts_monkeys/login/index.phtml:36
 msgid "Enable Maintenance Mode"
 msgstr "Enable Maintenance Mode"
 
 #: modules/users/views/scripts/login/index.phtml:40
-#: modules/users/views/scripts_monkeys/login/index.phtml:40
 msgid "Statistics"
 msgstr "Statistics"
 
-#: modules/users/views/scripts/login/index.phtml:47
-#: modules/users/views/scripts_monkeys/login/index.phtml:50
+#: modules/users/views/scripts/login/index.phtml:43
+msgid "About Community-ID"
+msgstr "About Community-ID"
+
+#: modules/users/views/scripts/login/index.phtml:50
 msgid "User access is currently disabled for system maintenance.<br />Please try again later"
 msgstr "User access is currently disabled for system maintenance.<br />Please try again later"
 
-#: modules/users/views/scripts/login/index.phtml:58
-#: modules/users/views/scripts_monkeys/login/index.phtml:61
+#: modules/users/views/scripts/login/index.phtml:64
 msgid "Remember me"
 msgstr "Remember me"
 
-#: modules/users/views/scripts/login/index.phtml:61
-#: modules/users/views/scripts_monkeys/login/index.phtml:64
+#: modules/users/views/scripts/login/index.phtml:67
 msgid "Log in"
 msgstr "Log in"
 
-#: modules/users/views/scripts/login/index.phtml:67
-#: modules/users/views/scripts_monkeys/login/index.phtml:70
+#: modules/users/views/scripts/login/index.phtml:73
 msgid "Forgot you password?"
 msgstr "Forgot you password?"
 
-#: modules/users/views/scripts/login/index.phtml:73
-#: modules/users/views/scripts_monkeys/login/index.phtml:76
+#: modules/users/views/scripts/login/index.phtml:79
 msgid "You don't have an account?"
 msgstr "You don't have an account?"
 
-#: modules/users/views/scripts/login/index.phtml:75
-#: modules/users/views/scripts_monkeys/login/index.phtml:78
+#: modules/users/views/scripts/login/index.phtml:81
 msgid "REGISTER NOW!"
 msgstr "REGISTER NOW!"
 
-#: modules/users/views/scripts/manageusers/index.phtml:11
-msgid "All"
-msgstr "All"
+#: modules/stats/views/scripts/sites/index.phtml:1
+msgid "Trusted Sites"
+msgstr "Trusted Sites"
 
-#: modules/users/views/scripts/manageusers/index.phtml:14
-msgid "Confirmed"
-msgstr "Confirmed"
+#: modules/stats/views/scripts/sites/index.phtml:3
+#: modules/stats/views/scripts/registrations/index.phtml:3
+#: modules/stats/views/scripts/authorizations/index.phtml:3
+msgid "Select view"
+msgstr "Select view"
 
-#: modules/users/views/scripts/manageusers/index.phtml:17
-msgid "Unconfirmed"
-msgstr "Unconfirmed"
+#: modules/stats/views/scripts/sites/index.phtml:5
+#: modules/stats/views/scripts/registrations/index.phtml:5
+#: modules/stats/views/scripts/authorizations/index.phtml:5
+msgid "Last Week"
+msgstr "Last Week"
 
-#: modules/users/views/scripts/manageusers/index.phtml:24
-msgid "Total users:"
-msgstr "Total users:"
+#: modules/stats/views/scripts/sites/index.phtml:6
+#: modules/stats/views/scripts/registrations/index.phtml:7
+#: modules/stats/views/scripts/authorizations/index.phtml:6
+msgid "Last Year"
+msgstr "Last Year"
 
-#: modules/users/views/scripts/manageusers/index.phtml:25
-msgid "Total confirmed users:"
-msgstr "Total confirmed users:"
+#: modules/stats/views/scripts/top/index.phtml:1
+msgid "Top 10 Trusted Sites"
+msgstr "Top 10 Trusted Sites"
 
-#: modules/users/views/scripts/manageusers/index.phtml:26
-msgid "Total unconfirmed users:"
-msgstr "Total unconfirmed users:"
+#: modules/stats/views/scripts/top/index.phtml:7
+#, php-format
+msgid "%s users"
+msgstr "%s users"
 
-#: modules/users/views/scripts/manageusers/index.phtml:29
-msgid "Add User"
-msgstr "Add User"
+#: modules/stats/views/scripts/registrations/index.phtml:1
+msgid "Registrations per day"
+msgstr "Registrations per day"
 
-#: modules/users/views/scripts/manageusers/index.phtml:31
-msgid "Delete Unconfirmed Users"
-msgstr "Delete Unconfirmed Users"
+#: modules/stats/views/scripts/registrations/index.phtml:6
+msgid "Last Month"
+msgstr "Last Month"
 
-#: views/layouts_monkeys/layout.phtml:32
+#: modules/stats/views/scripts/authorizations/index.phtml:1
+msgid "Authorizations per day"
+msgstr "Authorizations per day"
+
+#: modules/news/views/scripts/view/index.phtml:3
+#: modules/news/views/scripts/index/index.phtml:16
+#, php-format
+msgid "Published on %s"
+msgstr "Published on %s"
+
+#: modules/news/views/scripts/view/index.phtml:6
+msgid "Edit Article"
+msgstr "Edit Article"
+
+#: modules/news/views/scripts/view/index.phtml:7
+msgid "Delete Article"
+msgstr "Delete Article"
+
+#: modules/news/views/scripts/index/pagination.phtml:10
+#: modules/news/views/scripts/index/pagination.phtml:13
+msgid "Previous"
+msgstr "Previous"
+
+#: modules/news/views/scripts/index/pagination.phtml:30
+#: modules/news/views/scripts/index/pagination.phtml:33
+msgid "Next"
+msgstr "Next"
+
+#: modules/news/views/scripts/index/index.phtml:3
+msgid "Latest News"
+msgstr "Latest News"
+
+#: modules/news/views/scripts/index/index.phtml:21
+msgid "read more"
+msgstr "read more"
+
 #: views/layouts/layout.phtml:32
 msgid "Home"
 msgstr "Home"
 
-#: views/layouts_monkeys/layout.phtml:35
 #: views/layouts/layout.phtml:35
 msgid "Feedback"
 msgstr "Feedback"
 
-#: views/layouts_monkeys/layout.phtml:38
-msgid "Help and Support"
-msgstr "Help and Support"
+#: views/layouts/layout.phtml:41
+msgid "Your OpenID is:"
+msgstr "Your OpenID is:"
 
-#: views/layouts_monkeys/layout.phtml:55
-#: views/layouts/layout.phtml:52
+#: views/layouts/layout.phtml:58
 msgid "Maintenance mode is enabled: user access is restricted"
 msgstr "Maintenance mode is enabled: user access is restricted"
 
-#: views/layouts_monkeys/layout.phtml:75
-msgid "Privacy"
-msgstr "Privacy"
-
-#: views/layouts_monkeys/layout.phtml:78
-msgid "About Us"
-msgstr "About Us"
-
-#: views/layouts_monkeys/layout.phtml:81
-msgid "Contact Us"
-msgstr "Contact Us"
+#~ msgid "Body:"
+#~ msgstr "Body:"
+#~ msgid "OPEN AN ACCOUNT NOW"
+#~ msgstr "OPEN AN ACCOUNT NOW"
+#~ msgid ""
+#~ "Fed up with having to remember dozens of<br />usernames and passwords<br /"
+#~ ">for your favorite websites?"
+#~ msgstr ""
+#~ "Fed up with having to remember dozens of<br />usernames and passwords<br /"
+#~ ">for your favorite websites?"
+#~ msgid "Starting today<br />you'll only have to remember one"
+#~ msgstr "Starting today<br />you'll only have to remember one"
+#~ msgid "Help and Support"
+#~ msgstr "Help and Support"
+#~ msgid "Privacy"
+#~ msgstr "Privacy"
+#~ msgid "About Us"
+#~ msgstr "About Us"
+#~ msgid "Contact Us"
+#~ msgstr "Contact Us"
 

@@ -1,15 +1,20 @@
 <?
 
 class Monkeys_Form_Decorator_Composite extends Zend_Form_Decorator_Abstract
+        implements Zend_Form_Decorator_Marker_File_Interface // to avoid Zend_Form_Element_File to whine
 {
     public function buildLabel()
     {
         $element = $this->getElement();
         $label = $element->getLabel();
+        if ($label == '') {
+            return false;
+        }
+
         if ($translator = $element->getTranslator()) {
             $label = $translator->translate($label);
         }
-        if ($element->isRequired()) {
+        if ($element->isRequired() && !$this->getOption('dontMarkRequired')) {
             $label .= '*';
         }
 
@@ -83,6 +88,7 @@ class Monkeys_Form_Decorator_Composite extends Zend_Form_Decorator_Abstract
             return $content;
         }
 
+        $separator = $this->getSeparator();
         $placement = $this->getPlacement();
         $label     = $this->buildLabel();
         $input     = $this->buildInput($content);
@@ -102,15 +108,30 @@ class Monkeys_Form_Decorator_Composite extends Zend_Form_Decorator_Abstract
         }
 
         if ($this->getOption('wideLabel')) {
-            $output = "<div class=\"yui-$yuiGridType\" style=\"padding-bottom:10px\">\n"
-                     ."     <div class=\"formLabel\" style=\"padding-bottom:10px\">$label</div>\n"
-                     ."     <div class=\"yui-u first\">&nbsp;</div>\n"
-                     ."     <div class=\"yui-u\">\n"
-                     ."          $input\n"
-                     ."          $desc\n"
-          . ($errors? "          <div>$errors</div>\n" : "")
-                     ."     </div>\n"
-                     ."</div>\n";
+            if ($label !== false) {
+                $output = "<div class=\"yui-$yuiGridType\" style=\"padding-bottom:10px\">\n"
+                         ."     <div class=\"formLabel\" style=\"padding-bottom:10px\">$label</div>\n"
+                         ."     <div class=\"yui-u first\">&nbsp;</div>\n"
+                         ."     <div class=\"yui-u\">\n"
+                         ."          $input\n"
+                         ."          $desc\n"
+             . ($errors? "          <div>$errors</div>\n" : "")
+                         ."     </div>\n"
+                         ."</div>\n";
+            } else {
+                $output = "<div style=\"padding-bottom:10px\">\n"
+                         ."      $input\n"
+                         ."      $desc\n"
+              . ($errors? "      <div>$errors</div>\n" : "")
+                         ."</div>\n";
+            }
+       } else if ($this->getOption('separateLine')) {
+            $output = "<div class=\"yui-$yuiGridType\" style=\"font-weight:bold\">\n"
+                     ."     $label\n"
+                     ."</div>\n"
+                     ."<div>$input</div>\n"
+                     ."<div>$desc</div>\n"
+          . ($errors? "<div>$errors</div>\n" : "");
         } else if ($this->getOption('continuous')) {
             $output = "<div style=\"padding-bottom:10px\">\n"
                      ."     <span class=\"formLabel\">$label</span> $input"
@@ -131,6 +152,15 @@ class Monkeys_Form_Decorator_Composite extends Zend_Form_Decorator_Abstract
         }
 
         return $output;
+
+        // I believe we shouldn't use $placement (messes up the captcha, but I'm not sure about radios)
+        /*switch ($placement) {
+            case (self::PREPEND):
+                return $output . $separator . $content;
+            case (self::APPEND):
+            default:
+                return $content . $separator . $output;
+        }*/
     }
 }
 

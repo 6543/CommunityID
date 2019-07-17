@@ -10,7 +10,7 @@
 */
 
 
-class History extends Zend_Db_Table_Row_Abstract
+class Model_History extends Zend_Db_Table_Row_Abstract
 {
     const DENIED        = 0;
     const AUTHORIZED    = 1;

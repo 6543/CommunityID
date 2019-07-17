@@ -10,14 +10,14 @@
 */
 
 define('APP_DIR', realpath(dirname(__FILE__) . '/../..'));
-require APP_DIR . '/Setup.php';
+require APP_DIR . '/Application.php';
 
-Setup::setIncludePath();
-Setup::setAutoLoader();
-Setup::setConfig();
-Setup::setErrorReporting();
-Setup::setLogger();
-$translate = Setup::setI18N();
+Application::setIncludePath();
+Application::setAutoLoader();
+Application::setConfig();
+Application::setErrorReporting();
+Application::setLogger();
+$translate = Application::setI18N();
 
 ?>
 
@@ -61,5 +61,9 @@ COMMID.lang = {
     "of": "<?= $translate->translate('of') ?>",
     "next": "<?= $translate->translate('next') ?>",
     "prev": "<?= $translate->translate('prev') ?>",
-    "IP": "<?= $translate->translate('IP') ?>"
+    "IP": "<?= $translate->translate('IP') ?>",
+    "Delete unconfirmed accounts older than how many days?": "<?= $translate->translate('Delete unconfirmed accounts older than how many days?') ?>",
+    "The value entered is incorrect": "<?= $translate->translate('The value entered is incorrect') ?>",
+    "Send reminder to accounts older than how many days?": "<?= $translate->translate('Send reminder to accounts older than how many days?') ?>",
+    "Are you sure you wish to delete this article?": "<?= $translate->translate('Are you sure you wish to delete this article?') ?>"
 }

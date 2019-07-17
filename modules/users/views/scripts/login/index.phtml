@@ -1,79 +1,85 @@
-<? if ($this->user->role != User::ROLE_GUEST ): ?>
+<?php if ($this->user->role != Users_Model_User::ROLE_GUEST ): ?>
     <h3>
-        <?= $this->translate('Hello, %s', Zend_Filter::get($this->user->username, 'HtmlEntities')) ?>
+        <?php echo $this->translate('Hello, %s', $this->escape($this->user->username)) ?>
     </h3>
     <ul>
         <li>
-            <a href="<?= $this->base ?>/users/profile"><?= $this->translate('Account') ?></a>
+            <a href="<?php echo $this->base ?>/users/profile"><?= $this->translate('Account') ?></a>
         </li>
         <li>
-            <a href="<?= $this->base ?>/users/personalinfo"><?= $this->translate('Personal Info') ?></a>
+            <a href="<?php echo $this->base ?>/users/personalinfo"><?= $this->translate('Personal Info') ?></a>
         </li>
         <li>
-            <a href="<?= $this->base ?>/sites"><?= $this->translate('Sites database') ?></a>
+            <a href="<?php echo $this->base ?>/sites"><?= $this->translate('Sites database') ?></a>
         </li>
         <li>
-            <a href="<?= $this->base ?>/history"><?= $this->translate('History Log') ?></a>
+            <a href="<?php echo $this->base ?>/history"><?= $this->translate('History Log') ?></a>
         </li>
         <li>
-            <a href="<?= $this->base ?>/users/login/logout"><?= $this->translate('Logout') ?></a>
+            <a href="<?php echo $this->base ?>/users/login/logout"><?= $this->translate('Logout') ?></a>
         </li>
     </ul>
-    <? if ($this->user->role == User::ROLE_ADMIN): ?>
+    <?php if ($this->user->role == Users_Model_User::ROLE_ADMIN): ?>
         <hr />
-        <h3><?= $this->translate('Admin options') ?></h3>
+        <h3><?php echo $this->translate('Admin options') ?></h3>
         <ul>
             <li>
-                <a href="<?= $this->base ?>/users/manageusers"><?= $this->translate('Manage Users') ?></a>
+                <a href="<?php echo $this->base ?>/users/manageusers"><?= $this->translate('Manage Users') ?></a>
             </li>
             <li>
-                <a href="<?= $this->base ?>/messageusers"><?= $this->translate('Message Users') ?></a>
+                <a href="<?php echo $this->base ?>/messageusers"><?= $this->translate('Message Users') ?></a>
             </li>
             <li>
-                <? if ($this->maintenanceEnabled): ?>
-                    <a href="<?= $this->base ?>/maintenancemode/disable"><?= $this->translate('Disable Maintenance Mode') ?></a>
-                <? else: ?>
-                    <a href="<?= $this->base ?>/maintenancemode/enable"><?= $this->translate('Enable Maintenance Mode') ?></a>
-                <? endif ?>
+                <?php if ($this->maintenanceEnabled): ?>
+                    <a href="<?php echo $this->base ?>/maintenancemode/disable"><?= $this->translate('Disable Maintenance Mode') ?></a>
+                <?php else: ?>
+                    <a href="<?php echo $this->base ?>/maintenancemode/enable"><?= $this->translate('Enable Maintenance Mode') ?></a>
+                <?php endif ?>
             </li>
             <li>
-                <a href="<?= $this->base ?>/stats"><?= $this->translate('Statistics') ?></a>
+                <a href="<?php echo $this->base ?>/stats"><?= $this->translate('Statistics') ?></a>
+            </li>
+            <li>
+                <a href="<?php echo $this->base ?>/cid"><?= $this->translate('About Community-ID') ?></a>
             </li>
         </ul>
-    <? endif ?>
-<? else: ?>
-    <? if ($this->underMaintenance): ?>
+    <?php endif ?>
+<?php else: ?>
+    <?php if ($this->underMaintenance): ?>
         <div class="messages_small">
-            <?= $this->translate('User access is currently disabled for system maintenance.<br />Please try again later') ?>
+            <?php echo $this->translate('User access is currently disabled for system maintenance.<br />Please try again later') ?>
         </div>
-    <? endif ?>
-    <form id="loginForm" action="<?= $this->loginTargetBase ?>/users/login/authenticate" method="post">
-        <dl id="credentials">
-            <?= $this->loginForm->username ?>
-            <?= $this->loginForm->password ?>
-        </dl>
-        <dl id="rememberMe">
+    <?php endif ?>
+    <form id="loginForm" action="<?php echo $this->loginTargetBase ?>/users/login/authenticate" method="post" class="formGrid">
+        <div id="credentials">
+            <?php echo $this->loginForm->username ?>
+            <?php echo $this->loginForm->password ?>
+            <?php if ($this->useCaptcha): ?>
+                <?php echo $this->loginForm->captcha ?>
+            <?php endif ?>
+        </div>
+        <div id="rememberMe">
             <!-- to hard to do in the ZF -->
-            <input type="checkbox" name="rememberme" style="top:0" />
-            <label><?= $this->translate('Remember me') ?></label>
-        </dl>
+            <input type="checkbox" name="rememberme" style="top:0; width:15px" />
+            <label><?php echo $this->translate('Remember me') ?></label>
+        </div>
         <div id="loginButton">
-            <input type="submit" id="login" value="<?= $this->translate('Log in') ?>" />
+            <input type="submit" id="login" value="<?php echo $this->translate('Log in') ?>" />
             <script type="text/javascript">
                 var oButton = new YAHOO.widget.Button("login");
             </script> 
         </div>
         <p>
-            <a href="<?= $this->base ?>/users/recoverpassword" class="panel_link"><?= $this->translate('Forgot you password?') ?></a>
+            <a href="<?php echo $this->base ?>/users/recoverpassword" class="panel_link"><?= $this->translate('Forgot you password?') ?></a>
         </p>
     </form>
     <hr/>
     <div id="registerNow">
         <p>
-            <?= $this->translate('You don\'t have an account?') ?>
+            <?php echo $this->translate('You don\'t have an account?') ?>
             <div>
-                <a href="<?= $this->base ?>/users/register"><?= $this->translate('REGISTER NOW!') ?></a>
+                <a href="<?php echo $this->base ?>/users/register"><?= $this->translate('REGISTER NOW!') ?></a>
             </div>
         </p>&nbsp;<!-- safari bug workaround -->
     </div>
-<? endif; ?>
+<?php endif; ?>

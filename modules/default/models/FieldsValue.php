@@ -10,6 +10,6 @@
 */
 
 
-class FieldsValue extends Zend_Db_Table_Row_Abstract
+class Model_FieldsValue extends Zend_Db_Table_Row_Abstract
 {
 }

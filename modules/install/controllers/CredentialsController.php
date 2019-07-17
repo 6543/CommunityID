@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class Install_CredentialsController extends Monkeys_Controller_Action
+class Install_CredentialsController extends CommunityID_Controller_Action
 {
     protected $_numCols = 1;
 
@@ -24,13 +24,13 @@ class Install_CredentialsController extends Monkeys_Controller_Action
             $this->view->form = $appSession->installForm;
             unset($appSession->installForm);
         } else {
-            $this->view->form = new InstallForm();
+            $this->view->form = new Install_Form_Install();
         }
     }
     
     public function saveAction()
     {
-        $form = new InstallForm();
+        $form = new Install_Form_Install();
         $formData = $this->_request->getPost();
 
         $form->populate($formData);
@@ -53,13 +53,13 @@ class Install_CredentialsController extends Monkeys_Controller_Action
         $this->_importDb();
 
         if (!$this->_writeConfig($form)) {
-            throw new Exception('Couldn\'t write to config file file ' . APP_DIR . DIRECTORY_SEPARATOR . 'config.php');
+            throw new Exception('Couldn\'t write to config file ' . APP_DIR . DIRECTORY_SEPARATOR . 'config.php');
         }
 
         $this->_forward('index', 'complete');
     }
 
-    private function _connectToDbEngine(InstallForm $form)
+    private function _connectToDbEngine(Install_Form_Install $form)
     {
         $this->_config->database->params->host      = $form->getValue('hostname');
         $this->_config->database->params->username  = $form->getValue('dbusername');
@@ -69,10 +69,10 @@ class Install_CredentialsController extends Monkeys_Controller_Action
         // without attempting to connect to the dbname
         $this->_config->database->params->dbname    = null;
 
-        return Setup::setDatabase();
+        return Application::setDatabase();
     }
 
-    private function _createDbIfMissing(InstallForm $form)
+    private function _createDbIfMissing(Install_Form_Install $form)
     {
         $this->_config->database->params->host      = $form->getValue('hostname');
         $this->_config->database->params->username  = $form->getValue('dbusername');
@@ -80,15 +80,15 @@ class Install_CredentialsController extends Monkeys_Controller_Action
 
         $this->_config->database->params->dbname    = $form->getValue('dbname');
 
-        if (!Setup::setDatabase()) {
+        if (!Application::setDatabase()) {
             try {
                 $this->_config->database->params->dbname    = null;
-                Setup::setDatabase();
+                Application::setDatabase();
 
                 // binding doesn't work here for some reason
                 Zend_Registry::get('db')->getConnection()->query("CREATE DATABASE `" . $form->getValue('dbname') . "`");
                 $this->_config->database->params->dbname = $form->getValue('dbname');
-                Setup::setDatabase();
+                Application::setDatabase();
             } catch (PDOException $e) {    // when using PDO, it throws this exception, not Zend's
                 return false;
             }
@@ -97,7 +97,7 @@ class Install_CredentialsController extends Monkeys_Controller_Action
         return true;
     }
 
-    private function _writeConfig(InstallForm $form)
+    private function _writeConfig(Install_Form_Install $form)
     {
         $this->_config->environment->installed = true;
         $this->_config->email->supportemail = $form->getValue('supportemail');
@@ -113,8 +113,6 @@ class Install_CredentialsController extends Monkeys_Controller_Action
             '{environment.registrations_enabled}' => $this->_config->environment->registrations_enabled? 'true' : 'false',
             '{environment.locale}'                => $this->_config->environment->locale,
             '{environment.template}'              => $this->_config->environment->template,
-            '{news_feed.url}'                     => $this->_config->news_feed->url,
-            '{news_feed.num_items}'               => $this->_config->news_feed->num_items,
             '{logging.location}'                  => $this->_config->logging->location,
             '{logging.level}'                     => $this->_config->logging->level,
             '{subdomain.enabled}'                 => $this->_config->subdomain->enabled? 'true' : 'false',
@@ -168,7 +166,7 @@ class Install_CredentialsController extends Monkeys_Controller_Action
         fclose($fp);
     }
 
-    private function _forwardFormError(InstallForm $form)
+    private function _forwardFormError(Install_Form_Install $form)
     {
         $appSession = Zend_Registry::get('appSession');
         $appSession->installForm = $form;
@@ -181,7 +179,7 @@ class Install_CredentialsController extends Monkeys_Controller_Action
         $errors = array();
         $webServerUser = $this->_getProcessUser();
 
-        if (!is_writable(APP_DIR) && !is_writable(APP_DIR . '/config.php')) {
+        if (!is_writable(APP_DIR) && !is_writable(APP_DIR . DIRECTORY_SEPARATOR . 'config.php')) {
             $errors[] = $this->view->translate('The directory where Community-ID is installed must be writable by the web server user (%s). Another option is to create an EMPTY config.php file that is writable by that user.', $webServerUser);
         }
         if (!is_writable(WEB_DIR . '/captchas')) {

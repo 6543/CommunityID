@@ -1,0 +1,12 @@
+Dear {userName},
+
+We haven't received the confirmation of your community-id.org account.
+
+Please confirm your account by clicking on the following link, or else your account will be deleted in a few days:
+
+{registrationURL}
+
+
+Thanks,
+The Community-ID Team
+

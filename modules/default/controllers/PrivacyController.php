@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class PrivacyController extends Monkeys_Controller_Action
+class PrivacyController extends CommunityID_Controller_Action
 {
     protected $_numCols = 1;
 

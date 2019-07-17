@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class FeedbackController extends Monkeys_Controller_Action
+class FeedbackController extends CommunityID_Controller_Action
 {
     protected $_numCols = 1;
 
@@ -17,7 +17,7 @@ class FeedbackController extends Monkeys_Controller_Action
     {
         parent::init();
 
-        if ($this->user->role != User::ROLE_ADMIN && $this->underMaintenance) {
+        if ($this->user->role != Users_Model_User::ROLE_ADMIN && $this->underMaintenance) {
             return $this->_redirectForMaintenance();
         }
     }
@@ -29,14 +29,14 @@ class FeedbackController extends Monkeys_Controller_Action
             $form = $appSession->feedbackForm;
             unset($appSession->feedbackForm);
         } else {
-            $form = new FeedbackForm(null, $this->view->base);
+            $form = new Form_Feedback(null, $this->view->base);
         }
         $this->view->form = $form;
     }
 
     public function sendAction()
     {
-        $form = new FeedbackForm(null, $this->view->base);
+        $form = new Form_Feedback(null, $this->view->base);
         $formData = $this->_request->getPost();
         $form->populate($formData);
 
@@ -102,7 +102,7 @@ Feedback:
 $feedback
 EOD
 );
-        $mail->setFrom($this->_config->email->supportemail);
+        $mail->setFrom($configEmail->supportemail);
         $mail->addTo($configEmail->supportemail);
         $mail->setSubject('Community-ID feedback form');
 

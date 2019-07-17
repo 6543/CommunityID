@@ -4,8 +4,8 @@
 * @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkeys Ltd.
-* @since Textroller 0.9
-* @package TextRoller
+* @since CommunityID 0.9
+* @package CommunityID
 * @packager Keyboard Monkeys
 */
 
@@ -19,26 +19,26 @@ class Users_ProfilegeneralControllerTests extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         TestHarness::setUp();
-        Setup::$front->returnResponse(true);
+        Application::$front->returnResponse(true);
         $this->_response = new Zend_Controller_Response_Http();
-        Setup::$front->setResponse($this->_response);
+        Application::$front->setResponse($this->_response);
     }
 
     public function testChangepasswordAction()
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->createRow();
         $user->id = 23;
-        $user->role = User::ROLE_REGISTERED;
+        $user->role = Users_Model_User::ROLE_REGISTERED;
         Zend_Registry::set('user', $user);
 
         $targetUser = $users->createRow();
         $targetUser->id = 24;
         Zend_Registry::set('targetUser', $targetUser);
 
-        Setup::$front->setRequest(new TestRequest('/users/profilegeneral/changepassword'));
+        Application::$front->setRequest(new TestRequest('/users/profilegeneral/changepassword'));
         try {
-            Setup::dispatch();
+            Application::dispatch();
             $this->fail();
         } catch (Exception $e) {
             $this->assertType('Monkeys_AccessDeniedException', $e);
@@ -46,7 +46,7 @@ class Users_ProfilegeneralControllerTests extends PHPUnit_Framework_TestCase
 
         $targetUser = clone $user;
         Zend_Registry::set('targetUser', $targetUser);
-        Setup::dispatch();
+        Application::dispatch();
         $this->assertContains('<form name="changePasswordForm"', $this->_response->getBody());
     }
 }

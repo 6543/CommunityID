@@ -4,8 +4,8 @@
 * @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkeys Ltd.
-* @since Textroller 0.9
-* @package TextRoller
+* @since CommunityID 0.9
+* @package CommunityID
 * @packager Keyboard Monkeys
 */
 
@@ -20,15 +20,15 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         TestHarness::setUp();
-        Setup::$front->returnResponse(true);
+        Application::$front->returnResponse(true);
         $this->_response = new Zend_Controller_Response_Http();
-        Setup::$front->setResponse($this->_response);
+        Application::$front->setResponse($this->_response);
     }
 
     public function testIndexAction()
     {
-        Setup::$front->setRequest(new TestRequest('/users/register'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/users/register'));
+        Application::dispatch();
 
         $this->assertContains('</form>', $this->_response->getBody());
     }
@@ -49,10 +49,10 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
             'password2' => $password2,
         );
 
-        Setup::$front->setRequest(new TestRequest('/users/register/save'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/users/register/save'));
+        Application::dispatch();
 
-        $this->assertContains('Value is empty, but a non-empty value is required', $this->_response->getBody());
+        $this->assertContains('Value is required and can\'t be empty', $this->_response->getBody());
     }
 
     public function testSaveActionWithBadEmail()
@@ -66,8 +66,8 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
                 'password2' => 'johns',
         );
 
-        Setup::$front->setRequest(new TestRequest('/users/register/save'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/users/register/save'));
+        Application::dispatch();
 
         $this->assertContains('is not a valid email address', $this->_response->getBody());
     }
@@ -83,8 +83,8 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
             'password2' => 'johns',
         );
 
-        Setup::$front->setRequest(new TestRequest('/users/register/save'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/users/register/save'));
+        Application::dispatch();
 
         $this->assertContains('Password confirmation does not match', $this->_response->getBody());
     }
@@ -101,8 +101,8 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
             'captcha'   => 'whatever',
         );
 
-        Setup::$front->setRequest(new TestRequest('/users/register/save'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/users/register/save'));
+        Application::dispatch();
 
         $this->assertContains('Captcha value is wrong', $this->_response->getBody());
     }
@@ -112,8 +112,8 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         // I gotta render the form first to generate the captcha
         $sessionStub = new CaptchaImageTestSessionContainer();
         Zend_Registry::set('appSession', $sessionStub);
-        Setup::$front->setRequest(new TestRequest('/users/register'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/users/register'));
+        Application::dispatch();
         $this->assertEquals(preg_match('/name="captcha\[id\]" value="([0-9a-f]+)"/', $this->_response->__toString(), $matches), 1);
 
         $email = 'john_' . rand(0, 1000) . '@mailinator.com';
@@ -132,27 +132,27 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
 
         // this is used to build the users's openid URL
         $_SERVER['SCRIPT_URI'] = 'http://localhost/communityid/users/register/save';
-        Setup::$front->setRequest(new TestRequest('/users/register/save'));
+        Application::$front->setRequest(new TestRequest('/users/register/save'));
 
-        Setup::$mockLogger->events = array();
+        Application::$mockLogger->events = array();
         try {
-            Setup::dispatch();
+            Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
             // I still don't know how to avoid the "headers already sent" problem here...
         }
-        $lastLog = array_pop(Setup::$mockLogger->events);
+        $lastLog = array_pop(Application::$mockLogger->events);
         $this->assertEquals("redirected to ''", $lastLog['message']);
 
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->getUserWithEmail($email);
-        $this->assertType('User', $user);
+        $this->assertType('Users_Model_User', $user);
         $this->assertEquals('johns34', $user->username);
         $this->assertEquals('http://localhost/communityid/identity/johns34', $user->openid);
         $this->assertEquals(0, $user->accepted_eula);
         $this->assertEquals('john', $user->firstname);
         $this->assertEquals('smith', $user->lastname);
         $this->assertEquals($email, $user->email);
-        $this->assertEquals(User::ROLE_GUEST, $user->role);
+        $this->assertEquals(Users_Model_User::ROLE_GUEST, $user->role);
         $this->assertNotEquals('', $user->token);
 
         $user->delete();
@@ -166,7 +166,7 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         $_SERVER['SCRIPT_URI'] = 'http://localhost/communityid/users/register/save';
 
         require_once APP_DIR . '/modules/users/controllers/RegisterController.php';
-        $mail = Users_RegisterController::getMail($user);
+        $mail = Users_RegisterController::getMail($user, 'Community-ID registration confirmation');
         $this->assertType('Zend_Mail', $mail);
         $mailBody = $mail->getBodyText(true);
         $mailBody = str_replace("=\n", '', $mailBody);  // remove line splitters
@@ -180,12 +180,12 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
     public function testEulaBadTokenAction()
     {
         $_GET = array('token' => 'asdfsdf');
-        Setup::$front->setRequest(new TestRequest('/users/register/eula'));
+        Application::$front->setRequest(new TestRequest('/users/register/eula'));
         try {
-            Setup::dispatch();
+            Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
         }
-        $lastLog = array_pop(Setup::$mockLogger->events);
+        $lastLog = array_pop(Application::$mockLogger->events);
         $this->assertEquals("redirected to ''", $lastLog['message']);
     }
 
@@ -194,9 +194,9 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         $user = $this->_getUser();
         $user->save();
         $_GET = array('token' => $user->token);
-        Setup::$front->setRequest(new TestRequest('/users/register/eula'));
-        Setup::dispatch();
-        $fp = fopen(dirname(__FILE__) . '/../../../../resources/eula.txt', 'r');
+        Application::$front->setRequest(new TestRequest('/users/register/eula'));
+        Application::dispatch();
+        $fp = fopen(dirname(__FILE__) . '/../../../../resources/en/eula.txt', 'r');
         $firstLine = fgets($fp);
         $this->assertContains($firstLine, $this->_response->getBody());
         $user->delete();
@@ -205,14 +205,14 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
     public function testDeclineeulaBadTokenAction()
     {
         $_GET = array('token' => 'asdfsdf');
-        Setup::$front->setRequest(new TestRequest('/users/register/declineeula'));
+        Application::$front->setRequest(new TestRequest('/users/register/declineeula'));
         try {
-            Setup::dispatch();
+            Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
         }
-        $lastLog = array_pop(Setup::$mockLogger->events);
+        $lastLog = array_pop(Application::$mockLogger->events);
         $this->assertEquals("redirected to ''", $lastLog['message']);
-        $lastLog = array_pop(Setup::$mockLogger->events);
+        $lastLog = array_pop(Application::$mockLogger->events);
         $this->assertEquals("invalid token", $lastLog['message']);
     }
 
@@ -223,15 +223,15 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
         $token = $user->token;
 
         $_GET = array('token' => $user->token);
-        Setup::$front->setRequest(new TestRequest('/users/register/declineeula'));
+        Application::$front->setRequest(new TestRequest('/users/register/declineeula'));
         try {
-            Setup::dispatch();
+            Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
         }
-        $lastLog = array_pop(Setup::$mockLogger->events);
+        $lastLog = array_pop(Application::$mockLogger->events);
         $this->assertEquals("redirected to ''", $lastLog['message']);
 
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->getUserWithToken($token);
         $this->assertNull($user);
     }
@@ -239,12 +239,12 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
     public function testAccepteulaBadTokenAction()
     {
         $_GET = array('token' => 'asdfsdf');
-        Setup::$front->setRequest(new TestRequest('/users/register/accepteula'));
+        Application::$front->setRequest(new TestRequest('/users/register/accepteula'));
         try {
-            Setup::dispatch();
+            Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
         }
-        $lastLog = array_pop(Setup::$mockLogger->events);
+        $lastLog = array_pop(Application::$mockLogger->events);
         $this->assertEquals("redirected to ''", $lastLog['message']);
     }
 
@@ -256,12 +256,12 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
 
         $_GET = array('token' => $user->token);
 
-        Setup::$front->setRequest(new TestRequest('/users/register/accepteula'));
+        Application::$front->setRequest(new TestRequest('/users/register/accepteula'));
         try {
-            Setup::dispatch();
+            Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
         }
-        $lastLog = array_pop(Setup::$mockLogger->events);
+        $lastLog = array_pop(Application::$mockLogger->events);
         $this->assertEquals("redirected to '/users/profile'", $lastLog['message']);
 
         $user->delete();
@@ -299,11 +299,11 @@ class Users_RegisterControllerTests extends PHPUnit_Framework_TestCase
 
     private function _getUser()
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->createRow();
         $user->firstname = 'john';
         $user->lastname = 'smith';
-        $user->token = User::generateToken();
+        $user->token = Users_Model_User::generateToken();
         $user->email = 'john@mailinator.com';
 
         return $user;

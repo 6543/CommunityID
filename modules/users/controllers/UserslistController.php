@@ -9,20 +9,20 @@
 * @packager Keyboard Monkeys
 */
 
-class Users_UserslistController extends Monkeys_Controller_Action
+class Users_UserslistController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
         $this->_helper->viewRenderer->setNeverRender(true);
 
-        $users = new Users();
+        $users = new Users_Model_Users();
 
         switch($this->_getParam('filter')) {
             case 'confirmed':
-                $where = "accepted_eula=1 AND role != '".User::ROLE_ADMIN."'";
+                $where = "accepted_eula=1 AND role != '".Users_Model_User::ROLE_ADMIN."'";
                 break;
             case 'unconfirmed':
-                $where = "accepted_eula=0 AND role != '".User::ROLE_ADMIN."'";
+                $where = "accepted_eula=0 AND role != '".Users_Model_User::ROLE_ADMIN."'";
                 break;
             default:
                 $where = false;
@@ -33,20 +33,22 @@ class Users_UserslistController extends Monkeys_Controller_Action
             $this->_getParam('startIndex'),
             $this->_getParam('results'),
             $this->_getParam('sort', 'registration'),
-            $this->_getParam('dir', Users::DIR_DESC),
-            $where);
+            $this->_getParam('dir', Users_Model_Users::DIR_DESC),
+            $where,
+            trim($this->_getParam('search')));
 
         $jsonObj = new StdClass();
         $jsonObj->recordsReturned = count($usersRows);
-        $jsonObj->totalRecords = $users->getNumUsers();
+        $jsonObj->totalRecords = $users->getNumUsers($where, trim($this->_getParam('search')));
+        $jsonObj->totalUsers = $users->getNumUsers();
         $jsonObj->totalUnconfirmedUsers = $users->getNumUnconfirmedUsers();
-        $jsonObj->startIndex = $_GET['startIndex'];
+        $jsonObj->startIndex = $this->_getParam('startIndex');
         $jsonObj->sort = $this->_getParam('sort');
         $jsonObj->dir = $this->_getParam('dir');
         $jsonObj->records = array();
 
         foreach ($usersRows as $user) {
-            if ($user->role == User::ROLE_ADMIN) {
+            if ($user->role == Users_Model_User::ROLE_ADMIN) {
                 $status = $this->view->translate('admin');
             } else if ($user->accepted_eula) {
                 $status = $this->view->translate('confirmed');

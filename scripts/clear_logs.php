@@ -17,17 +17,17 @@
 
 define('APP_DIR', dirname(__FILE__) . '/../');
 
-require APP_DIR . '/Setup.php';
+require APP_DIR . '/Application.php';
 
-Setup::setIncludePath();
-Setup::setAutoLoader();
-Setup::setConfig();
-Setup::setLogger();
-Setup::setDatabase();
+Application::setIncludePath();
+Application::setAutoLoader();
+Application::setConfig();
+Application::setLogger();
+Application::setDatabase();
 
 require 'modules/default/models/Histories.php';
 
-$histories = new Histories();
+$histories = new Model_Histories();
 $histories->clearOldEntries();
 
 ?>

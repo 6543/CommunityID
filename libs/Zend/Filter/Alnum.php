@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -17,9 +16,8 @@
  * @package    Zend_Filter
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Alnum.php 12501 2008-11-10 16:28:31Z matthew $
+ * @version    $Id: Alnum.php 14560 2009-03-31 14:41:22Z thomas $
  */
-
 
 /**
  * @see Zend_Filter_Interface
@@ -42,6 +40,7 @@ class Zend_Filter_Alnum implements Zend_Filter_Interface
      * Whether to allow white space characters; off by default
      *
      * @var boolean
+     * @depreciated
      */
     public $allowWhiteSpace;
 
@@ -51,17 +50,17 @@ class Zend_Filter_Alnum implements Zend_Filter_Interface
      * @var mixed
      **/
     protected static $_unicodeEnabled;
-    
+
     /**
      * Locale in browser.
-     * 
+     *
      * @var Zend_Locale object
      */
     protected $_locale;
-    
+
     /**
      * The Alphabet means english alphabet.
-     * 
+     *
      * @var boolean
      */
     protected static $_meansEnglishAlphabet;
@@ -80,12 +79,34 @@ class Zend_Filter_Alnum implements Zend_Filter_Interface
         }
 
         if (null === self::$_meansEnglishAlphabet) {
-            $this->_locale = new Zend_Locale(Zend_Locale::BROWSER);
+            $this->_locale = new Zend_Locale('auto');
             self::$_meansEnglishAlphabet = in_array($this->_locale->getLanguage(),
-                                                    array('ja')
+                                                    array('ja', 'ko', 'zh')
                                                     );
         }
-       
+
+    }
+
+    /**
+     * Returns the allowWhiteSpace option
+     *
+     * @return boolean
+     */
+    public function getAllowWhiteSpace()
+    {
+        return $this->allowWhiteSpace;
+    }
+
+    /**
+     * Sets the allowWhiteSpace option
+     *
+     * @param boolean $allowWhiteSpace
+     * @return Zend_Filter_Alnum Provides a fluent interface
+     */
+    public function setAllowWhiteSpace($allowWhiteSpace)
+    {
+        $this->allowWhiteSpace = (boolean) $allowWhiteSpace;
+        return $this;
     }
 
     /**

@@ -9,167 +9,292 @@
 * @packager Keyboard Monkeys
 */
 
-class OpenidController extends Monkeys_Controller_Action
+class OpenidController extends CommunityID_Controller_Action
 {
+    protected $_numCols = 1;
+
     public function providerAction()
     {
-        if (isset($_POST['action']) && $_POST['action'] == 'proceed') {
-            return $this->_proceed();
-        } else {
-            Zend_OpenId::$exitOnRedirect = false;
+        $server = $this->_getOpenIdProvider();
+        $request = $server->decodeRequest();
+        $sites = new Model_Sites();
 
-            $this->_helper->layout->disableLayout();
+        if (!$request) {
             $this->_helper->viewRenderer->setNeverRender(true);
+            header('HTTP/1.0 403 Forbidden');
+            Zend_Registry::get('logger')->log("OpenIdController::providerAction: FORBIDDEN", Zend_Log::DEBUG);
+            echo 'Forbidden';
+            return;
+        }
 
-            $server = $this->_getOpenIdProvider();
-            $response = new Zend_Controller_Response_Http();
-            $ret = $server->handle(null, new Zend_OpenId_Extension_Sreg(), $response);
-            Zend_Registry::get('logger')->log("RET: ".print_r($ret, true), Zend_Log::DEBUG);
-            Zend_Registry::get('logger')->log("RESPONSE: ".print_r($response->getHeaders(), true), Zend_Log::DEBUG);
-            if (is_string($ret)) {
-                echo $ret;
-            } else if ($ret !== true) {
-                header('HTTP/1.0 403 Forbidden');
-                Zend_Registry::get('logger')->log("OpenIdController::providerAction: FORBIDDEN", Zend_Log::DEBUG);
-                echo 'Forbidden';
-            } elseif ($ret === true
-                      // Zend_OpenId is messy and can change the type of the response I initially sent >:|
-                      && is_a($response, 'Zend_Controller_Response_Http'))
+        // association and other transactions, handled automatically by the framework
+        if (!in_array($request->mode, array('checkid_immediate', 'checkid_setup'))) {
+            return $this->_sendResponse($server, $server->handleRequest($request));
+        }
 
-            {
-                $headers = $response->getHeaders();
-                if (isset($headers[0]['name']) && $headers[0]['name'] == 'Location'
-                    // redirection to the Trust page is not logged
-                    && strpos($headers[0]['value'], '/openid/trust') === false
-                    && strpos($headers[0]['value'], '/openid/login') === false)
-                {
-                    if (strpos($headers[0]['value'], 'openid.mode=cancel') !== false) {
-                        $this->_saveHistory($server, History::DENIED);
+        // can't process immediate requests if user is not logged in
+        if ($request->immediate && $this->user->role == Users_Model_User::ROLE_GUEST) {
+            return $this->_sendResponse($server, $request->answer(false));
+        }
+
+        if ($request->idSelect()) {
+            if ($this->user->role == Users_Model_User::ROLE_GUEST) {
+                $this->_forward('login');
+            } else {
+                if ($sites->isTrusted($this->user, $request->trust_root)) {
+                    $this->_forward('proceed', null, null, array('allow' => true));
+                } elseif ($sites->isNeverTrusted($this->user, $request->trust_root)) {
+                    $this->_forward('proceed', null, null, array('allow' => false));
+                } else {
+                    if ($request->immediate) {
+                        return $this->_sendResponse($server, $request->answer(false));
+                    }
+
+                    $this->_forward('trust');
+                }
+            }
+        } else {
+            if (!$request->identity) {
+                die('No identifier sent by OpenID relay');
+            }
+
+            if ($this->user->role == Users_Model_User::ROLE_GUEST) {
+                $this->_forward('login');
+            } else {
+                // user is logged-in already. Check the requested identity is his
+                if ($this->user->openid != $request->identity) {
+                    Zend_Auth::getInstance()->clearIdentity();
+                    if ($this->immediate) {
+                        return $this->_sendResponse($server, $request->answer(false));
+                    }
+
+                    $this->_forward('login');
+                } else {
+                    if ($sites->isTrusted($this->user, $request->trust_root)) {
+                        $this->_forward('proceed', null, null, array('allow' => true));
+                    } elseif ($sites->isNeverTrusted($this->user, $request->trust_root)) {
+                        $this->_forward('proceed', null, null, array('deny' => true));
                     } else {
-                        $this->_saveHistory($server, History::AUTHORIZED);
+                        $this->_forward('trust');
                     }
                 }
             }
         }
     }
 
+    /**
+    * We don't use the session with the login form to simplify the dynamic appearance of the captcha
+    */
     public function loginAction()
     {
-        $appSession = Zend_Registry::get('appSession');
-        if (isset($appSession->openidLoginForm)) {
-            $this->view->form = $appSession->openidLoginForm;
-            unset($appSession->openidLoginForm);
-        } else {
-            $this->view->form = new OpenidLoginForm();
-        }
-        $this->view->form->openIdIdentity->setValue(htmlspecialchars($_GET['openid_identity']));
+        $server = $this->_getOpenIdProvider();
+        $request = $server->decodeRequest();
 
-        $this->view->queryString = $_SERVER['QUERY_STRING'];
+        $authAttempts = new Users_Model_AuthAttempts();
+        $attempt = $authAttempts->get();
+        $this->view->useCaptcha = $attempt && $attempt->surpassedMaxAllowed();
+        $this->view->form = new Form_OpenidLogin(null, $this->view->base, $attempt && $attempt->surpassedMaxAllowed());
+
+        if (!$request->idSelect()) {
+            $this->view->form->openIdIdentity->setValue(htmlspecialchars($request->identity));
+        }
+
+        $this->view->queryString = $this->_queryString();
     }
 
     public function authenticateAction()
     {
-        $form = new OpenidLoginForm();
+        $server = $this->_getOpenIdProvider();
+        $request = $server->decodeRequest();
+
+        $authAttempts = new Users_Model_AuthAttempts();
+        $attempt = $authAttempts->get();
+
+        $form = new Form_OpenidLogin(null, $this->view->base, $attempt && $attempt->surpassedMaxAllowed());
         $formData = $this->_request->getPost();
         $form->populate($formData);
 
         if (!$form->isValid($formData)) {
-            $appSession = Zend_Registry::get('appSession');
-            $appSession->openidLoginForm = $form;
-            return $this->_forward('login', null, null);
+            $this->_forward('login');
+            return;
         }
 
-        $server = $this->_getOpenIdProvider();
-        $server->login($form->getValue('openIdIdentity'), $form->getValue('password'));
+        $users = new Users_Model_Users();
+        $result = $users->authenticate($form->getValue('openIdIdentity'),
+            $form->getValue('password'), true);
 
-        // needed for unit tests
-        $this->_helper->layout->disableLayout();
-        $this->_helper->viewRenderer->setNeverRender(true);
-
-        Zend_OpenId::redirect($this->view->base . '/openid/provider', $_GET);
+        if ($result) {
+            if ($attempt) {
+                $attempt->delete();
+            }
+            $sites = new Model_Sites();
+            if ($sites->isTrusted($users->getUser(), $request->trust_root)) {
+                $this->_forward('proceed', null, null, array('allow' => true));
+            } elseif ($sites->isNeverTrusted($users->getUser(), $request->trust_root)) {
+                $this->_forward('proceed', null, null, array('deny' => true));
+            } else {
+                $this->_forward('trust');
+            }
+        } else {
+            if (!$attempt) {
+                $authAttempts->create();
+            } else {
+                $attempt->addFailure();
+                $attempt->save();
+            }
+            $this->_forward('login');
+        }
     }
 
     public function trustAction()
     {
         $server = $this->_getOpenIdProvider();
-        $this->view->siteRoot = $server->getSiteRoot($_GET);
-        $this->view->identityUrl = $server->getLoggedInUser($_GET);
-        $this->view->queryString = $_SERVER['QUERY_STRING'];
+        $request = $server->decodeRequest();
 
-        $sreg = new Zend_OpenId_Extension_Sreg();
-        $sreg->parseRequest($_GET);
+        $this->view->siteRoot = $request->trust_root;
+        $this->view->identityUrl = $this->user->openid;
+        $this->view->queryString = $this->_queryString();
 
         $this->view->fields = array();
         $this->view->policyUrl = false;
 
-        $props = $sreg->getProperties();
+        // The class Auth_OpenID_SRegRequest is included in the following file
+        require 'libs/Auth/OpenID/SReg.php';
+
+        $sregRequest = Auth_OpenID_SRegRequest::fromOpenIDRequest($request);
+        $props = $sregRequest->allRequestedFields();
+        $args  = $sregRequest->getExtensionArgs();
+        if (isset($args['required'])) {
+            $required = explode(',', $args['required']);
+        } else {
+            $required = false;
+        }
+
         if (is_array($props) && count($props) > 0) {
-            $personalInfoForm = new PersonalInfoForm(null, $this->user, $props);
+            $sregProps = array();
+            foreach ($props as $field) {
+                $sregProps[$field] = $required && in_array($field, $required);
+            }
+
+            $personalInfoForm = new Users_Form_PersonalInfo(null, $this->user, $sregProps);
             $this->view->fields = $personalInfoForm->getElements();
 
-            $policy = $sreg->getPolicyUrl();
-            if (!empty($policy)) {
-                $this->view->policyUrl = $policy;
+            if (isset($args['policy_url'])) {
+                $this->view->policyUrl = $args['policy_url'];
             }
         }
     }
 
-    private function _proceed()
+    public function proceedAction()
     {
-        if ($this->user->role == User::ROLE_GUEST) {
-            throw new Monkeys_AccessDeniedException();
-        }
-
         // needed for unit tests
         $this->_helper->layout->disableLayout();
         $this->_helper->viewRenderer->setNeverRender(true);
 
         $server = $this->_getOpenIdProvider();
+        $request = $server->decodeRequest();
 
-        $sreg = new Zend_OpenId_Extension_Sreg();
-        $sreg->parseRequest($_GET);
-        $props = $sreg->getProperties();
+        if ($request->idSelect()) {
+            $id = $this->user->openid;
+        } else {
+            $id = null;
+        }
 
-        $personalInfoForm = new PersonalInfoForm(null, $this->user, $props);
-        $formData = $this->_request->getPost();
-        $personalInfoForm->populate($formData);
+        $response = $request->answer(true, null, $id);
 
-        // not planning on validating stuff here yet, but I call this
-        // for the date element to be filled properly
-        $personalInfoForm->isValid($formData);
+        // The class Auth_OpenID_SRegRequest is included in the following file
+        require 'libs/Auth/OpenID/SReg.php';
 
-        $sreg->parseResponse($personalInfoForm->getValues());
-        if (isset($_POST['allow'])) {
-            if (isset($_POST['forever'])) {
-                $server->allowSite($server->getSiteRoot($_GET), $sreg);
+        $sregRequest = Auth_OpenID_SRegRequest::fromOpenIDRequest($request);
+        $props = $sregRequest->allRequestedFields();
+        $args  = $sregRequest->getExtensionArgs();
+        if (isset($args['required'])) {
+            $required = explode(',', $args['required']);
+        } else {
+            $required = false;
+        }
+
+        if (is_array($props) && count($props) > 0) {
+            $sregProps = array();
+            foreach ($props as $field) {
+                $sregProps[$field] = $required && in_array($field, $required);
             }
-            unset($_GET['openid_action']);
 
-            $this->_saveHistory($server, History::AUTHORIZED);
+            $personalInfoForm = new Users_Form_PersonalInfo(null, $this->user, $sregProps);
+            $formData = $this->_request->getPost();
+            $personalInfoForm->populate($formData);
 
-            $server->respondToConsumer($_GET, $sreg);
-        } else if (isset($_POST['deny'])) {
-            if (isset($_POST['forever'])) {
-                $server->denySite($server->getSiteRoot($_GET));
+            // not planning on validating stuff here yet, but I call this
+            // for the date element to be filled properly
+            $personalInfoForm->isValid($formData);
+
+            $sregResponse = Auth_OpenID_SRegResponse::extractResponse($sregRequest,
+                $personalInfoForm->getUnqualifiedValues());
+            $sregResponse->toMessage($response->fields);
+        }
+
+        if ($this->_getParam('allow')) {
+            if ($this->_getParam('forever')) {
+
+                $sites = new Model_Sites();
+                $sites->deleteForUserSite($this->user, $request->trust_root);
+
+                $siteObj = $sites->createRow();
+                $siteObj->user_id = $this->user->id;
+                $siteObj->site = $request->trust_root;
+                $siteObj->creation_date = date('Y-m-d');
+
+                if (isset($personalInfoForm)) {
+                    $trusted = array();
+                    // using this key name for BC pre 1.1 when we used Zend_OpenId
+                    $trusted['Zend_OpenId_Extension_Sreg'] = $personalInfoForm->getUnqualifiedValues();
+                } else {
+                    $trusted = true;
+                }
+                $siteObj->trusted = serialize($trusted);
+
+                $siteObj->save();
             }
 
-            $this->_saveHistory($server, History::DENIED);
+            $this->_saveHistory($request->trust_root, Model_History::AUTHORIZED);
 
-            Zend_OpenId::redirect($_GET['openid_return_to'], array('openid.mode'=>'cancel'));
+            $webresponse = $server->encodeResponse($response);
+
+            foreach ($webresponse->headers as $k => $v) {
+                header("$k: $v");
+            }
+
+            header('Connection: close');
+            echo $webresponse->body;
+        } elseif ($this->_getParam('deny')) {
+            if ($this->_getParam('forever')) {
+                $sites = new Model_Sites();
+                $sites->deleteForUserSite($this->user, $request->trust_root);
+
+                $siteObj = $sites->createRow();
+                $siteObj->user_id = $this->user->id;
+                $siteObj->site = $request->trust_root;
+                $siteObj->creation_date = date('Y-m-d');
+                $siteObj->trusted = serialize(false);
+                $siteObj->save();
+            }
+
+            $this->_saveHistory($request->trust_root, Model_History::DENIED);
+
+            header('HTTP/1.1 302 Found');
+            header('Content-Type: text/plain; charset=us-ascii');
+            header('Connection: close');
+            header('Location: ' . $request->getCancelUrl());
         }
     }
-    private function _saveHistory(Zend_OpenId_Provider $server, $result)
-    {
-        // only log if user exists
-        if ($this->user->role == User::ROLE_GUEST) {
-            return;
-        }
 
-        $histories = new Histories();
+    private function _saveHistory($site, $result)
+    {
+        $histories = new Model_Histories();
         $history = $histories->createRow();
         $history->user_id = $this->user->id;
         $history->date = date('Y-m-d H:i:s');
-        $history->site = $server->getSiteRoot($_GET);
+        $history->site = $site;
         $history->ip = $_SERVER['REMOTE_ADDR'];
         $history->result = $result;
         $history->save();
@@ -177,11 +302,64 @@ class OpenidController extends Monkeys_Controller_Action
 
     private function _getOpenIdProvider()
     {
-        $server = new Zend_OpenId_Provider($this->view->base . '/openid/login',
-                                           $this->view->base . '/openid/trust',
-                                           new OpenIdUser(),
-                                           new Monkeys_OpenId_Provider_Storage_Database());
+        $connection = new CommunityID_OpenId_DatabaseConnection(Zend_Registry::get('db'));
+        $store = new Auth_OpenID_MySQLStore($connection, 'associations', 'nonces');
+        $server = new Auth_OpenID_Server($store, $this->_helper->ProviderUrl($this->_config));
 
         return $server;
+    }
+
+    private function _sendResponse(Auth_OpenID_Server $server, Auth_OpenID_ServerResponse $response)
+    {
+        $this->_helper->layout->disableLayout();
+        $this->_helper->viewRenderer->setNeverRender(true);
+
+        $webresponse = $server->encodeResponse($response);
+
+        if ($webresponse->code != AUTH_OPENID_HTTP_OK) {
+            header(sprintf("HTTP/1.1 %d ", $webresponse->code), true, $webresponse->code);
+        }
+
+        foreach ($webresponse->headers as $k => $v) {
+            header("$k: $v");
+        }
+
+        header('Connection: close');
+
+        echo $webresponse->body;
+    }
+
+
+    /**
+    * Circumvent PHP's automatic replacement of dots by underscore in var names in $_GET and $_POST
+    */
+    private function _queryString()
+    {
+        $unfilteredVars = array_merge($_GET, $_POST);
+        $varsTemp = array();
+        $vars = array();
+        $extensions = array();
+        foreach ($unfilteredVars as $key => $value) {
+            if (substr($key, 0, 10) == 'openid_ns_') {
+                $extensions[] = substr($key, 10);
+                $varsTemp[str_replace('openid_ns_', 'openid.ns.', $key)] = $value;
+            } else {
+                $varsTemp[str_replace('openid_', 'openid.', $key)] = $value;
+            }
+        }
+        foreach ($extensions as $extension) {
+            foreach ($varsTemp as $key => $value) {
+                if (strpos($key, "openid.$extension") === 0) {
+                    $prefix = "openid.$extension.";
+                    $key = $prefix . substr($key, strlen($prefix));
+                }
+                $vars[$key] = $value;
+            }
+        }
+        if (!$extensions) {
+            $vars = $varsTemp;
+        }
+
+        return '?' . http_build_query($vars);
     }
 }

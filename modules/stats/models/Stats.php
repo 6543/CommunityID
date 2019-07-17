@@ -4,13 +4,13 @@
 * @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkeys Ltd.
-* @since Textroller 0.9
-* @package TextRoller
+* @since CommunityID 0.9
+* @package CommunityID
 * @packager Keyboard Monkeys
 */
 
 
-class Stats
+class Stats_Model_Stats
 {
     private $_db;
 

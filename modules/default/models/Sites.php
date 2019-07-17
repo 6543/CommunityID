@@ -10,20 +10,34 @@
 */
 
 
-class Sites extends Monkeys_Db_Table_Gateway
+class Model_Sites extends Monkeys_Db_Table_Gateway
 {
     protected $_name = 'sites';
     protected $_primary = 'id';
-    protected $_rowClass = 'Site';
+    protected $_rowClass = 'Model_Site';
 
-    public function deleteForUserSite(User $user, $site)
+    private $_userSites = array();
+
+    public function deleteForUserSite(Users_Model_User $user, $site)
     {
         $where1 = $this->getAdapter()->quoteInto('user_id=?',$user->id);
         $where2 = $this->getAdapter()->quoteInto('site=?', $site);
         $this->delete("$where1 AND $where2");
     }
 
-    public function get(User $user, $startIndex, $results)
+    public function getSites(Users_Model_User $user)
+    {
+        if (!isset($this->_userSites[$user->username])) {
+            $select = $this->select()
+                           ->where('user_id=?', $user->id);
+
+            $this->_userSites[$user->username] = $this->fetchAll($select);
+        }
+
+        return $this->_userSites[$user->username];
+    }
+
+    public function get(Users_Model_User $user, $startIndex, $results)
     {
         $select = $this->select()
                        ->where('user_id=?', $user->id);
@@ -35,18 +49,32 @@ class Sites extends Monkeys_Db_Table_Gateway
         return $this->fetchAll($select);
     }
 
-    public function getNumSites(User $user)
+    public function getNumSites(Users_Model_User $user)
     {
         $sites = $this->get($user, false, false);
 
         return count($sites);
     }
 
-    public function getTrusted(User $user)
+    public function isTrusted(Users_Model_User $user, $site)
     {
-        $select = $this->select()
-                       ->where('user_id=?', $user->id);
+        foreach ($this->getSites($user) as $userSite) {
+            if ($userSite->site == $site && $userSite->trusted != 'b:0;') {
+                return true;
+            }
+        }
 
-        return $this->fetchAll($select);
+        return false;
+    }
+
+    public function isNeverTrusted(Users_Model_User $user, $site)
+    {
+        foreach ($this->getSites($user) as $userSite) {
+            if ($userSite->site == $site && $userSite->trusted == 'b:0;') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -10,7 +10,7 @@ YAHOO.util.Event.onDOMReady(function () {
 <div id="paging"></div>
 <div id="dt"></div>
 <div id="clearHistory">
-    <input type="button" id="clearHistoryBtn" value="<?= $this->translate('Clear History') ?>" onclick="COMMID.historyList.clearEntries()" />
+    <input type="button" id="clearHistoryBtn" value="<?php echo $this->translate('Clear History') ?>" onclick="COMMID.historyList.clearEntries()" />
     <script type="text/javascript">
         YAHOO.util.Event.onDOMReady(function () {
             var oButton = new YAHOO.widget.Button(

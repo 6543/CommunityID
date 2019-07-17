@@ -18,14 +18,14 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         TestHarness::setUp();
-        Setup::$front->returnResponse(true);
+        Application::$front->returnResponse(true);
         $this->_response = new Zend_Controller_Response_Http();
-        Setup::$front->setResponse($this->_response);
+        Application::$front->setResponse($this->_response);
 
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->createRow();
         $user->id = 23;
-        $user->role = User::ROLE_ADMIN;
+        $user->role = Users_Model_User::ROLE_ADMIN;
         $user->username = 'testadmin';
         Zend_Registry::set('user', $user);
 
@@ -36,10 +36,10 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
     */
     public function testIndexGuestUserAction()
     {
-        Zend_Registry::get('user')->role = User::ROLE_GUEST;
+        Zend_Registry::get('user')->role = Users_Model_User::ROLE_GUEST;
 
-        Setup::$front->setRequest(new TestRequest('/messageusers'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/messageusers'));
+        Application::dispatch();
     }
 
     /**
@@ -47,16 +47,16 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
     */
     public function testIndexRegisteredUserAction()
     {
-        Zend_Registry::get('user')->role = User::ROLE_REGISTERED;
+        Zend_Registry::get('user')->role = Users_Model_User::ROLE_REGISTERED;
 
-        Setup::$front->setRequest(new TestRequest('/messageusers'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/messageusers'));
+        Application::dispatch();
     }
 
     public function testIndexAction()
     {
-        Setup::$front->setRequest(new TestRequest('/messageusers'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/messageusers'));
+        Application::dispatch();
 
         $this->assertContains('</form>', $this->_response->getBody());
     }
@@ -71,10 +71,10 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
             'bodyHTML'      => 'Hello <strong>world</strong>',
         );
 
-        Setup::$front->setRequest(new TestRequest('/messageusers/send'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/messageusers/send'));
+        Application::dispatch();
 
-        $this->assertContains('Value is empty, but a non-empty value is required', $this->_response->getBody());
+        $this->assertContains('Value is required and can\'t be empty', $this->_response->getBody());
     }
 
     public function testSaveActionWithBadCC()
@@ -87,8 +87,8 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
             'bodyHTML'      => 'Hello <strong>world</strong>',
         );
 
-        Setup::$front->setRequest(new TestRequest('/messageusers/send'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/messageusers/send'));
+        Application::dispatch();
 
         $this->assertContains('CC field must be a comma-separated list of valid E-mails', $this->_response->getBody());
     }
@@ -98,10 +98,10 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
     */
     public function testSaveGuestUser()
     {
-        Zend_Registry::get('user')->role = User::ROLE_GUEST;
+        Zend_Registry::get('user')->role = Users_Model_User::ROLE_GUEST;
 
-        Setup::$front->setRequest(new TestRequest('/messageusers/send'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/messageusers/send'));
+        Application::dispatch();
     }
 
     /**
@@ -109,10 +109,10 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
     */
     public function testSaveRegisteredUser()
     {
-        Zend_Registry::get('user')->role = User::ROLE_REGISTERED;
+        Zend_Registry::get('user')->role = Users_Model_User::ROLE_REGISTERED;
 
-        Setup::$front->setRequest(new TestRequest('/messageusers/send'));
-        Setup::dispatch();
+        Application::$front->setRequest(new TestRequest('/messageusers/send'));
+        Application::dispatch();
     }
 
     public function testSaveSuccessfull()
@@ -125,15 +125,15 @@ class MessageusersControllerTests extends PHPUnit_Framework_TestCase
             'bodyHTML'      => 'Hello <strong>world</strong>',
         );
 
-        Setup::$front->setRequest(new TestRequest('/messageusers/send'));
-        Setup::$mockLogger->events = array();
+        Application::$front->setRequest(new TestRequest('/messageusers/send'));
+        Application::$mockLogger->events = array();
         try {
-            Setup::dispatch();
+            Application::dispatch();
         } catch (Zend_Controller_Response_Exception $e) {
             // I still don't know how to avoid the "headers already sent" problem here...
         }
 
-        $lastLog = array_pop(Setup::$mockLogger->events);
+        $lastLog = array_pop(Application::$mockLogger->events);
         $this->assertEquals("redirected to ''", $lastLog['message']);
     }
 }

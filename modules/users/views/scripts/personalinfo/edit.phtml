@@ -1,59 +1,29 @@
-<script>
-YAHOO.util.Event.onDOMReady(function () {
-    COMMID.loader.insert(
-        ["connection"],
-        null
-    );
-});
-
-COMMID.editPersonalInfo = function() {
-
-    return {
-        save: function() {
-            YAHOO.util.Connect.setForm("personalInfoForm");
-            YAHOO.util.Connect.asyncRequest(
-                'POST',
-                'personalinfo/save',
-                {
-                    success: function (responseObj) {COMMID.utils.replaceContent(responseObj, "personalInfo")},
-                    failure: COMMID.utils.asyncFailed
-                },
+<form name="personalInfoForm" class="formGrid" >
+    <?php foreach ($this->fields as $field): ?>
+        <?php echo $field ?>
+    <?php endforeach ?><br />
+    <input type="button" id="save" value="<?php echo $this->translate('Save') ?>" onclick="COMMID.editPersonalInfo.save()" />
+    <input type="button" id="cancel" value="<?php echo $this->translate('Cancel') ?>" onclick="COMMID.editPersonalInfo.cancel()" />
+    <script type="text/javascript">
+        YAHOO.util.Event.onDOMReady(function () {
+            COMMID.loader.insert(
+                ["connection"],
                 null
             );
-        },
+        });
 
-        cancel: function() {
-            var transaction = YAHOO.util.Connect.asyncRequest(
-                'GET',
-                'personalinfo/show',
-                {
-                    success: function (responseObj) {COMMID.utils.replaceContent(responseObj, "personalInfo")},
-                    failure: COMMID.utils.asyncFailed
-                }
-            );
-        }
-    };
-}();
-</script>
-<form name="personalInfoForm" class="formGrid" >
-    <? foreach ($this->fields as $field): ?>
-        <?= $field ?>
-    <? endforeach ?><br />
-    <input type="button" id="save" value="<?= $this->translate('Save') ?>" onclick="COMMID.editPersonalInfo.save()" />
-    <input type="button" id="cancel" value="<?= $this->translate('Cancel') ?>" onclick="COMMID.editPersonalInfo.cancel()" />
-    <script type="text/javascript">
         var oButton = new YAHOO.widget.Button(
             "save",
             {
                 type    : "push",
-                onclick : {fn: COMMID.editPersonalInfo.save}
+                onclick : {fn: COMMID.personalInfo.save}
             }
         );
         var oButton = new YAHOO.widget.Button(
             "cancel",
             {
                 type    : "push",
-                onclick : {fn: COMMID.editPersonalInfo.cancel}
+                onclick : {fn: COMMID.personalInfo.cancel}
             }
         );
     </script> 

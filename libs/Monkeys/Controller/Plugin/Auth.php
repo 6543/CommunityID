@@ -1,14 +1,5 @@
 <?php
 
-/*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
-* @license http://creativecommons.org/licenses/BSD/ BSD License
-* @author Keyboard Monkey Ltd
-* @since  CommunityID 0.9
-* @package CommunityID
-* @packager Keyboard Monkeys
-*/
-
 class Monkeys_Controller_Plugin_Auth extends Zend_Controller_Plugin_Abstract
 {
     private $_acl;
@@ -18,6 +9,10 @@ class Monkeys_Controller_Plugin_Auth extends Zend_Controller_Plugin_Abstract
         $this->_acl = $acl;
     }
 
+    /**
+    * Here we only check for the basic action access permissions.
+    * In Monkeys_Controller_Action we check for more specific permissions
+    */
     public function preDispatch($request)
     {
         if (!Zend_Registry::get('config')->environment->installed
@@ -36,7 +31,7 @@ class Monkeys_Controller_Plugin_Auth extends Zend_Controller_Plugin_Abstract
             $user= Zend_Registry::get('user');
         } else {
             $auth = Zend_Auth::getInstance();
-            $users = new Users();
+            $users = new Users_Model_Users();
             if ($auth->hasIdentity()) {
                 $user = $auth->getStorage()->read();
                 $user->init();
@@ -59,7 +54,7 @@ class Monkeys_Controller_Plugin_Auth extends Zend_Controller_Plugin_Abstract
         }
 
         // if an admin is not allowed for this action, then the action doesn't exist
-        if (!$this->_acl->isAllowed(User::ROLE_ADMIN, $resource, $request->getActionName())) {
+        if (!$this->_acl->isAllowed(Users_Model_User::ROLE_ADMIN, $resource, $request->getActionName())) {
             //echo "role: " . $user->role . " - resource: $resource - privilege: " . $request->getActionName() . "<br>\n";
             throw new Monkeys_BadUrlException($this->getRequest()->getRequestUri());
         }

@@ -1,12 +1,12 @@
-<h2><?= $this->translate('Please read the following EULA in order to continue') ?></h2>
+<h2><?php echo $this->translate('Please read the following EULA in order to continue') ?></h2>
 <form name="eulaForm" action="accepteula" method="post">
-    <input type="hidden" name="token" value="<?= $this->token ?>" />
+    <input type="hidden" name="token" value="<?php echo $this->token ?>" />
     <div>
-        <textarea rows="30" style="width:700px"><?= $this->eula ?></textarea>
+        <textarea rows="30" style="width:700px"><?php echo $this->eula ?></textarea>
     </div>
     <div style="margin-top:20px">
-        <input type="submit" id="agree" value="<?= $this->translate('I AGREE') ?>" />&nbsp;&nbsp;&nbsp;&nbsp;
-        <input type="submit" id="disagree" value="<?= $this->translate('I DISAGREE') ?>" onclick="this.form.action='declineeula'; return true" />
+        <input type="submit" id="agree" value="<?php echo $this->translate('I AGREE') ?>" />&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="submit" id="disagree" value="<?php echo $this->translate('I DISAGREE') ?>" onclick="this.form.action='declineeula'; return true" />
         <script>
             YAHOO.util.Event.onDOMReady(function () {
                 COMMID.loader.insert(

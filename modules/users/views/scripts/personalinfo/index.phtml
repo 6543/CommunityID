@@ -10,19 +10,19 @@ YAHOO.util.Event.onDOMReady(function () {
 <div id="article">
     <div id="generalTab" class="dataSection">
         <div class="formHeader">
-            <h2><?= $this->translate('Personal Info') ?></h2>
+            <h2><?php echo $this->translate('Personal Info') ?></h2>
             <div>
                 <a href="javascript:void(0);" onclick="COMMID.personalInfo.edit();">
-                    <?= $this->translate('Edit') ?>
+                    <?php echo $this->translate('Edit') ?>
                 </a>
-                <img id="loadingEditPersonalInfo" src="<?= $this->base ?>/images/progress.gif" style="visibility:hidden" />
+                <img id="loadingEditPersonalInfo" src="<?php echo $this->base ?>/images/progress.gif" style="visibility:hidden" />
             </div>
         </div>
         <div style="margin:10px 0">
-            <em><?= $this->translate('This information will be used to automatically populate registration fields to any OpenID transaction that requires so') ?></em>
+            <em><?php echo $this->translate('This information will be used to automatically populate registration fields to any OpenID transaction that requires so') ?></em>
         </div>
         <div id="personalInfo">
-            <?= $this->action('show', 'personalinfo', 'users', array('userid' => $this->targetUser->id)) ?>
+            <?php echo $this->action('show', 'personalinfo', 'users', array('userid' => $this->targetUser->id)) ?>
         </div>
     </div>
 </div>

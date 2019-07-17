@@ -9,9 +9,9 @@
 * @packager Keyboard Monkeys
 */
 
-class IndexController extends Monkeys_Controller_Action
+class IndexController extends CommunityID_Controller_Action
 {
-    const NEWS_CONTENT_MAX_LENGTH = 100;
+    const NEWS_NUMBER = 4;
 
     public function indexAction()
     {
@@ -41,31 +41,8 @@ class IndexController extends Monkeys_Controller_Action
 
         $this->_helper->actionStack('index', 'login', 'users');
 
-        try {
-            $feed = Zend_Feed::import($this->_config->news_feed->url);
-        } catch (Zend_Exception $e) {
-            // feed import failed
-            $obj = new StdClass();
-            $obj->link = array('href' => '');
-            $obj->title = $this->view->translate('Could not retrieve news items');
-            $obj->updated = '';
-            $obj->content = '';
-            $feed = array($obj);
-        }
-
-        $this->view->news = array();
-        $i = 0;
-        foreach ($feed as $item) {
-            if ($i++ >= $this->_config->news_feed->num_items) {
-                break;
-            }
-
-            if (strlen($item->content) > self::NEWS_CONTENT_MAX_LENGTH) {
-                $item->content = substr($item->content, 0, self::NEWS_CONTENT_MAX_LENGTH)
-                               . '...<br /><a class="readMore" href="'.$item->link['href'].'">' . $this->view->translate('Read More') . '</a>';
-            }
-            $this->view->news[] = $item;
-        }
+        $news = new News_Model_News();
+        $this->view->news = $news->getLatest(self::NEWS_NUMBER, $this->user);
 
         $view = false;
         foreach ($scriptsDir as $scriptDir) {

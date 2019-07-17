@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class Stats_RegistrationsController extends Monkeys_Controller_Action
+class Stats_RegistrationsController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
@@ -78,13 +78,13 @@ class Stats_RegistrationsController extends Monkeys_Controller_Action
 
     private function _populateWeekData(&$labelsy, &$datay)
     {
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $registeredUsers  = $stats->getNumRegisteredUsersDays(strtotime('-1 week'), time());
 
         for ($i = -7; $i < 0; $i++) {
             $time = strtotime("$i days");
             $date = date('Y-m-d', $time);
-            $labelsy[] = Stats::$weekDays[date('w', $time)];
+            $labelsy[] = Stats_Model_Stats::$weekDays[date('w', $time)];
             if (isset($registeredUsers[$date])) {
                 $datay[] = $registeredUsers[$date]['users'];
             } else {
@@ -95,7 +95,7 @@ class Stats_RegistrationsController extends Monkeys_Controller_Action
 
     private function _populateMonthData(&$labelsy, &$datay)
     {
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $registeredUsers  = $stats->getNumRegisteredUsersDays(strtotime('-30 days'), strtotime('-1 week'));
 
         for ($i = -30; $i < -7; $i++) {
@@ -112,14 +112,14 @@ class Stats_RegistrationsController extends Monkeys_Controller_Action
 
     private function _populateYearData(&$labelsy, &$datay)
     {
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $firstDayOfMonth = date('Y-' . date('m') . '-01');
         $registeredUsers  = $stats->getNumRegisteredUsersYear(strtotime('-11 months', strtotime($firstDayOfMonth)), time());
 
         for ($i = -11; $i <= 0; $i++) {
             $time = strtotime("$i months");
             $monthNumber = date('n', $time);
-            $labelsy[] = Stats::$months[$monthNumber];
+            $labelsy[] = Stats_Model_Stats::$months[$monthNumber];
             if (isset($registeredUsers[$monthNumber])) {
                 $datay[] = $registeredUsers[$monthNumber]['users'];
             } else {

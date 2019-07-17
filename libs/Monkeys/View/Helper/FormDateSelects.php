@@ -15,7 +15,7 @@
 */
 class Monkeys_View_Helper_FormDateSelects extends Zend_View_Helper_FormElement
 {
-    private $_months = array(
+    protected $_months = array(
             1   => 'January',
             2   => 'February',
             3   => 'March',
@@ -38,7 +38,7 @@ class Monkeys_View_Helper_FormDateSelects extends Zend_View_Helper_FormElement
     protected $_translator;
             
     public function formDateSelects($name, $value = null, $attribs = null,
-    $options = null, $listsep = "<br />\n")
+            $options = null, $listsep = "<br />\n")
     {
         $info = $this->_getInfo($name, $value, $attribs, $options, $listsep);
         extract($info); // name, id, value, attribs, options, listsep, disable
@@ -262,7 +262,7 @@ class Monkeys_View_Helper_FormDateSelects extends Zend_View_Helper_FormElement
         return $this;
     }
 
-    private function _translationsHolder()
+    protected function _translationsHolder()
     {
         translate('January');
         translate('February');

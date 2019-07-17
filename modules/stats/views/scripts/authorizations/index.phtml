@@ -1,10 +1,10 @@
-<h3><?= $this->translate('Authorizations per day') ?></h3>
+<h3><?php echo $this->translate('Authorizations per day') ?></h3>
 <div>
-    <?= $this->translate('Select view') ?>:
+    <?php echo $this->translate('Select view') ?>:
     <select name="view" onchange="COMMID.stats.loadReport('authorizations', 'statsAuths', 'type=' + this.value)">
-        <option value="week" <?= $this->weekSelected ?>><?= $this->translate('Last Week') ?></option>
-        <option value="year" <?= $this->yearSelected ?>><?= $this->translate('Last Year') ?></option>
+        <option value="week" <?php echo $this->weekSelected ?>><?= $this->translate('Last Week') ?></option>
+        <option value="year" <?php echo $this->yearSelected ?>><?= $this->translate('Last Year') ?></option>
     </select>
 </div>
-<img src="<?= $this->base ?>/stats/authorizations/graph?rand=<?= $this->rand ?>&type=<?= $this->type ?>" />
+<img src="<?php echo $this->base ?>/stats/authorizations/graph?rand=<?= $this->rand ?>&type=<?= $this->type ?>" />
 

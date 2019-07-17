@@ -20,13 +20,13 @@ define('APP_DIR', dirname(__FILE__) . '/..');
 */
 define('NUM_ENTRIES', 1000);
 
-require APP_DIR . '/Setup.php';
+require APP_DIR . '/Application.php';
 
-Setup::setIncludePath();
-Setup::setAutoLoader();
-Setup::setConfig();
-Setup::setLogger();
-Setup::setDatabase();
+Application::setIncludePath();
+Application::setAutoLoader();
+Application::setConfig();
+Application::setLogger();
+Application::setDatabase();
 
 class GenerateRandomSites
 {
@@ -41,9 +41,9 @@ class GenerateRandomSites
 
     public function generate()
     {
-        $sites = new Sites();
+        $sites = new Model_Sites();
 
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $userIds = $stats->getAllTestUsersIds();
         $numUsers = count($userIds);
 

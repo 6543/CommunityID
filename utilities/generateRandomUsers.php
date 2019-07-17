@@ -20,13 +20,13 @@ define('APP_DIR', dirname(__FILE__) . '/..');
 */
 define('NUM_USERS', 1000);
 
-require APP_DIR . '/Setup.php';
+require APP_DIR . '/Application.php';
 
-Setup::setIncludePath();
-Setup::setAutoLoader();
-Setup::setConfig();
-Setup::setLogger();
-Setup::setDatabase();
+Application::setIncludePath();
+Application::setAutoLoader();
+Application::setConfig();
+Application::setLogger();
+Application::setDatabase();
 
 class GenerateRandomUsers
 {
@@ -41,7 +41,7 @@ class GenerateRandomUsers
 
     public function generate()
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         for ($i = 0; $i < NUM_USERS ; $i++) {
             $firstname = trim($this->_names[rand(0, $this->_numNames)]);
             $username = strtolower(substr($firstname, 0, 4));

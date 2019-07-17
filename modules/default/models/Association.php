@@ -10,6 +10,6 @@
 */
 
 
-class Association extends Zend_Db_Table_Row_Abstract
+class Model_Association extends Zend_Db_Table_Row_Abstract
 {
 }

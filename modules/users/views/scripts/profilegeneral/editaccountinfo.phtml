@@ -1,17 +1,17 @@
 <form name="accountInfoForm" class="formGrid">
-    <?= $this->accountInfoForm->username ?>
-    <?= $this->accountInfoForm->firstname ?>
-    <?= $this->accountInfoForm->lastname ?>
-    <?= $this->accountInfoForm->email ?>
-    <? if (!$this->targetUser->id) {
+    <?php echo $this->accountInfoForm->username ?>
+    <?php echo $this->accountInfoForm->firstname ?>
+    <?php echo $this->accountInfoForm->lastname ?>
+    <?php echo $this->accountInfoForm->email ?>
+    <?php if (!$this->targetUser->id) {
             echo $this->accountInfoForm->password1;
             echo $this->accountInfoForm->password2;
     } ?>
     <div class="yui-gf">
         <div class="yui-u first">&nbsp;</div>
         <div class="yui-u">
-            <input type="button" id="save" value="<?= $this->translate('Save') ?>" onclick="COMMID.editAccountInfo.save()" />
-            <input type="button" id="cancel" value="<?= $this->translate('Cancel') ?>" onclick="COMMID.editAccountInfo.cancel()" />
+            <input type="button" id="save" value="<?php echo $this->translate('Save') ?>" onclick="COMMID.editAccountInfo.save()" />
+            <input type="button" id="cancel" value="<?php echo $this->translate('Cancel') ?>" onclick="COMMID.editAccountInfo.cancel()" />
             <script type="text/javascript">
                 YAHOO.util.Event.onDOMReady(function () {
                     new YAHOO.widget.Button(

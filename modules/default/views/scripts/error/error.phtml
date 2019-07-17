@@ -6,13 +6,13 @@
 </head>
 <body>
     <h2>An error occurred</h2>
-    <strong><?= $this->message ?></strong>
-    <? if ($this->trace): ?>
+    <strong><?php echo $this->message ?></strong>
+    <?php if ($this->trace): ?>
     <pre>
 Stack Trace:
-<?= $this->trace ?>
+<?php echo $this->trace ?>
     </pre>
-    <? endif ?>
+    <?php endif ?>
 </body>
 </html>
 

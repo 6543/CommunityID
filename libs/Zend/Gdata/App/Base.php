@@ -20,12 +20,17 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+/**
+ * @see Zend_Gdata_App_Util
+ */
+require_once 'Zend/Gdata/App/Util.php';
 
 /**
  * Abstract class for all XML elements
  *
  * @category   Zend
  * @package    Zend_Gdata
+ * @subpackage App
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
@@ -64,6 +69,14 @@ abstract class Zend_Gdata_App_Base
     protected $_text = null;
 
     /**
+     * @var array Memoized results from calls to lookupNamespace() to avoid
+     *      expensive calls to getGreatestBoundedValue(). The key is in the
+     *      form 'prefix-majorVersion-minorVersion', and the value is the
+     *      output from getGreatestBoundedValue().
+     */
+    protected static $_namespaceLookupCache = array();
+
+    /**
      * List of namespaces, as a three-dimensional array. The first dimension
      * represents the namespace prefix, the second dimension represents the
      * minimum major protocol version, and the third dimension is the minimum
@@ -75,9 +88,10 @@ abstract class Zend_Gdata_App_Base
      *
      * @see lookupNamespace()
      * @see registerNamespace()
+     * @see registerAllNamespaces()
      * @var array
      */
-    protected $_namespaces = array(
+   protected $_namespaces = array(
         'atom'      => array(
             1 => array(
                 0 => 'http://www.w3.org/2005/Atom'
@@ -91,7 +105,7 @@ abstract class Zend_Gdata_App_Base
                 0 => 'http://www.w3.org/2007/app'
                 )
             )
-    );
+        );
 
     public function __construct()
     {
@@ -152,8 +166,8 @@ abstract class Zend_Gdata_App_Base
 
     /**
      * Returns an array of all extension attributes not transformed into data
-     * model properties during parsing of the XML.  Each element of the array 
-     * is a hashed array of the format: 
+     * model properties during parsing of the XML.  Each element of the array
+     * is a hashed array of the format:
      *     array('namespaceUri' => string, 'name' => string, 'value' => string);
      *
      * @return array All extension attributes
@@ -165,8 +179,8 @@ abstract class Zend_Gdata_App_Base
 
     /**
      * Sets an array of all extension attributes not transformed into data
-     * model properties during parsing of the XML.  Each element of the array 
-     * is a hashed array of the format: 
+     * model properties during parsing of the XML.  Each element of the array
+     * is a hashed array of the format:
      *     array('namespaceUri' => string, 'name' => string, 'value' => string);
      * This can be used to add arbitrary attributes to any data model element
      *
@@ -191,7 +205,7 @@ abstract class Zend_Gdata_App_Base
      */
     public function getDOM($doc = null, $majorVersion = 1, $minorVersion = null)
     {
-        if (is_null($doc)) {
+        if ($doc === null) {
             $doc = new DOMDocument('1.0', 'utf-8');
         }
         if ($this->_rootNamespaceURI != null) {
@@ -325,7 +339,7 @@ abstract class Zend_Gdata_App_Base
     {
         return $this->saveXML();
     }
-    
+
     /**
      * Alias for saveXML()
      *
@@ -358,9 +372,15 @@ abstract class Zend_Gdata_App_Base
                                     $majorVersion = 1,
                                     $minorVersion = null)
     {
+        // Check for a memoized result
+        $key = $prefix . ' ' .
+               (is_null($majorVersion) ? 'NULL' : $majorVersion) .
+               ' '. (is_null($minorVersion) ? 'NULL' : $minorVersion);
+        if (array_key_exists($key, self::$_namespaceLookupCache))
+          return self::$_namespaceLookupCache[$key];
         // If no match, return the prefix by default
         $result = $prefix;
-        
+
         // Find tuple of keys that correspond to the namespace we should use
         if (isset($this->_namespaces[$prefix])) {
             // Major version search
@@ -374,7 +394,10 @@ abstract class Zend_Gdata_App_Base
             // Extract NS
             $result = $nsData[$foundMinorV];
         }
-        
+
+        // Memoize result
+        self::$_namespaceLookupCache[$key] = $result;
+
         return $result;
     }
 
@@ -384,6 +407,12 @@ abstract class Zend_Gdata_App_Base
      * Takes a prefix and a full namespace URI and adds them to the
      * list of registered namespaces for use by
      * $this->lookupNamespace().
+     *
+     * WARNING: Currently, registering a namespace will NOT invalidate any
+     *          memoized data stored in $_namespaceLookupCache. Under normal
+     *          use, this behavior is acceptable. If you are adding
+     *          contradictory data to the namespace lookup table, you must
+     *          call flushNamespaceLookupCache().
      *
      * @param  string $prefix The namespace prefix
      * @param  string $namespaceUri The full namespace URI
@@ -396,11 +425,42 @@ abstract class Zend_Gdata_App_Base
     public function registerNamespace($prefix,
                                       $namespaceUri,
                                       $majorVersion = 1,
-                                      $minorVersion = null)
+                                      $minorVersion = 0)
     {
         $this->_namespaces[$prefix][$majorVersion][$minorVersion] =
-                $namespaceUri;
+        $namespaceUri;
     }
+
+    /**
+     * Flush namespace lookup cache.
+     *
+     * Empties the namespace lookup cache. Call this function if you have
+     * added data to the namespace lookup table that contradicts values that
+     * may have been cached during a previous call to lookupNamespace().
+     */
+    public static function flushNamespaceLookupCache()
+    {
+        self::$_namespaceLookupCache = array();
+    }
+
+    /**
+     * Add an array of namespaces to the registered list.
+     *
+     * Takes an array in the format of:
+     * namespace prefix, namespace URI, major protocol version,
+     * minor protocol version and adds them with calls to ->registerNamespace()
+     *
+     * @param array $namespaceArray An array of namespaces.
+     * @return void
+     */
+    public function registerAllNamespaces($namespaceArray)
+    {
+        foreach($namespaceArray as $namespace) {
+                $this->registerNamespace(
+                    $namespace[0], $namespace[1], $namespace[2], $namespace[3]);
+        }
+    }
+
 
     /**
      * Magic getter to allow access like $entry->foo to call $entry->getFoo()
@@ -442,7 +502,7 @@ abstract class Zend_Gdata_App_Base
         $method = 'set'.ucfirst($name);
         if (method_exists($this, $method)) {
             return call_user_func(array(&$this, $method), $val);
-        } else if (isset($this->{'_' . $name}) || is_null($this->{'_' . $name})) {
+        } else if (isset($this->{'_' . $name}) || ($this->{'_' . $name} === null)) {
             $this->{'_' . $name} = $val;
         } else {
             require_once 'Zend/Gdata/App/InvalidArgumentException.php';

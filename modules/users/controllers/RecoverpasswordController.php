@@ -9,13 +9,13 @@
 * @packager Keyboard Monkeys
 */
 
-class Users_RecoverpasswordController extends Monkeys_Controller_Action
+class Users_RecoverpasswordController extends CommunityID_Controller_Action
 {
     public function init()
     {
         parent::init();
 
-        if ($this->user->role != User::ROLE_ADMIN && $this->underMaintenance) {
+        if ($this->user->role != Users_Model_User::ROLE_ADMIN && $this->underMaintenance) {
             return $this->_redirectForMaintenance();
         }
     }
@@ -27,7 +27,7 @@ class Users_RecoverpasswordController extends Monkeys_Controller_Action
             $this->view->form = $appSession->recoverPasswordForm;
             unset($appSession->recoverPasswordForm);
         } else {
-            $this->view->form = new RecoverPasswordForm();
+            $this->view->form = new Users_Form_RecoverPassword();
         }
 
         $this->_helper->actionStack('index', 'login', 'users');
@@ -35,7 +35,7 @@ class Users_RecoverpasswordController extends Monkeys_Controller_Action
 
     public function sendAction()
     {
-        $form = new RecoverPasswordForm();
+        $form = new Users_Form_RecoverPassword();
         $formData = $this->_request->getPost();
 
         $form->populate($formData);
@@ -45,7 +45,7 @@ class Users_RecoverpasswordController extends Monkeys_Controller_Action
             return $this->_forward('index');
         }
 
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->getUserWithEmail($form->getValue('email'));
         if (!$user) {
             $form->email->addError($this->view->translate('This E-mail is not registered in the system'));
@@ -54,7 +54,7 @@ class Users_RecoverpasswordController extends Monkeys_Controller_Action
             return $this->_forward('index');
         }
 
-        $user->token = User::generateToken();
+        $user->token = Users_Model_User::generateToken();
         $user->save();
 
         $locale = Zend_Registry::get('Zend_Locale');
@@ -87,7 +87,7 @@ class Users_RecoverpasswordController extends Monkeys_Controller_Action
 
     public function resetAction()
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         $user = $users->getUserWithToken($this->_getParam('token'));
         if (!$user) {
             $this->_helper->FlashMessenger->addMessage('Wrong Token');
@@ -99,7 +99,7 @@ class Users_RecoverpasswordController extends Monkeys_Controller_Action
         $user->setClearPassword($newPassword);
 
         // reset token
-        $user->token = User::generateToken();
+        $user->token = Users_Model_User::generateToken();
 
         $user->save();
 

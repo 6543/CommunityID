@@ -9,20 +9,20 @@
 * @packager Keyboard Monkeys
 */
 
-class Users_LoginController extends Monkeys_Controller_Action
+/**
+* We don't use the session with the login form to simplify the dynamic appearance of the captcha
+*/
+class Users_LoginController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
-        $settings = new Settings();
+        $settings = new Model_Settings();
         $this->view->maintenanceEnabled = $settings->isMaintenanceMode();
 
-        $appSession = Zend_Registry::get('appSession');
-        if (isset($appSession->loginForm)) {
-            $this->view->loginForm = $appSession->loginForm;
-            unset($appSession->loginForm);
-        } else {
-            $this->view->loginForm = new LoginForm();
-        }
+        $authAttempts = new Users_Model_AuthAttempts();
+        $attempt = $authAttempts->get();
+        $this->view->useCaptcha = $attempt && $attempt->surpassedMaxAllowed();
+        $this->view->loginForm = new Users_Form_Login(null, $this->view->base, $this->view->useCaptcha);
 
         if ($this->_config->SSL->enable_mixed_mode) {
             $this->view->loginTargetBase = 'https://' . $_SERVER['HTTP_HOST'] . $this->view->base;
@@ -35,46 +35,43 @@ class Users_LoginController extends Monkeys_Controller_Action
 
     public function authenticateAction()
     {
-        $auth = Zend_Auth::getInstance();
+        $authAttempts = new Users_Model_AuthAttempts();
+        $attempt = $authAttempts->get();
 
-        $form = new LoginForm();
+        $form = new Users_Form_Login(null, $this->view->base, $attempt && $attempt->surpassedMaxAllowed());
         $formData = $this->_request->getPost();
         $form->populate($formData);
-        $appSession = Zend_Registry::get('appSession');
 
         if (!$form->isValid($formData)) {
-            $appSession->loginForm = $form;
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid credentials'));
             $this->_redirectToNormalConnection('');
         }
 
-        $db = Zend_Db::factory($this->_config->database);
-        $authAdapter = new Zend_Auth_Adapter_DbTable($db, 'users', 'username', 'password', 'MD5(CONCAT(openid, ?))');
-        $authAdapter->setIdentity($this->_request->getPost('username'));
-        $authAdapter->setCredential($this->_request->getPost('password'));
+        $users = new Users_Model_Users();
+        $result = $users->authenticate($this->_request->getPost('username'),
+            $this->_request->getPost('password'));
 
-        $result = $auth->authenticate($authAdapter);
+        if ($result) {
+            $user = $users->getUser();
 
-        if ($result->isValid()) {
-            $users = new Users();
-            $user = $users->getUser($result->getIdentity());
-
-            // $user might not exist when the openid validation passed, but there's no
-            // user in the system with that openid identity
-            if (!$user) {
+            if ($attempt) {
+                $attempt = $authAttempts->delete();
+            }
+            
+            if ($user->role != Users_Model_User::ROLE_ADMIN && $this->underMaintenance) {
                 Zend_Auth::getInstance()->clearIdentity();
-                $this->_helper->FlashMessenger->addMessage('Invalid credentials');
-            } else {
-                $auth->getStorage()->write($user);
 
-                if ($user->role != User::ROLE_ADMIN && $this->underMaintenance) {
-                    Zend_Auth::getInstance()->clearIdentity();
-
-                    return $this->_redirectForMaintenance(true);
-                }
+                return $this->_redirectForMaintenance(true);
             }
         } else {
-            $this->_helper->FlashMessenger->addMessage('Invalid credentials');
-            $appSession->loginForm = $form;
+            if (!$attempt) {
+                $authAttempts->create();
+            } else {
+                $attempt->addFailure();
+                $attempt->save();
+            }
+
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid credentials'));
         }
 
         $this->_redirectToNormalConnection('');

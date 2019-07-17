@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class Stats_AuthorizationsController extends Monkeys_Controller_Action
+class Stats_AuthorizationsController extends CommunityID_Controller_Action
 {
     public function indexAction()
     {
@@ -71,13 +71,13 @@ class Stats_AuthorizationsController extends Monkeys_Controller_Action
 
     private function _populateWeekData(&$labelsy, &$datay)
     {
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $authorizations = $stats->getNumAuthorizationsDays(strtotime('-1 week'), time());
 
         for ($i = -7; $i < 0; $i++) {
             $time = strtotime("$i days");
             $date = date('Y-m-d', $time);
-            $labelsy[] = Stats::$weekDays[date('w', $time)];
+            $labelsy[] = Stats_Model_Stats::$weekDays[date('w', $time)];
             if (isset($authorizations[$date])) {
                 $datay[] = $authorizations[$date]['entry'];
             } else {
@@ -88,14 +88,14 @@ class Stats_AuthorizationsController extends Monkeys_Controller_Action
 
     private function _populateYearData(&$labelsy, &$datay)
     {
-        $stats = new Stats();
+        $stats = new Stats_Model_Stats();
         $firstDayOfMonth = date('Y-' . date('m') . '-01');
         $authorizations = $stats->getNumAuthorizationsYear(strtotime('-11 months', strtotime($firstDayOfMonth)), time());
 
         for ($i = -11; $i <= 0; $i++) {
             $time = strtotime("$i months");
             $monthNumber = date('n', $time);
-            $labelsy[] = Stats::$months[$monthNumber];
+            $labelsy[] = Stats_Model_Stats::$months[$monthNumber];
             if (isset($authorizations[$monthNumber])) {
                 $datay[] = $authorizations[$monthNumber]['entry'];
             } else {

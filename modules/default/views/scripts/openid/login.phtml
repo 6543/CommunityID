@@ -1,10 +1,16 @@
-<div id="article">
-    <form action="authenticate?<?= $this->queryString ?>" method="post">
-        <?= $this->form->openIdIdentity ?>
-        <?= $this->form->password ?>
-        <input type="submit" id="login" value="<?= $this->translate('Login') ?>" />
-        <script type="text/javascript">
-            var oButton = new YAHOO.widget.Button("login");
-        </script> 
-    </form>
-</div>
+<form action="authenticate<?php echo $this->queryString ?>" method="post" class="formGrid">
+    <?php echo $this->form->openIdIdentity ?>
+    <?php echo $this->form->password ?>
+    <?php if ($this->useCaptcha): ?>
+        <?php echo $this->form->captcha ?>
+    <?php endif ?>
+    <div class="yui-gf">
+        <div class="yui-u first">
+            <input type="submit" id="login" value="<?php echo $this->translate('Login') ?>" />
+            <script type="text/javascript">
+                var oButton = new YAHOO.widget.Button("login");
+            </script> 
+        </div>
+        <div class="yui-u">&nbsp;</div>
+    </div>
+</form>

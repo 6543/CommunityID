@@ -10,7 +10,7 @@
 */
 
 
-class Field extends Zend_Db_Table_Row_Abstract
+class Model_Field extends Zend_Db_Table_Row_Abstract
 {
     const TYPE_TEXT     = 1;
     const TYPE_DATE     = 2;

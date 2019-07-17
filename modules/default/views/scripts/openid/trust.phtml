@@ -1,31 +1,31 @@
 <div id="article">
     <div>
-        <?= $this->translate('A site identifying as %s has asked for confirmation that %s is your identity URL.', '<a href="' . $this->siteRoot . '">' . $this->siteRoot . '</a>', '<a href="' . $this->identityUrl . '">' . $this->identityUrl . '</a>') ?>
+        <?php echo $this->translate('A site identifying as %s has asked for confirmation that %s is your identity URL.', '<a href="' . $this->siteRoot . '">' . $this->siteRoot . '</a>', '<a href="' . $this->identityUrl . '">' . $this->identityUrl . '</a>') ?>
     </div>
-    <form method="post" action="provider?<?= $this->queryString ?>" class="formGrid">
+    <form method="post" action="proceed<?php echo $this->queryString ?>" class="formGrid">
         <input type="hidden" name="action" value="proceed">
-        <? if ($this->fields): ?>
+        <?php if ($this->fields): ?>
             <br />
-            <?= $this->translate('It also requests this additional information about you:') ?><br /><br />
-            <?= $this->translate('Fields are automatically filled according to the personal info stored in your community-id account.') ?><br />
-            <?= $this->translate('Fields marked with * are required.') ?>
+            <?php echo $this->translate('It also requests this additional information about you:') ?><br /><br />
+            <?php echo $this->translate('Fields are automatically filled according to the personal info stored in your community-id account.') ?><br />
+            <?php echo $this->translate('Fields marked with * are required.') ?>
             <br />
             <br />
             <br />
-            <? foreach ($this->fields as $field): ?>
-                <?= $field ?>
-            <? endforeach ?>
-            <? if ($this->policyUrl): ?>
-               <?= $this->translate('The private policy can be found at %s',
+            <?php foreach ($this->fields as $field): ?>
+                <?php echo $field ?>
+            <?php endforeach ?>
+            <?php if ($this->policyUrl): ?>
+               <?php echo $this->translate('The private policy can be found at %s',
                                     '<a href="'.$this->policyUrl.'">'.$this->policyUrl.'</a>'); ?><br /><br />
-            <? endif ?>
-        <? endif ?>
+            <?php endif ?>
+        <?php endif ?>
         <div style="margin-top:20px">
-            <input type="checkbox" name="forever" style="top:0" /> <?= $this->translate('Forever') ?>
+            <input type="checkbox" name="forever" style="top:0" /> <?php echo $this->translate('Forever') ?>
         </div>
         <div style="margin-top:20px">
-            <input type="submit" id="allow" name="allow" value="<?= $this->translate('Allow') ?>" />
-            <input type="submit" id="deny" name="deny" value="<?= $this->translate('Deny') ?>" />
+            <input type="submit" id="allow" name="allow" value="<?php echo $this->translate('Allow') ?>" />
+            <input type="submit" id="deny" name="deny" value="<?php echo $this->translate('Deny') ?>" />
             <script type="text/javascript">
                 var oButton1 = new YAHOO.widget.Button("allow");
                 var oButton2 = new YAHOO.widget.Button("deny");

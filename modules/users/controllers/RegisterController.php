@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class Users_RegisterController extends Monkeys_Controller_Action
+class Users_RegisterController extends CommunityID_Controller_Action
 {
     protected $_numCols = 1;
 
@@ -17,7 +17,7 @@ class Users_RegisterController extends Monkeys_Controller_Action
     {
         parent::init();
 
-        if ($this->user->role != User::ROLE_ADMIN && $this->underMaintenance) {
+        if ($this->user->role != Users_Model_User::ROLE_ADMIN && $this->underMaintenance) {
             return $this->_redirectForMaintenance();
         }
 
@@ -36,14 +36,14 @@ class Users_RegisterController extends Monkeys_Controller_Action
             $form = $appSession->registerForm;
             unset($appSession->registerForm);
         } else {
-            $form = new RegisterForm(null, $this->view->base);
+            $form = new Users_Form_Register(null, $this->view->base);
         }
         $this->view->form = $form;
     }
     
     public function saveAction()
     {
-        $form = new RegisterForm(null, $this->view->base);
+        $form = new Users_Form_Register(null, $this->view->base);
         $formData = $this->_request->getPost();
         $form->populate($formData);
 
@@ -53,9 +53,9 @@ class Users_RegisterController extends Monkeys_Controller_Action
             return $this->_forward('index', null, null);
         }
 
-        $users = new Users();
+        $users = new Users_Model_Users();
 
-        if ($users->getUser($form->getValue('username'))) {
+        if ($users->getUserWithUsername($form->getValue('username'))) {
             $form->username->addError($this->view->translate('This username is already in use'));
             $appSession = Zend_Registry::get('appSession');
             $appSession->registerForm = $form;
@@ -79,7 +79,7 @@ class Users_RegisterController extends Monkeys_Controller_Action
         $currentUrl = Zend_OpenId::selfURL();
         preg_match('#(.*)/users/register/save#', $currentUrl, $matches);
         if ($this->_config->subdomain->enabled) {
-            $openid = $this->_getProtocol() . '://' . $user->username . '.' . $this->_config->subdomain->hostname;
+            $openid = $this->getProtocol() . '://' . $user->username . '.' . $this->_config->subdomain->hostname;
         } else {
             $openid = $matches[1] . '/identity/' . $user->username;
         }
@@ -91,14 +91,14 @@ class Users_RegisterController extends Monkeys_Controller_Action
         $user->openid = $openid;
 
         $user->setClearPassword($form->getValue('password1'));
-        $user->role = User::ROLE_GUEST;
-        $registrationToken = User::generateToken();
+        $user->role = Users_Model_User::ROLE_GUEST;
+        $registrationToken = Users_Model_User::generateToken();
         $user->token = $registrationToken;
         $user->accepted_eula = 0;
         $user->registration_date = date('Y-m-d');
         $user->save();
 
-        $mail = $this->getMail($user);
+        $mail = self::getMail($user, $this->view->translate('Community-ID registration confirmation'));
         try {
             $mail->send();
             $this->_helper->FlashMessenger->addMessage($this->view->translate('Thank you.'));
@@ -115,7 +115,7 @@ class Users_RegisterController extends Monkeys_Controller_Action
 
     public function eulaAction()
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         if ($this->_request->getParam('token') == ''
                 || !($user = $users->getUserWithToken($this->_request->getParam('token')))) {
             $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid token'));
@@ -141,7 +141,7 @@ class Users_RegisterController extends Monkeys_Controller_Action
 
     public function declineeulaAction()
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
 
         if ($this->_request->getParam('token') == ''
                 || !($user = $users->getUserWithToken($this->_request->getParam('token')))) {
@@ -157,14 +157,14 @@ class Users_RegisterController extends Monkeys_Controller_Action
 
     public function accepteulaAction()
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
         if ($this->_request->getParam('token') == ''
                 || !($user = $users->getUserWithToken($this->_request->getParam('token')))) {
             $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid token'));
             $this->_redirect('');
         }
 
-        $user->role = User::ROLE_REGISTERED;
+        $user->role = Users_Model_User::ROLE_REGISTERED;
         $user->accepted_eula = 1;
         $user->registration_date = date('Y-m-d');
         $user->token = '';
@@ -180,7 +180,7 @@ class Users_RegisterController extends Monkeys_Controller_Action
     * @return Zend_Mail
     * @throws Zend_Mail_Protocol_Exception
     */
-    public function getMail(User $user)
+    public static function getMail(Users_Model_User $user, $subject)
     {
         $locale = Zend_Registry::get('Zend_Locale');
         $localeElements = explode('_', $locale);
@@ -221,9 +221,9 @@ class Users_RegisterController extends Monkeys_Controller_Action
 
         $mail = new Zend_Mail('UTF-8');
         $mail->setBodyText($emailTemplate);
-        $mail->setFrom($this->_config->email->supportemail);
+        $mail->setFrom($configEmail->supportemail);
         $mail->addTo($user->email);
-        $mail->setSubject($this->view->translate('Community-ID registration confirmation'));
+        $mail->setSubject($subject);
 
         return $mail;
     }

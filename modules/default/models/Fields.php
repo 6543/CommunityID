@@ -10,15 +10,15 @@
 */
 
 
-class Fields extends Monkeys_Db_Table_Gateway
+class Model_Fields extends Monkeys_Db_Table_Gateway
 {
     protected $_name = 'fields';
     protected $_primary = 'id';
-    protected $_rowClass = 'Field';
+    protected $_rowClass = 'Model_Field';
 
     private $_fieldsNames= array();
 
-    public function getValues(User $user)
+    public function getValues(Users_Model_User $user)
     {
         $userId = (int)$user->id;
         $select = $this->select()

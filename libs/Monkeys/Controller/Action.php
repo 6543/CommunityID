@@ -1,14 +1,5 @@
 <?php
 
-/*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
-* @license http://creativecommons.org/licenses/BSD/ BSD License
-* @author Keyboard Monkey Ltd
-* @since  CommunityID 0.9
-* @package CommunityID
-* @packager Keyboard Monkeys
-*/
-
 abstract class Monkeys_Controller_Action extends Zend_Controller_Action
 {
     /**
@@ -18,19 +9,29 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
     protected $targetUser;
 
     protected $_config;
+    protected $_settings;
     protected $_numCols = 2;
+    protected $_title = '';
     protected $underMaintenance = false;
 
     public function init()
     {
+        $this->_config = Zend_Registry::get('config');
+        $this->_settings = new Model_Settings();
+
+        if ($this->_request->getModuleName() != 'install'
+                && strtoupper(get_class($this)) != 'ERRORCONTROLLER'
+                && $this->_needsUpgrade()) {
+            $this->_redirect('/install/upgrade');
+            return;
+        }
+
         if (!Zend_Registry::isRegistered('user')) {
             // guest user
-            $users = new Users();
+            $users = new Users_Model_Users();
             $user = $users->createRow();
             Zend_Registry::set('user', $user);
         }
-
-        $this->_config = Zend_Registry::get('config');
 
         $this->user = Zend_Registry::get('user');
         $this->view->user = $this->user;
@@ -45,6 +46,18 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
         $this->_setBase();
         $this->view->numCols = $this->_numCols;
 
+        $this->view->module = $this->getRequest()->getModuleName();
+
+        if ($this->_getParam('subtitle')) {
+            $this->view->pageSubtitle = $this->view->escape($this->_getParam('subtitle'));
+        }
+
+        if ($this->getRequest()->getParam('next')) {
+            $this->view->nextAction = $this->getRequest()->getParam('next');
+        } else {
+            $this->view->nextAction = '';
+        }
+
         if ($this->getRequest()->isXmlHttpRequest()) {
             $slowdown = $this->_config->environment->ajax_slowdown;
             if ($slowdown > 0) {
@@ -52,13 +65,20 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
             }
             $this->_helper->layout->disableLayout();
         } else {
-            $this->view->version = Setup::VERSION;
+            $this->view->version = Application::VERSION;
             $this->view->messages = $this->_helper->FlashMessenger->getMessages();
             $this->view->loaderCombine = $this->_config->environment->YDN? 'true' : 'false';
             $this->view->loaderBase = $this->_config->environment->YDN?
-                                        'http://yui.yahooapis.com/2.6.0/build/'
+                                        'http://yui.yahooapis.com/2.7.0/build/'
                                         : $this->view->base . '/javascript/yui/';
         }
+
+        $this->view->min = $this->_config->environment->production ? '-min' : '';
+    }
+
+    public function postDispatch()
+    {
+        $this->view->title = $this->_title;
     }
 
     private function _setScriptPaths()
@@ -75,43 +95,29 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
         $view->addScriptPath($newPath);
     }
 
-    private function _setBase()
+    protected function _setBase()
     {
-        if ($this->_config->subdomain->enabled) {
-            $protocol = $this->_getProtocol();
-
-            $this->view->base = "$protocol://"
-                                   . ($this->_config->subdomain->use_www? 'www.' : '')
-                                   . $this->_config->subdomain->hostname;
-        } else {
-            $this->view->base = $this->view->getBase();
-        }
+        $this->view->base = $this->view->getBase();
     }
 
-    private function _validateTargetUser()
-    {
-        if (Zend_Registry::isRegistered('targetUser')) {
-            // used by unit tests to inject the target user
-            $this->targetUser = Zend_Registry::get('targetUser');
-        } else {
-            $userId = $this->_getParam('userid');
+    protected abstract function _validateTargetUser();
 
-            if (is_null($userId)) {
-                $this->targetUser = $this->user;
-            } elseif ($this->_getParam('userid') == 0) {
-                $users = new Users();
-                $this->targetUser = $users->createRow();
-            } else {
-                if ($userId != $this->user->id && $this->user->role != User::ROLE_ADMIN) {
-                    $this->_helper->FlashMessenger->addMessage('Error: Invalid user id');
-                    $this->_redirect('profile/edit');
-                }
-                $users = new Users();
-                $this->targetUser = $users->getRowInstance($userId);
-            }
+    protected function _needsUpgrade()
+    {
+        require 'setup/versions.php';
+
+        $lastVersion = array_pop($versions);
+
+        return $lastVersion != $this->_getDbVersion();
+    }
+
+    protected function _getDbVersion()
+    {
+        if (!$version = $this->_settings->getVersion()) {
+            $version = '1.0.1';
         }
 
-        $this->view->targetUser = $this->targetUser;
+        return $version;
     }
 
     protected function _checkMaintenanceMode()
@@ -122,18 +128,8 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
             return;
         }
 
-        $settings = new Settings();
-        $this->underMaintenance = $settings->isMaintenanceMode();
+        $this->underMaintenance = $this->_settings->isMaintenanceMode();
         $this->view->underMaintenance = $this->underMaintenance;
-    }
-
-    protected function _redirectToNormalConnection()
-    {
-        if ($this->_config->SSL->enable_mixed_mode) {
-            $this->_redirect('http://' . $_SERVER['HTTP_HOST'] . $this->view->base);
-        } else {
-            $this->_redirect('');
-        }
     }
 
     protected function _redirectForMaintenance($backToNormalConnection = false)
@@ -152,12 +148,24 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
         return parent::_redirect($url, $options);
     }
 
-    protected function _getProtocol()
+    public function getProtocol()
     {
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
             return 'https';
         } else {
             return 'http';
         }
+    }
+
+    protected function _checkPermission($permission)
+    {
+        if (!$this->_hasPermission($permission)) {
+            throw new Monkeys_AccessDeniedException();
+        }
+    }
+
+    protected function _overrideNumCols($numCols)
+    {
+        $this->view->numCols = $this->_numCols = $numCols;
     }
 }

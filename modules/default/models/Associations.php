@@ -10,11 +10,11 @@
 */
 
 
-class Associations extends Monkeys_Db_Table_Gateway
+class Model_Associations extends Monkeys_Db_Table_Gateway
 {
     protected $_name = 'associations';
     protected $_primary = 'handle';
-    protected $_rowClass = 'Association';
+    protected $_rowClass = 'Model_Association';
 
     public function getAssociationGivenHandle($handle)
     {

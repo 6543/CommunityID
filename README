@@ -1,1 +1,5 @@
-import things form https://sourceforge.net/projects/communityid/files/
+009-08-21 Reiner Jung <reiner@kb-m.com>
+
+NEW REQUIREMENTS:
+
+- Minimal supported PHP version is 5.2.4

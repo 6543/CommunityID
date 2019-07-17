@@ -12,13 +12,13 @@ YAHOO.util.Event.onDOMReady(function () {
 <div id="paging"></div>
 <div id="dt"></div>
 <div id="fieldsDialog">
-    <div class="hd"><?= $this->translate('Information Exchanged') ?></div>
+    <div class="hd"><?php echo $this->translate('Information Exchanged') ?></div>
     <div class="bd">
-        <?= $this->translate('Information exchanged with:') ?><br />
+        <?php echo $this->translate('Information exchanged with:') ?><br />
         <span id="fieldsDialogSite"></span>
         <div id="fieldsDialogDl" class="formGrid"></div>
         <div style="text-align:right">
-            <input type="button" id="closeDialog" value="<?= $this->translate('OK') ?>" onclick="COMMID.sitesList.closeDialog()" />
+            <input type="button" id="closeDialog" value="<?php echo $this->translate('OK') ?>" onclick="COMMID.sitesList.closeDialog()" />
             <script type="text/javascript">
                 YAHOO.util.Event.onDOMReady(function () {
                     var oButton = new YAHOO.widget.Button(

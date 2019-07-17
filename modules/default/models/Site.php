@@ -10,6 +10,6 @@
 */
 
 
-class Site extends Zend_Db_Table_Row_Abstract
+class Model_Site extends Zend_Db_Table_Row_Abstract
 {
 }

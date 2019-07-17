@@ -4,8 +4,8 @@
 * @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkeys Ltd.
-* @since Textroller 0.9
-* @package TextRoller
+* @since CommunityID 0.9
+* @package CommunityID
 * @packager Keyboard Monkeys
 */
 
@@ -13,7 +13,7 @@
 * This class is never called. It's only a placeholder for form error messages wrapped in translate(),
 * so that Poedit (or any other message catalogs editor) can catalog these messages for translation
 */
-class ErrorMessages
+class Form_ErrorMessages
 {
     private function _messages()
     {
@@ -24,5 +24,6 @@ class ErrorMessages
         translate('\'%value%\' appears to be a local network name but local network names are not allowed');
         translate('Captcha value is wrong');
         translate('Password confirmation does not match');
+        translate('Username can only contain US-ASCII alphanumeric characters, plus any of the symbols $-_.+!*\'(), and "');
     }
 }

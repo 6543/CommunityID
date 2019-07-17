@@ -9,7 +9,7 @@
 * @packager Keyboard Monkeys
 */
 
-class IdentityController extends Monkeys_Controller_Action
+class IdentityController extends CommunityID_Controller_Action
 {
     protected $_numCols = 1;
 
@@ -20,39 +20,15 @@ class IdentityController extends Monkeys_Controller_Action
 
     public function idAction()
     {
-        $currentUrl = Zend_OpenId::selfURL();
+        $this->view->headLink()->headLink(array(
+                    'rel'   => 'openid.server',
+                    'href'  => $this->_helper->ProviderUrl($this->_config)
+        ));
+        $this->view->headLink()->headLink(array(
+                    'rel'   => 'openid2.provider',
+                    'href'  => $this->_helper->ProviderUrl($this->_config)
+        ));
 
-        if ($this->_config->subdomain->enabled) {
-            $protocol = $this->_getProtocol();
-            preg_match('#(.*)\.'.$this->_config->subdomain->hostname.'#', $currentUrl, $matches);
-
-            $this->view->headLink()->headLink(array(
-                        'rel'   => 'openid.server',
-                        'href'  => "$protocol://"
-                                   . ($this->_config->subdomain->use_www? 'www.' : '')
-                                   . $this->_config->subdomain->hostname
-                                   . '/openid/provider'
-            ));
-            $this->view->headLink()->headLink(array(
-                        'rel'   => 'openid2.provider',
-                        'href'  => "$protocol://"
-                                   . ($this->_config->subdomain->use_www? 'www.' : '')
-                                   . $this->_config->subdomain->hostname
-                                   . '/openid/provider'
-            ));
-        } else {
-            preg_match('#(.*)/identity/#', $currentUrl, $matches);
-
-            $this->view->headLink()->headLink(array(
-                        'rel'   => 'openid.server',
-                        'href'  => $matches[1] . '/openid/provider',
-            ));
-            $this->view->headLink()->headLink(array(
-                        'rel'   => 'openid2.provider',
-                        'href'  => $matches[1] . '/openid/provider',
-            ));
-        }
-
-        $this->view->idUrl = $currentUrl;
+        $this->view->idUrl = urldecode(Zend_OpenId::selfURL());
     }
 }

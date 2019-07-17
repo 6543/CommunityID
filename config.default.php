@@ -18,14 +18,6 @@ $config['environment']['locale']            = 'auto';
 
 $config['environment']['template']          = 'default';
 
-
-#
-#  -------  HOME NEWS FEED ------------
-#
-$config['news_feed']['url']                 = 'http://source.keyboard-monkeys.org/projects/communityid/news?format=atom';
-$config['news_feed']['num_items']           = 3;
-
-
 #
 #  -------  LOGGING ------------
 #

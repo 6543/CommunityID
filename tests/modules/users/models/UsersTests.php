@@ -4,8 +4,8 @@
 * @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkeys Ltd.
-* @since Textroller 0.9
-* @package TextRoller
+* @since CommunityID 0.9
+* @package CommunityID
 * @packager Keyboard Monkeys
 */
 
@@ -21,7 +21,7 @@ class UsersTests extends PHPUnit_Framework_TestCase
 
     public function testUserCreating()
     {
-        $users = new Users();
+        $users = new Users_Model_Users();
 
         $user = $users->getUserWithEmail('thisshouldntexist');
         $this->assertNull($user);
@@ -34,19 +34,19 @@ class UsersTests extends PHPUnit_Framework_TestCase
         $user->firstname = 'firstnametest';
         $user->lastname = 'lastnametest';
         $user->email = 'usertest@mailinator.com';
-        $user->role = User::ROLE_REGISTERED;
+        $user->role = Users_Model_User::ROLE_REGISTERED;
         $user->token = '';
         $user->save();
 
         $user = $users->getUserWithEmail('usertest@mailinator.com');
-        $this->assertType('User', $user);
+        $this->assertType('Users_Model_User', $user);
         $this->assertEquals('usernametest', $user->username);
         $this->assertEquals('http://example.com', $user->openid);
         $this->assertEquals(1, $user->accepted_eula);
         $this->assertEquals('firstnametest', $user->firstname);
         $this->assertEquals('lastnametest', $user->lastname);
         $this->assertEquals('usertest@mailinator.com', $user->email);
-        $this->assertEquals(User::ROLE_REGISTERED, $user->role);
+        $this->assertEquals(Users_Model_User::ROLE_REGISTERED, $user->role);
         $this->assertEquals('', $user->token);
 
         $user->delete();
