@@ -1,11 +1,10 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2008 Keyboard Monkeys Ltd. http://www.kb-m.com
-* @license http://www.fsf.org/copyleft/lgpl.html GNU Lesser General Public License
-* @author Alejandro Pedraza
-* @since Sciret 1.2
-* @package Sciret
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @license http://creativecommons.org/licenses/BSD/ BSD Licensese
+* @author Keyboard Monkeys Ltd.
+* @package Monkeys Framework
 * @packager Keyboard Monkeys
 */
 

@@ -1,8 +1,8 @@
-<form name="personalInfoForm" class="formGrid" >
+<form name="personalInfoForm" class="formGrid" method="post" action="<?= $this->base ?>/users/personalinfo/save/profile/<?= $this->profile->id ?>">
     <?php foreach ($this->fields as $field): ?>
         <?php echo $field ?>
     <?php endforeach ?><br />
-    <input type="button" id="save" value="<?php echo $this->translate('Save') ?>" onclick="COMMID.editPersonalInfo.save()" />
+    <input type="submit" id="save" value="<?php echo $this->translate('Save') ?>" />
     <input type="button" id="cancel" value="<?php echo $this->translate('Cancel') ?>" onclick="COMMID.editPersonalInfo.cancel()" />
     <script type="text/javascript">
         YAHOO.util.Event.onDOMReady(function () {
@@ -15,15 +15,14 @@
         var oButton = new YAHOO.widget.Button(
             "save",
             {
-                type    : "push",
-                onclick : {fn: COMMID.personalInfo.save}
+                type    : "submit"
             }
         );
         var oButton = new YAHOO.widget.Button(
             "cancel",
             {
                 type    : "push",
-                onclick : {fn: COMMID.personalInfo.cancel}
+                onclick : {fn: function() {COMMID.personalInfo.cancel();}}
             }
         );
     </script> 

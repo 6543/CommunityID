@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -20,30 +20,33 @@ class Users_PersonalinfoController extends CommunityID_Controller_Action
 
     public function indexAction()
     {
-        $this->_helper->actionStack('index', 'login', 'users');
-    }
+        $profiles = new Users_Model_Profiles();
+        $this->view->profiles = $profiles->getForUser($this->user);
 
-    public function showAction()
-    {
-        $fields = new Model_Fields();
-        $this->view->fields = $fields->getValues($this->user);
+        $this->_helper->actionStack('index', 'login', 'users');
     }
 
     public function editAction()
     {
+        $this->view->profile = $this->_getProfile();
+
         $appSession = Zend_Registry::get('appSession');
         if (isset($appSession->personalInfoForm)) {
             $this->view->fields = $appSession->personalInfoForm->getElements();
             unset($appSession->personalInfoForm);
         } else {
-            $personalInfoForm = new Users_Form_PersonalInfo(null, $this->user);
+            $personalInfoForm = new Users_Form_PersonalInfo(null, $this->view->profile);
             $this->view->fields = $personalInfoForm->getElements();
         }
+
+        $this->_helper->actionStack('index', 'login', 'users');
     }
 
     public function saveAction()
     {
-        $form = new Users_Form_PersonalInfo(null, $this->user);
+        $profile = $this->_getProfile();
+
+        $form = new Users_Form_PersonalInfo(null, $profile);
         $formData = $this->_request->getPost();
 
         $form->populate($formData);
@@ -55,15 +58,23 @@ class Users_PersonalinfoController extends CommunityID_Controller_Action
         }
 
         $fieldsValues = new Model_FieldsValues();
-        $fieldsValues->deleteForUser($this->user);
+
+        if ($this->_getParam('profile')) {
+            $fieldsValues->deleteForProfile($profile);
+        } else {
+            $profile->user_id = $this->user->id;
+            $profile->name = $form->getValue('profileName');
+            $profile->save();
+        }
 
         foreach ($form->getValues() as $fieldName => $fieldValue) {
-            if (!$fieldValue) {
+            if ($fieldName == 'profileName' || !$fieldValue) {
                 continue;
             }
 
             $fieldsValue = $fieldsValues->createRow();
             $fieldsValue->user_id = $this->user->id;
+            $fieldsValue->profile_id = $profile->id;
 
             list(, $fieldId) = explode('_', $fieldName);
             $fieldsValue->field_id = $fieldId;
@@ -73,7 +84,34 @@ class Users_PersonalinfoController extends CommunityID_Controller_Action
             $fieldsValue->save();
         }
 
+        $this->_helper->FlashMessenger->addMessage($this->view->translate('Profile has been saved'));
+        $this->_redirect('/users/personalinfo');
+    }
 
-        $this->_forward('show');
+    public function deleteAction()
+    {
+        $profile = $this->_getProfile();
+        if ($profile->id) {
+            $profile->delete();
+        }
+
+        $this->_helper->FlashMessenger->addMessage($this->view->translate('Profile has been deleted'));
+        $this->_redirect('/users/personalinfo');
+    }
+
+    private function _getProfile()
+    {
+        $profiles = new Users_Model_Profiles();
+
+        if (!$this->_getParam('profile')) {
+            return $profiles->createRow();
+        }
+
+        $profile = $profiles->getRowInstance($this->_getParam('profile'));
+        if (!$profile || $profile->user_id != $this->user->id) {
+            throw new Monkeys_AccessDeniedException();
+        }
+
+        return $profile;
     }
 }

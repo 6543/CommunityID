@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -11,7 +11,7 @@
 
 class Application
 {
-    const VERSION = '1.1.0.RC2';
+    const VERSION = '2.0.0.RC3';
 
     public static $config;
     public static $logger;
@@ -58,6 +58,7 @@ class Application
         $loader->registerNamespace('Monkeys_');
         $loader->registerNamespace('CommunityID');
         $loader->registerNamespace('Auth');
+        $loader->registerNamespace('Yubico');
         new Monkeys_Application_Module_Autoloader(array(
             'namespace' => '',
             'basePath'  => APP_DIR . '/modules/default',
@@ -82,31 +83,15 @@ class Application
 
     public static function setConfig()
     {
-        if (file_exists(APP_DIR . DIRECTORY_SEPARATOR . 'config.php')) {
-            $configFile = APP_DIR . DIRECTORY_SEPARATOR . 'config.php';
-        } else {
-            $configFile = APP_DIR . DIRECTORY_SEPARATOR . 'config.default.php';
-        }
-
         $config = array();
-        require $configFile;
 
-        // in case config.php is empty (during install)
-        if (!$config) {
-            $configFile = APP_DIR . DIRECTORY_SEPARATOR . 'config.default.php';
-            require $configFile;
-
+        // first defaults are loaded, then the custom configs
+        require APP_DIR . DIRECTORY_SEPARATOR . 'config.default.php';
+        if (file_exists(APP_DIR . DIRECTORY_SEPARATOR . 'config.php')) {
+            require APP_DIR . DIRECTORY_SEPARATOR . 'config.php';
         }
 
         self::$config = new Zend_Config($config, array('allowModifications' => true));
-        if(self::$config->environment->installed === null) {
-            $configFile = APP_DIR . DIRECTORY_SEPARATOR . 'config.default.php';
-            require $configFile;
-            self::$config = new Zend_Config($config, array('allowModifications' => true));
-        }
-
-        // @todo: remove this when all interconnected apps use the same LDAP source
-        self::$config->environment->app = 'communityid';
 
         Zend_Registry::set('config', self::$config);
     }
@@ -162,10 +147,11 @@ class Application
 
     public static function setDatabase()
     {
-        // constant not set if pdo_mysql extension is not loaded
-        if (defined('PDO::MYSQL_ATTR_USE_BUFFERED_QUERY')) {
+        // I was using this for when using PDO, but lately it's generating a segfault, and we're not using PDO anymore anyway
+        /*if (defined('PDO::MYSQL_ATTR_USE_BUFFERED_QUERY')) {
+            // constant not set if pdo_mysql extension is not loaded
             self::$config->database->params->driver_options = array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true);
-        }
+        }*/
 
         $db = Zend_Db::factory(self::$config->database);
         if (self::$config->logging->level == Zend_Log::DEBUG) {

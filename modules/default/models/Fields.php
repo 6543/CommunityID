@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -18,13 +18,22 @@ class Model_Fields extends Monkeys_Db_Table_Gateway
 
     private $_fieldsNames= array();
 
-    public function getValues(Users_Model_User $user)
+    public function getAll()
     {
-        $userId = (int)$user->id;
+        $select = $this->select();
+
+        return $this->fetchAll($select);
+    }
+
+    public function getValues(Users_Model_Profile $profile)
+    {
         $select = $this->select()
                        ->setIntegrityCheck(false)
                        ->from('fields')
-                       ->joinLeft('fields_values', "fields_values.field_id=fields.id AND fields_values.user_id=".$user->id);
+                       ->joinLeft('fields_values',
+                            $this->getAdapter()->quoteInto("fields_values.field_id=fields.id AND fields_values.profile_id=?", $profile->id),
+                            array('user_id', 'profile_id', 'field_id', 'value')
+                        );
 
         return $this->fetchAll($select);
     }
@@ -38,6 +47,14 @@ class Model_Fields extends Monkeys_Db_Table_Gateway
         }
 
         return $this->_fieldsNames[$fieldIdentifier];
+    }
+
+    public function getByOpenIdIdentifier($openid)
+    {
+        $select = $this->select()
+            ->where('openid=?', $openid);
+
+        return $this->fetchRow($select);
     }
 
     private function _translationPlaceholders()

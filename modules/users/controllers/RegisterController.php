@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -55,7 +55,7 @@ class Users_RegisterController extends CommunityID_Controller_Action
 
         $users = new Users_Model_Users();
 
-        if ($users->getUserWithUsername($form->getValue('username'))) {
+        if ($users->getUserWithUsername($form->getValue('username'), false, $this->view)) {
             $form->username->addError($this->view->translate('This username is already in use'));
             $appSession = Zend_Registry::get('appSession');
             $appSession->registerForm = $form;
@@ -76,35 +76,37 @@ class Users_RegisterController extends CommunityID_Controller_Action
         $user->email = $form->getValue('email');
         $user->username = $form->getValue('username');
 
-        $currentUrl = Zend_OpenId::selfURL();
-        preg_match('#(.*)/users/register/save#', $currentUrl, $matches);
-        if ($this->_config->subdomain->enabled) {
-            $openid = $this->getProtocol() . '://' . $user->username . '.' . $this->_config->subdomain->hostname;
+        preg_match('#(.*)/users/register/save#', Zend_OpenId::selfURL(), $matches);
+        $user->generateOpenId($matches[1]);
+
+        if ($this->_config->ldap->enabled) {
+            // when using ldap, unconfirmed users' password is saved unhashed temporarily, while he registers,
+            // and then it's stored in LDAP and cleared from the db
+            $user->setPassword($form->getValue('password1'));
         } else {
-            $openid = $matches[1] . '/identity/' . $user->username;
+            $user->setClearPassword($form->getValue('password1'));
         }
 
-        if ($this->_config->SSL->enable_mixed_mode) {
-            $openid = str_replace('http://', 'https://', $openid);
-        }
-        Zend_OpenId::normalizeUrl($openid);
-        $user->openid = $openid;
-
-        $user->setClearPassword($form->getValue('password1'));
         $user->role = Users_Model_User::ROLE_GUEST;
-        $registrationToken = Users_Model_User::generateToken();
-        $user->token = $registrationToken;
+        $user->token = Users_Model_User::generateToken();
         $user->accepted_eula = 0;
         $user->registration_date = date('Y-m-d');
-        $user->save();
 
         $mail = self::getMail($user, $this->view->translate('Community-ID registration confirmation'));
         try {
             $mail->send();
+            $user->save();
+            $user->createDefaultProfile($this->view);
             $this->_helper->FlashMessenger->addMessage($this->view->translate('Thank you.'));
             $this->_helper->FlashMessenger->addMessage($this->view->translate('You will receive an E-mail with instructions to activate the account.'));
-        } catch (Zend_Mail_Protocol_Exception $e) {
-            $this->_helper->FlashMessenger->addMessage($this->view->translate('The account was created but the E-mail could not be sent'));
+        } catch (Zend_Mail_Exception $e) {
+            if ($this->_config->environment->production) {
+                $this->_helper->FlashMessenger->addMessage($this->view->translate('The confirmation E-mail could not be sent, so the account creation was cancelled. Please contact support.'));
+            } else {
+                $this->_helper->FlashMessenger->addMessage($this->view->translate('The account was created but the E-mail could not be sent'));
+                // I still wanna create the user when in development mode
+                $user->save();
+            }
             if ($this->_config->logging->level == Zend_Log::DEBUG) {
                 $this->_helper->FlashMessenger->addMessage($e->getMessage());
             }
@@ -125,18 +127,7 @@ class Users_RegisterController extends CommunityID_Controller_Action
 
         $this->view->token = $user->token;
 
-        $locale = Zend_Registry::get('Zend_Locale');
-        $localeElements = explode('_', $locale);
-
-        if (file_exists(APP_DIR . "/resources/$locale/eula.txt")) {
-            $file = APP_DIR . "/resources/$locale/eula.txt";
-        } else if (count($localeElements == 2)
-                && file_exists(APP_DIR . "/resources/".$localeElements[0]."/eula.txt")) {
-            $file = APP_DIR . "/resources/".$localeElements[0]."/eula.txt";
-        } else {
-            $file = APP_DIR . "/resources/en/eula.txt";
-        }
-
+        $file = CommunityID_Resources::getResourcePath('eula.txt');
         $this->view->eula = file_get_contents($file);
     }
 
@@ -171,6 +162,15 @@ class Users_RegisterController extends CommunityID_Controller_Action
         $user->accepted_eula = 1;
         $user->registration_date = date('Y-m-d');
         $user->token = '';
+
+        if ($this->_config->ldap->enabled) {
+            $ldap = Monkeys_Ldap::getInstance();
+            $ldap->add($user);
+
+            // clear unencrypted password
+            $user->setPassword('');
+        }
+
         $user->save();
 
         $auth = Zend_Auth::getInstance();
@@ -185,17 +185,7 @@ class Users_RegisterController extends CommunityID_Controller_Action
     */
     public static function getMail(Users_Model_User $user, $subject)
     {
-        $locale = Zend_Registry::get('Zend_Locale');
-        $localeElements = explode('_', $locale);
-        if (file_exists(APP_DIR . "/resources/$locale/registration_mail.txt")) {
-            $file = APP_DIR . "/resources/$locale/registration_mail.txt";
-        } else if (count($localeElements == 2)
-                && file_exists(APP_DIR . "/resources/".$localeElements[0]."/registration_mail.txt")) {
-            $file = APP_DIR . "/resources/".$localeElements[0]."/registration_mail.txt";
-        } else {
-            $file = APP_DIR . "/resources/en/registration_mail.txt";
-        }
-
+        $file = CommunityID_Resources::getResourcePath('registration_mail.txt');
         $emailTemplate = file_get_contents($file);
         $emailTemplate = str_replace('{userName}', $user->getFullName(), $emailTemplate);
 

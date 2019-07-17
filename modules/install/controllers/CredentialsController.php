@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -11,6 +11,8 @@
 
 class Install_CredentialsController extends CommunityID_Controller_Action
 {
+    const PHP_MINIMAL_VERSION_REQUIRED = '5.2.4';
+
     protected $_numCols = 1;
 
     public function indexAction()
@@ -39,14 +41,14 @@ class Install_CredentialsController extends CommunityID_Controller_Action
         }
 
         if (!$this->_connectToDbEngine($form)) {
-            $this->_helper->FlashMessenger->addMessage('We couldn\'t connect to the database using those credentials.');
-            $this->_helper->FlashMessenger->addMessage('Please verify and try again.');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('We couldn\'t connect to the database using those credentials.'));
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Please verify and try again.'));
             return $this->_forwardFormError($form);
         }
 
         if (!$this->_createDbIfMissing($form)) {
-            $this->_helper->FlashMessenger->addMessage(
-                'The connection to the database engine worked, but the database "' . $form->getValue('dbname') . '" doesn\'t exist or the provided user doesn\'t have access to it. An attempt was made to create it, but the provided user doesn\'t have permissions to do so either. Please create it yourself and try again.');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate(
+                'The connection to the database engine worked, but the database %s doesn\'t exist or the provided user doesn\'t have access to it. An attempt was made to create it, but the provided user doesn\'t have permissions to do so either. Please create it yourself and try again.', $form->getValue('dbname')));
             return $this->_forwardFormError($form);
         }
 
@@ -57,7 +59,7 @@ class Install_CredentialsController extends CommunityID_Controller_Action
             throw new Exception('Couldn\'t write to config file ' . APP_DIR . DIRECTORY_SEPARATOR . 'config.php');
         }
 
-        $this->_forward('index', 'complete');
+        $this->_redirect('/install/complete');
     }
 
     private function _connectToDbEngine(Install_Form_Install $form)
@@ -111,9 +113,12 @@ class Install_CredentialsController extends CommunityID_Controller_Action
             '{environment.YDN}'                   => $this->_config->environment->YDN? 'true' : 'false',
             '{environment.ajax_slowdown}'         => $this->_config->environment->ajax_slowdown,
             '{environment.keep_history_days}'     => $this->_config->environment->keep_history_days,
+            '{environment.unconfirmed_accounts_days_expire}' => $this->_config->environment->unconfirmed_accounts_days_expire,
             '{environment.registrations_enabled}' => $this->_config->environment->registrations_enabled? 'true' : 'false',
             '{environment.locale}'                => $this->_config->environment->locale,
             '{environment.template}'              => $this->_config->environment->template,
+            '{metadata.description}'              => $this->_config->metadata->description,
+            '{metadata.keywords}'                 => $this->_config->metadata->keywords,
             '{logging.location}'                  => $this->_config->logging->location,
             '{logging.level}'                     => $this->_config->logging->level,
             '{subdomain.enabled}'                 => $this->_config->subdomain->enabled? 'true' : 'false',
@@ -125,6 +130,31 @@ class Install_CredentialsController extends CommunityID_Controller_Action
             '{database.params.dbname}'            => $this->_config->database->params->dbname,
             '{database.params.username}'          => $this->_config->database->params->username,
             '{database.params.password}'          => $this->_config->database->params->password,
+            '{security.passwords.dictionary}'     => $this->_config->security->passwords->dictionary,
+            '{security.passwords.username_different}' => $this->_config->security->passwords->username_different? 'true' : 'false',
+            '{security.passwords.minimum_length}' => $this->_config->security->passwords->minimum_length,
+            '{security.passwords.include_numbers}'=> $this->_config->security->passwords->include_numbers? 'true' : 'false',
+            '{security.passwords.include_symbols}'=> $this->_config->security->passwords->include_symbols? 'true' : 'false',
+            '{security.passwords.lowercase_and_uppercase}' => $this->_config->security->passwords->lowercase_and_uppercase? 'true' : 'false',
+            '{security.usernames.exclude}'        => $this->_config->security->usernames->exclude->current(),
+            '{ldap.enabled}'                      => $this->_config->ldap->enabled? 'true' : 'false',
+            '{ldap.host}'                         => $this->_config->ldap->host,
+            '{ldap.baseDn}'                       => $this->_config->ldap->baseDn,
+            '{ldap.bindRequiresDn}'               => $this->_config->ldap->bindRequiresDn? 'true' : 'false',
+            '{ldap.username}'                     => $this->_config->ldap->username,
+            '{ldap.password}'                     => $this->_config->ldap->password,
+            '{ldap.admin}'                        => $this->_config->ldap->admin,
+            '{ldap.keepRecordsSynced}'            => $this->_config->ldap->keepRecordsSynced? 'true' : 'false',
+            '{ldap.canChangePassword}'            => $this->_config->ldap->canChangePassword? 'true' : 'false',
+            '{ldap.passwordHashing}'              => $this->_config->ldap->passwordHashing,
+            '{ldap.fields.nickname}'              => $this->_config->ldap->fields->nickname,
+            '{ldap.fields.email}'                 => $this->_config->ldap->fields->email,
+            '{ldap.fields.fullname}'              => $this->_config->ldap->fields->fullname,
+            '{ldap.fields.postcode}'              => $this->_config->ldap->fields->postcode,
+            '{yubikey.enabled}'                   => $this->_config->yubikey->enabled? 'true' : 'false',
+            '{yubikey.force}'                     => $this->_config->yubikey->force? 'true' : 'false',
+            '{yubikey.api_id}'                    => $this->_config->yubikey->api_id,
+            '{yubikey.api_key}'                   => $this->_config->yubikey->api_key,
             '{email.supportemail}'                => $this->_config->email->supportemail,
             '{email.adminemail}'                  => $this->_config->email->adminemail,
             '{email.transport}'                   => $this->_config->email->transport,
@@ -147,7 +177,7 @@ class Install_CredentialsController extends CommunityID_Controller_Action
     {
         $users = new Users_Model_Users();
         $user = $users->createRow();
-        $user->username = $form->getValue('adminUsername');
+        $user->username = $form->getValue('username');
         $user->accepted_eula = 1;
         $user->registration_date = date('Y-m-d');
         $user->openid = '';
@@ -196,6 +226,10 @@ class Install_CredentialsController extends CommunityID_Controller_Action
         $errors = array();
         $webServerUser = $this->_getProcessUser();
 
+        if (version_compare(PHP_VERSION, self::PHP_MINIMAL_VERSION_REQUIRED, '<')) {
+            $errors[] = $this->view->translate('PHP version %s or greater is required',
+                self::PHP_MINIMAL_VERSION_REQUIRED);
+        }
         if (!is_writable(APP_DIR) && !is_writable(APP_DIR . DIRECTORY_SEPARATOR . 'config.php')) {
             $errors[] = $this->view->translate('The directory where Community-ID is installed must be writable by the web server user (%s). Another option is to create an EMPTY config.php file that is writable by that user.', $webServerUser);
         }
@@ -204,6 +238,18 @@ class Install_CredentialsController extends CommunityID_Controller_Action
         }
         if (!extension_loaded('mysqli')) {
             $errors[] = $this->view->translate('You need to have the %s extension installed', '<a href="http://www.php.net/manual/en/mysqli.installation.php">MySQLi</a>');
+        }
+        if (!extension_loaded('gd')) {
+            $errors[] = $this->view->translate('You need to have the %s extension installed', '<a href="http://www.php.net/manual/en/image.installation.php">GD</a>');
+        }
+        if (!function_exists('imagepng')) {
+            $errors[] = $this->view->translate('You need to have <a href="http://www.php.net/manual/en/image.installation.php">PNG support in your GD configuration</a>');
+        }
+        if (!function_exists('imageftbbox')) {
+            $errors[] = $this->view->translate('You need to have <a href="http://www.php.net/manual/en/image.installation.php">Freetype support in your GD configuration</a>');
+        }
+        if (!function_exists('curl_init')) {
+            $errors[] = $this->view->translate('You need to have the %s extension installed', '<a href="http://co.php.net/manual/en/curl.setup.php">cURL</a>');
         }
 
         return $errors;

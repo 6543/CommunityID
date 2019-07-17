@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -30,6 +30,8 @@ $privileges['default']['openid']['login']                  = Users_Model_User::R
 $privileges['default']['openid']['authenticate']           = Users_Model_User::ROLE_GUEST;
 $privileges['default']['openid']['trust']                  = Users_Model_User::ROLE_REGISTERED;
 $privileges['default']['openid']['proceed']                = Users_Model_User::ROLE_REGISTERED;
+
+$privileges['default']['profile']['index']                = Users_Model_User::ROLE_REGISTERED;
 
 $privileges['default']['sites']['index']                  = Users_Model_User::ROLE_REGISTERED;
 $privileges['default']['sites']['list']                  = Users_Model_User::ROLE_REGISTERED;
@@ -83,9 +85,9 @@ $privileges['users']['profile']['edit']           = Users_Model_User::ROLE_REGIS
 $privileges['users']['profile']['save']           = Users_Model_User::ROLE_REGISTERED;
 
 $privileges['users']['personalinfo']['index']           = Users_Model_User::ROLE_REGISTERED;
-$privileges['users']['personalinfo']['show']           = Users_Model_User::ROLE_REGISTERED;
 $privileges['users']['personalinfo']['edit']           = Users_Model_User::ROLE_REGISTERED;
 $privileges['users']['personalinfo']['save']           = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['personalinfo']['delete']         = Users_Model_User::ROLE_REGISTERED;
 
 $privileges['users']['profilegeneral']['accountinfo']     = Users_Model_User::ROLE_REGISTERED;
 $privileges['users']['profilegeneral']['editaccountinfo']     = Users_Model_User::ROLE_REGISTERED;
@@ -106,15 +108,15 @@ $privileges['users']['manageusers']['sendreminder']  = Users_Model_User::ROLE_AD
 
 $privileges['users']['userslist']['index']  = Users_Model_User::ROLE_ADMIN;
 
+$privileges['users']['signinimage']['index']  = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['signinimage']['saveimage']  = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['signinimage']['setcookie']  = Users_Model_User::ROLE_REGISTERED;
+$privileges['users']['signinimage']['image']  = Users_Model_User::ROLE_GUEST;
+
+
 $privileges['stats']['index']['index']          = Users_Model_User::ROLE_ADMIN;
-$privileges['stats']['registrations']['index']  = Users_Model_User::ROLE_ADMIN;
-$privileges['stats']['registrations']['graph']  = Users_Model_User::ROLE_ADMIN;
-$privileges['stats']['authorizations']['index'] = Users_Model_User::ROLE_ADMIN;
-$privileges['stats']['authorizations']['graph'] = Users_Model_User::ROLE_ADMIN;
-$privileges['stats']['sites']['index']          = Users_Model_User::ROLE_ADMIN;
-$privileges['stats']['sites']['graph']          = Users_Model_User::ROLE_ADMIN;
-$privileges['stats']['top']['index']            = Users_Model_User::ROLE_ADMIN;
-$privileges['stats']['top']['graph']            = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['reports']['index']        = Users_Model_User::ROLE_ADMIN;
+$privileges['stats']['reports']['graph']        = Users_Model_User::ROLE_ADMIN;
 
 $privileges['news']['index']['index']           = Users_Model_User::ROLE_GUEST;
 $privileges['news']['view']['index']            = Users_Model_User::ROLE_GUEST;

@@ -1,5 +1,13 @@
 <?php
 
+/*
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @license http://creativecommons.org/licenses/BSD/ BSD Licensese
+* @author Keyboard Monkeys Ltd.
+* @package Monkeys Framework
+* @packager Keyboard Monkeys
+*/
+
 /**
 * This iterator builds a collection filled with zeroes, except for the range it knows
 * the paginator will query it for.
@@ -12,7 +20,7 @@ class Monkeys_Iterator implements Iterator, Countable
 
     public function __construct($items, $numItems, $recordsPerPage, $page)
     {
-        if ($items) {
+        if ($items && $numItems > 1) {
             $this->_items = array_fill(0, $numItems- 1, 0);
         } else {
             $this->_items = array();

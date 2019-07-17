@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkeys Ltd.
 * @since CommunityID 0.9
@@ -13,10 +13,12 @@
 class Users_Form_Register extends Zend_Form
 {
     private $_baseWebDir;
+    private $_config;
 
     public function __construct($options = null, $baseWebDir = null)
     {
         $this->_baseWebDir = $baseWebDir;
+        $this->_config = Zend_Registry::get('config');
         parent::__construct($options);
     }
 
@@ -47,9 +49,15 @@ class Users_Form_Register extends Zend_Form
 
         $password1 = new Monkeys_Form_Element_Password('password1');
         translate('Enter desired password');
+        $passwordValidator = new Monkeys_Validate_Password();
         $password1->setLabel('Enter desired password')
                   ->setRequired(true)
-                  ->addValidator(new Monkeys_Validate_PasswordConfirmation());
+                  ->addValidator(new Monkeys_Validate_PasswordConfirmation())
+                  ->addValidator($passwordValidator);
+
+        if ($restrictions = $passwordValidator->getPasswordRestrictionsDescription()) {
+            $password1->setDescription($restrictions);
+        }
 
         $password2 = new Monkeys_Form_Element_Password('password2');
         translate('Enter password again');

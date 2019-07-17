@@ -1,5 +1,13 @@
 <?php
 
+/*
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @license http://creativecommons.org/licenses/BSD/ BSD Licensese
+* @author Keyboard Monkeys Ltd.
+* @package Monkeys Framework
+* @packager Keyboard Monkeys
+*/
+
 class Monkeys_Controller_Plugin_Auth extends Zend_Controller_Plugin_Abstract
 {
     private $_acl;
@@ -49,18 +57,18 @@ class Monkeys_Controller_Plugin_Auth extends Zend_Controller_Plugin_Abstract
         $resource   = $request->getModuleName() . '_' . $request->getControllerName();
 
         if (!$this->_acl->has($resource)) {
-            //echo "role: " . $user->role . " - resource: $resource - privilege: " . $request->getActionName() . "<br>\n";
+            //echo "role: " . $user->role . " - resource: $resource - privilege: " . $request->getActionName() . "<br>\n";exit;
             throw new Monkeys_BadUrlException($this->getRequest()->getRequestUri());
         }
 
         // if an admin is not allowed for this action, then the action doesn't exist
         if (!$this->_acl->isAllowed(Users_Model_User::ROLE_ADMIN, $resource, $request->getActionName())) {
-            //echo "role: " . $user->role . " - resource: $resource - privilege: " . $request->getActionName() . "<br>\n";
+            //echo "role: " . $user->role . " - resource: $resource - privilege: " . $request->getActionName() . "<br>\n";exit;
             throw new Monkeys_BadUrlException($this->getRequest()->getRequestUri());
         }
 
         if (!$this->_acl->isAllowed($user->role, $resource, $request->getActionName())) {
-            //echo "role: " . $user->role . " - resource: $resource - privilege: " . $request->getActionName() . "<br>\n";
+            //echo "role: " . $user->role . " - resource: $resource - privilege: " . $request->getActionName() . "<br>\n";exit;
             throw new Monkeys_AccessDeniedException();
         }
     }

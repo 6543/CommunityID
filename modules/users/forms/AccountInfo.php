@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkeys Ltd.
 * @since CommunityID 0.9
@@ -45,14 +45,32 @@ class Users_Form_AccountInfo extends Zend_Form
               ->setRequired(true)
               ->addValidator('EmailAddress');
 
-        $this->addElements(array($username, $firstname, $lastname, $email));
+        $authMethod = new Monkeys_Form_Element_Select('authMethod');
+        translate('Auth Method');
+        $authMethod->setLabel('Auth Method')
+            ->addMultiOption(Users_Model_User::AUTH_PASSWORD, 'Password')
+            ->addMultiOption(Users_Model_User::AUTH_YUBIKEY, 'YubiKey')
+            ->setAttrib('onchange', 'COMMID.general.toggleYubikey()');
+
+        $yubikey = new Monkeys_Form_Element_Text('yubikey');
+        translate('Associated YubiKey');
+        $yubikey->setLabel('Associated YubiKey')
+            ->setAttrib('class', 'yubiKeyInput');
+
+        $this->addElements(array($username, $firstname, $lastname, $email, $authMethod, $yubikey));
 
         if (!$this->_targetUser->id) {
             $password1 = new Monkeys_Form_Element_Password('password1');
             translate('Enter password');
+            $passwordValidator = new Monkeys_Validate_Password();
             $password1->setLabel('Enter password')
                       ->setRequired(true)
-                      ->addValidator(new Monkeys_Validate_PasswordConfirmation());
+                      ->addValidator(new Monkeys_Validate_PasswordConfirmation())
+                      ->addValidator($passwordValidator);
+
+            if ($restrictions = $passwordValidator->getPasswordRestrictionsDescription()) {
+                $password1->setDescription($restrictions);
+            }
 
             $password2 = new Monkeys_Form_Element_Password('password2');
             translate('Enter password again');

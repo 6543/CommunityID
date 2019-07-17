@@ -1,5 +1,13 @@
 <?php
 
+/*
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @license http://creativecommons.org/licenses/BSD/ BSD Licensese
+* @author Keyboard Monkeys Ltd.
+* @package Monkeys Framework
+* @packager Keyboard Monkeys
+*/
+
 require_once WEB_DIR . '/fckeditor/fckeditor.php';
 
 class Monkeys_View_Helper_FormRichtextarea extends Zend_View_Helper_FormElement

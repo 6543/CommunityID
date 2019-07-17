@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -57,23 +57,13 @@ class Users_RecoverpasswordController extends CommunityID_Controller_Action
         $user->token = Users_Model_User::generateToken();
         $user->save();
 
-        $locale = Zend_Registry::get('Zend_Locale');
-        $localeElements = explode('_', $locale);
-        if (file_exists(APP_DIR . "/resources/$locale/passwordreset_mail.txt")) {
-            $file = APP_DIR . "/resources/$locale/passwordreset_mail.txt";
-        } else if (count($localeElements == 2)
-                && file_exists(APP_DIR . "/resources/".$localeElements[0]."/passwordreset_mail.txt")) {
-            $file = APP_DIR . "/resources/".$localeElements[0]."/passwordreset_mail.txt";
-        } else {
-            $file = APP_DIR . "/resources/en/passwordreset_mail.txt";
-        }
-
+        $file = CommunityID_Resources::getResourcePath('passwordreset_mail.txt');
         $emailTemplate = file_get_contents($file);
         $emailTemplate = str_replace('{userName}', $user->getFullName(), $emailTemplate);
         $emailTemplate = str_replace('{IP}', $_SERVER['REMOTE_ADDR'], $emailTemplate);
 
         // $_SERVER['SCRIPT_URI'] is not always available
-        $URI = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $URI = self::getProtocol() . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         preg_match('#(.*)/users/recoverpassword#', $URI, $matches);
         $emailTemplate = str_replace('{passwordResetURL}',
                                      $matches[1] . '/users/recoverpassword/reset?token=' . $user->token,
@@ -90,7 +80,7 @@ class Users_RecoverpasswordController extends CommunityID_Controller_Action
         $users = new Users_Model_Users();
         $user = $users->getUserWithToken($this->_getParam('token'));
         if (!$user) {
-            $this->_helper->FlashMessenger->addMessage('Wrong Token');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Wrong Token'));
             $this->_redirect('');
             return;
         }
@@ -103,17 +93,7 @@ class Users_RecoverpasswordController extends CommunityID_Controller_Action
 
         $user->save();
 
-        $locale = Zend_Registry::get('Zend_Locale');
-        $localeElements = explode('_', $locale);
-        if (file_exists(APP_DIR . "/resources/$locale/passwordreset2_mail.txt")) {
-            $file = APP_DIR . "/resources/$locale/passwordreset2_mail.txt";
-        } else if (count($localeElements == 2)
-                && file_exists(APP_DIR . "/resources/".$localeElements[0]."/passwordreset2_mail.txt")) {
-            $file = APP_DIR . "/resources/".$localeElements[0]."/passwordreset2_mail.txt";
-        } else {
-            $file = APP_DIR . "/resources/en/passwordreset2_mail.txt";
-        }
-
+        $file = CommunityID_Resources::getResourcePath('passwordreset2_mail.txt');
         $emailTemplate = file_get_contents($file);
         $emailTemplate = str_replace('{userName}', $user->getFullName(), $emailTemplate);
         $emailTemplate = str_replace('{password}', $newPassword, $emailTemplate);

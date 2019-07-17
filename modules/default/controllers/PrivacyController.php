@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -15,18 +15,22 @@ class PrivacyController extends CommunityID_Controller_Action
 
     public function indexAction()
     {
-        $locale = Zend_Registry::get('Zend_Locale');
-        $localeElements = explode('_', $locale);
+        $scriptsDir = $this->view->getScriptPath('privacy');
 
-        if (file_exists(APP_DIR . "/resources/$locale/privacy.txt")) {
-            $file = APP_DIR . "/resources/$locale/privacy.txt";
+        $locale = Zend_Registry::get('Zend_Locale');
+        // render() changes _ to -
+        $locale = str_replace('_', '-', $locale);
+        $localeElements = explode('-', $locale);
+
+        if (file_exists("$scriptsDir/index-$locale.phtml")) {
+            $view = "index-$locale";
         } else if (count($localeElements == 2)
-                && file_exists(APP_DIR . "/resources/".$localeElements[0]."/privacy.txt")) {
-            $file = APP_DIR . "/resources/".$localeElements[0]."/privacy.txt";
+                && file_exists("$scriptsDir/index-".$localeElements[0].".phtml")) {
+            $view = 'index-'.$localeElements[0];
         } else {
-            $file = APP_DIR . "/resources/en/privacy.txt";
+            $view = 'index-en';
         }
 
-        $this->view->privacyPolicy = nl2br(file_get_contents($file));
+        $this->render($view);
     }
 }

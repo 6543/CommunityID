@@ -1,7 +1,18 @@
 <?php
 
+/*
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @license http://creativecommons.org/licenses/BSD/ BSD Licensese
+* @author Keyboard Monkeys Ltd.
+* @package Monkeys Framework
+* @packager Keyboard Monkeys
+*/
+
 class Monkeys_Ldap
 {
+    const EXCEPTION_SEARCH = 1;
+    const EXCEPTION_GET_ENTRIES = 2;
+
     private static $_instance;
 
     private $_ldapConfig;
@@ -10,6 +21,8 @@ class Monkeys_Ldap
     * Ldap link identifier
     */
     private $_dp;
+
+    private $_slappasswd = '/usr/sbin/slappasswd';
 
     private function __construct()
     {
@@ -37,14 +50,46 @@ class Monkeys_Ldap
     public function get($dn)
     {
         if (!$resultId = @ldap_search($this->_dp, $dn, "(&(objectClass=*))")) {
-            throw new Exception('Could not retrieve record to LDAP server (1): ' . ldap_error($this->_dp));
+            throw new Exception('Could not retrieve record from LDAP server (' . self::EXCEPTION_SEARCH . '): '
+                . ldap_error($this->_dp), self::EXCEPTION_SEARCH);
         }
 
         if (!$result = @ldap_get_entries($this->_dp, $resultId)) {
-            throw new Exception('Could not retrieve record to LDAP server (2): ' . ldap_error($this->_dp));
+            throw new Exception('Could not retrieve record from LDAP server (' . self::EXCEPTION_GET_ENTRIES . '): '
+                . ldap_error($this->_dp), self::EXCEPTION_GET_ENTRIES);
         }
 
         return $result[0];
+    }
+
+    public function search($baseDn, $field, $value)
+    {
+        if (!$resultId = @ldap_search($this->_dp, $baseDn, "(&(objectClass=*)($field=$value))")) {
+            throw new Exception('Could not retrieve record from LDAP server (' . self::EXCEPTION_SEARCH . '): '
+                . ldap_error($this->_dp), self::EXCEPTION_SEARCH);
+        }
+
+        if (!$result = @ldap_get_entries($this->_dp, $resultId)) {
+            throw new Exception('Could not retrieve record from LDAP server (' . self::EXCEPTION_GET_ENTRIES . '): '
+                . ldap_error($this->_dp), self::EXCEPTION_GET_ENTRIES);
+        }
+
+        return $result[0];
+    }
+
+    public function getAll($baseDn)
+    {
+        if (!$resultId = @ldap_search($this->_dp, $baseDn, "(&(objectClass=*))")) {
+            throw new Exception('Could not retrieve record from LDAP server (' . self::EXCEPTION_SEARCH . '): '
+                . ldap_error($this->_dp), self::EXCEPTION_SEARCH);
+        }
+
+        if (!$result = @ldap_get_entries($this->_dp, $resultId)) {
+            throw new Exception('Could not retrieve record from LDAP server (' . self::EXCEPTION_GET_ENTRIES . '): '
+                . ldap_error($this->_dp), self::EXCEPTION_GET_ENTRIES);
+        }
+
+        return $result;
     }
 
     /**
@@ -58,7 +103,7 @@ class Monkeys_Ldap
             'givenName'     => $user->firstname,
             'sn'            => $user->lastname,
             'mail'          => $user->email,
-            'userPassword'  => $user->password,
+            'userPassword'  => $this->_hashPassword($user->password),
             'objectclass'   => 'inetOrgPerson',
         );
         if (!@ldap_add($this->_dp, $dn, $info) && ldap_error($this->_dp) != 'Success') {
@@ -66,7 +111,7 @@ class Monkeys_Ldap
         }
     }
 
-    public function modify(User $user)
+    public function modify(Users_Model_User $user, $newPassword = false)
     {
         $dn = 'cn=' . $user->username . ',' . $this->_ldapConfig->baseDn;
         $info = array(
@@ -74,14 +119,16 @@ class Monkeys_Ldap
             'givenName'     => $user->firstname,
             'sn'            => $user->lastname,
             'mail'          => $user->email,
-            'objectclass'   => 'inetOrgPerson',
         );
+        if ($newPassword) {
+            $info['userPassword'] = $this->_hashPassword($newPassword);
+        }
         if (!@ldap_modify($this->_dp, $dn, $info) && ldap_error($this->_dp) != 'Success') {
             throw new Exception('Could not modify record in LDAP server: ' . ldap_error($this->_dp));
         }
     }
 
-    public function modifyUsername(User $user, $oldUsername)
+    public function modifyUsername(Users_Model_User $user, $oldUsername)
     {
         $dn = 'cn=' . $oldUsername . ',' . $this->_ldapConfig->baseDn;
         $newRdn = 'cn=' . $user->username;
@@ -90,11 +137,30 @@ class Monkeys_Ldap
         }
     }
 
-    public function delete($username)
+    public function delete(Users_Model_User $user)
     {
-        $dn = "cn=$username," . $this->_ldapConfig->baseDn;
+        $dn = "cn={$user->username}," . $this->_ldapConfig->baseDn;
         if (!@ldap_delete($this->_dp, $dn) && ldap_error($this->_dp) != 'Success') {
             throw new Exception('Could not delete record from LDAP server: ' . ldap_error($this->_dp));
         }
+    }
+
+    private function _hashPassword($password)
+    {
+        if ($algorithm = $this->_ldapConfig->passwordHashing) {
+            if (!@is_executable($this->_slappasswd)) {
+                throw new Exception($this->_slappasswd . ' doesn\'t exist, or is not executable.');
+            }
+
+            $trash = array();
+            $password = escapeshellarg($password);
+            if (!$returnVar = @exec("{$this->_slappasswd} -h " . '{' . $algorithm . '}' . " -s $password")) {
+                throw new Exception("There was a problem executing {$this->_slappasswd}");
+            }
+
+            $password = $returnVar;
+        }
+
+        return $password;
     }
 }

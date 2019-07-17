@@ -28,14 +28,19 @@ class Users_Form_Login extends Zend_Form
         $password->setLabel('PASSWORD')
                  ->setDecoratorOptions(array(
                     'separateLine'      => true,
-                    'dontMarkRequired'  => true,
-                 ))
-                 ->setRequired(true);
+                 ));
+
+        $yubikey = new Monkeys_Form_Element_Text('yubikey');
+        $yubikey->setLabel('YUBIKEY')
+             ->setDecoratorOptions(array(
+                'separateLine'      => true,
+             ))
+            ->setAttrib('class', 'yubiKeyInput');
 
         $rememberme = new Monkeys_Form_Element_Checkbox('rememberme');
         $rememberme->setLabel('Remember me');
 
-        $this->addElements(array($username, $password, $rememberme));
+        $this->addElements(array($username, $password, $yubikey, $rememberme));
 
         if ($this->_useCaptcha) {
             $captcha = new Monkeys_Form_Element_Captcha('captcha', array(

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -29,6 +29,9 @@ class Users_UserslistController extends CommunityID_Controller_Action
                 break;
         }
 
+        // This retrieves user data from the users table, even if using LDAP. This means the user's full name
+        // might be out of sync with what it's in LDAP. No biggie since user's names rarely change ;)
+        // However do know that a given user name is synced with LDAP every time he logs in.
         $usersRows = $users->getUsers(
             $this->_getParam('startIndex'),
             $this->_getParam('results'),
@@ -49,6 +52,10 @@ class Users_UserslistController extends CommunityID_Controller_Action
 
         foreach ($usersRows as $user) {
             if ($user->role == Users_Model_User::ROLE_ADMIN) {
+                if ($this->_config->ldap->enabled && $user->username != $this->_config->ldap->admin) {
+                    // this is the admin created during the installation, that is not used when ldap is enabled
+                    continue;
+                }
                 $status = $this->view->translate('admin');
             } else if ($user->accepted_eula) {
                 $status = $this->view->translate('confirmed');
@@ -61,7 +68,7 @@ class Users_UserslistController extends CommunityID_Controller_Action
             $jsonObjUser->registration = $user->registration_date;
             $jsonObjUser->role = $user->role;
             $jsonObjUser->status = $status;
-            $jsonObjUser->reminders = $user->reminders;
+            $jsonObjUser->reminders = $user->accepted_eula? 0 : $user->reminders;
             $jsonObj->records[] = $jsonObjUser;
         }
 

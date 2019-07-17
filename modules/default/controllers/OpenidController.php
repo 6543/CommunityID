@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -23,7 +23,7 @@ class OpenidController extends CommunityID_Controller_Action
             $this->_helper->viewRenderer->setNeverRender(true);
             $this->_response->setRawHeader('HTTP/1.0 403 Forbidden');
             Zend_Registry::get('logger')->log("OpenIdController::providerAction: FORBIDDEN", Zend_Log::DEBUG);
-            echo 'Forbidden';
+            echo $this->view->translate('Forbidden');
             return;
         }
 
@@ -37,13 +37,15 @@ class OpenidController extends CommunityID_Controller_Action
             return $this->_sendResponse($server, $request->answer(false));
         }
 
+        $trustRoot = $this->_getTrustRoot($request);
+
         if ($request->idSelect()) {
             if ($this->user->role == Users_Model_User::ROLE_GUEST) {
                 $this->_forward('login');
             } else {
-                if ($sites->isTrusted($this->user, $request->trust_root)) {
+                if ($sites->isTrusted($this->user, $trustRoot)) {
                     $this->_forward('proceed', null, null, array('allow' => true));
-                } elseif ($sites->isNeverTrusted($this->user, $request->trust_root)) {
+                } elseif ($sites->isNeverTrusted($this->user, $trustRoot)) {
                     $this->_forward('proceed', null, null, array('allow' => false));
                 } else {
                     if ($request->immediate) {
@@ -69,14 +71,27 @@ class OpenidController extends CommunityID_Controller_Action
                     }
 
                     $this->_forward('login');
-                } else {
-                    if ($sites->isTrusted($this->user, $request->trust_root)) {
-                        $this->_forward('proceed', null, null, array('allow' => true));
-                    } elseif ($sites->isNeverTrusted($this->user, $request->trust_root)) {
-                        $this->_forward('proceed', null, null, array('deny' => true));
-                    } else {
-                        $this->_forward('trust');
+                    return;
+                }
+
+                // Check if max_auth_age is requested through the PAPE extension
+                require_once 'libs/Auth/OpenID/PAPE.php';
+                if ($papeRequest = Auth_OpenID_PAPE_Request::fromOpenIDRequest($request)) {
+                    $extensionArgs = $papeRequest->getExtensionArgs();
+                    if (isset($extensionArgs['max_auth_age'])
+                            && $extensionArgs['max_auth_age'] < $this->user->getSecondsSinceLastLogin())
+                    {
+                        $this->_forward('login');
+                        return;
                     }
+                }
+
+                if ($sites->isTrusted($this->user, $trustRoot)) {
+                    $this->_forward('proceed', null, null, array('allow' => true));
+                } elseif ($sites->isNeverTrusted($this->user, $trustRoot)) {
+                    $this->_forward('proceed', null, null, array('deny' => true));
+                } else {
+                    $this->_forward('trust');
                 }
             }
         }
@@ -90,16 +105,36 @@ class OpenidController extends CommunityID_Controller_Action
         $server = $this->_getOpenIdProvider();
         $request = $server->decodeRequest();
 
+        $this->view->yubikey = $this->_config->yubikey;
+
         $authAttempts = new Users_Model_AuthAttempts();
         $attempt = $authAttempts->get();
         $this->view->useCaptcha = $attempt && $attempt->surpassedMaxAllowed();
         $this->view->form = new Form_OpenidLogin(null, $this->view->base, $attempt && $attempt->surpassedMaxAllowed());
 
-        if (!$request->idSelect()) {
-            $this->view->form->openIdIdentity->setValue(htmlspecialchars($request->identity));
+        if ($this->_getParam('invalidCaptcha')) {
+            $this->view->form->captcha->addError($this->view->translate('Captcha value is wrong'));
+        }
+
+        if ($this->_getParam('invalidLogin')) {
+            $this->view->form->addError($this->view->translate('Invalid credentials'));
+        }
+
+        if ($request->idSelect()) {
+            $this->view->identity = false;
+            $this->view->form->openIdIdentity->setRequired(true);
+        } else {
+            $this->view->identity = $request->identity;
         }
 
         $this->view->queryString = $this->_queryString();
+
+        if ($this->user->role == Users_Model_User::ROLE_GUEST && @$_COOKIE['image']) {
+            $images = new Users_Model_SigninImages();
+            $this->view->image = $images->getByCookie($_COOKIE['image']);
+        } else {
+            $this->view->image = false;
+        }
     }
 
     public function authenticateAction()
@@ -115,22 +150,35 @@ class OpenidController extends CommunityID_Controller_Action
         $form->populate($formData);
 
         if (!$form->isValid($formData)) {
-            $this->_forward('login');
+            $formErrors = $form->getErrors();
+            // gotta resort to pass errors as params because we don't use the session here
+            if (@$formErrors['captcha']) {
+                $this->_forward('login', null, null, array('invalidCaptcha' => true));
+            } else {
+                $this->_forward('login');
+            }
             return;
         }
 
         $users = new Users_Model_Users();
-        $result = $users->authenticate($form->getValue('openIdIdentity'),
-            $form->getValue('password'), true);
+        $result = $users->authenticate(
+            $request->idSelect()? $form->getValue('openIdIdentity') : $request->identity,
+            $this->_config->yubikey->enabled && $this->_config->yubikey->force?
+                $form->getValue('yubikey')
+                : $form->getValue('password'),
+            true,
+            $this->view
+        );
 
         if ($result) {
             if ($attempt) {
                 $attempt->delete();
             }
             $sites = new Model_Sites();
-            if ($sites->isTrusted($users->getUser(), $request->trust_root)) {
+            $trustRoot = $this->_getTrustRoot($request);
+            if ($sites->isTrusted($users->getUser(), $trustRoot)) {
                 $this->_forward('proceed', null, null, array('allow' => true));
-            } elseif ($sites->isNeverTrusted($users->getUser(), $request->trust_root)) {
+            } elseif ($sites->isNeverTrusted($users->getUser(), $trustRoot)) {
                 $this->_forward('proceed', null, null, array('deny' => true));
             } else {
                 $this->_forward('trust');
@@ -142,7 +190,7 @@ class OpenidController extends CommunityID_Controller_Action
                 $attempt->addFailure();
                 $attempt->save();
             }
-            $this->_forward('login');
+            $this->_forward('login', null, null, array('invalidLogin' => true));
         }
     }
 
@@ -151,38 +199,11 @@ class OpenidController extends CommunityID_Controller_Action
         $server = $this->_getOpenIdProvider();
         $request = $server->decodeRequest();
 
-        $this->view->siteRoot = $request->trust_root;
+        $this->view->siteRoot = $this->_getTrustRoot($request);
         $this->view->identityUrl = $this->user->openid;
         $this->view->queryString = $this->_queryString();
 
-        $this->view->fields = array();
-        $this->view->policyUrl = false;
-
-        // The class Auth_OpenID_SRegRequest is included in the following file
-        require_once 'libs/Auth/OpenID/SReg.php';
-
-        $sregRequest = Auth_OpenID_SRegRequest::fromOpenIDRequest($request);
-        $props = $sregRequest->allRequestedFields();
-        $args  = $sregRequest->getExtensionArgs();
-        if (isset($args['required'])) {
-            $required = explode(',', $args['required']);
-        } else {
-            $required = false;
-        }
-
-        if (is_array($props) && count($props) > 0) {
-            $sregProps = array();
-            foreach ($props as $field) {
-                $sregProps[$field] = $required && in_array($field, $required);
-            }
-
-            $personalInfoForm = new Users_Form_PersonalInfo(null, $this->user, $sregProps);
-            $this->view->fields = $personalInfoForm->getElements();
-
-            if (isset($args['policy_url'])) {
-                $this->view->policyUrl = $args['policy_url'];
-            }
-        }
+        $this->view->showProfileForm = $this->_hasSreg($request);
     }
 
     public function proceedAction()
@@ -202,25 +223,12 @@ class OpenidController extends CommunityID_Controller_Action
 
         $response = $request->answer(true, null, $id);
 
-        // The class Auth_OpenID_SRegRequest is included in the following file
-        require_once 'libs/Auth/OpenID/SReg.php';
-
-        $sregRequest = Auth_OpenID_SRegRequest::fromOpenIDRequest($request);
-        $props = $sregRequest->allRequestedFields();
-        $args  = $sregRequest->getExtensionArgs();
-        if (isset($args['required'])) {
-            $required = explode(',', $args['required']);
-        } else {
-            $required = false;
-        }
-
-        if (is_array($props) && count($props) > 0) {
-            $sregProps = array();
-            foreach ($props as $field) {
-                $sregProps[$field] = $required && in_array($field, $required);
-            }
-
-            $personalInfoForm = new Users_Form_PersonalInfo(null, $this->user, $sregProps);
+        if ($this->_hasSreg($request)
+                // profileId will be null if site is already trusted
+                && $this->_getParam('profileId')) {
+            $profiles = new Users_Model_Profiles();
+            $profile = $profiles->getRowInstance($this->_getParam('profileId'));
+            $personalInfoForm = Users_Form_PersonalInfo::getForm($request, $profile);
             $formData = $this->_request->getPost();
             $personalInfoForm->populate($formData);
 
@@ -228,20 +236,23 @@ class OpenidController extends CommunityID_Controller_Action
             // for the date element to be filled properly
             $foo = $personalInfoForm->isValid($formData);
 
-            $sregResponse = Auth_OpenID_SRegResponse::extractResponse($sregRequest,
+            $sregResponse = Auth_OpenID_SRegResponse::extractResponse(
+                $personalInfoForm->getSregRequest(),
                 $personalInfoForm->getUnqualifiedValues());
             $sregResponse->toMessage($response->fields);
         }
+
+        $trustRoot= $this->_getTrustRoot($request);
 
         if ($this->_getParam('allow')) {
             if ($this->_getParam('forever')) {
 
                 $sites = new Model_Sites();
-                $sites->deleteForUserSite($this->user, $request->trust_root);
+                $sites->deleteForUserSite($this->user, $trustRoot);
 
                 $siteObj = $sites->createRow();
                 $siteObj->user_id = $this->user->id;
-                $siteObj->site = $request->trust_root;
+                $siteObj->site = $trustRoot;
                 $siteObj->creation_date = date('Y-m-d');
 
                 if (isset($personalInfoForm)) {
@@ -256,7 +267,12 @@ class OpenidController extends CommunityID_Controller_Action
                 $siteObj->save();
             }
 
-            $this->_saveHistory($request->trust_root, Model_History::AUTHORIZED);
+            $this->_saveHistory($trustRoot, Model_History::AUTHORIZED);
+
+            require_once 'libs/Auth/OpenID/PAPE.php';
+            if ($papeRequest = Auth_OpenID_PAPE_Request::fromOpenIDRequest($request)) {
+                $this->_processPape($papeRequest, $response);
+            }
 
             $webresponse = $server->encodeResponse($response);
 
@@ -273,17 +289,17 @@ class OpenidController extends CommunityID_Controller_Action
         } elseif ($this->_getParam('deny')) {
             if ($this->_getParam('forever')) {
                 $sites = new Model_Sites();
-                $sites->deleteForUserSite($this->user, $request->trust_root);
+                $sites->deleteForUserSite($this->user, $trustRoot);
 
                 $siteObj = $sites->createRow();
                 $siteObj->user_id = $this->user->id;
-                $siteObj->site = $request->trust_root;
+                $siteObj->site = $trustRoot;
                 $siteObj->creation_date = date('Y-m-d');
                 $siteObj->trusted = serialize(false);
                 $siteObj->save();
             }
 
-            $this->_saveHistory($request->trust_root, Model_History::DENIED);
+            $this->_saveHistory($trustRoot, Model_History::DENIED);
 
             return $this->_sendResponse($server, $request->answer(false));
         }
@@ -299,15 +315,6 @@ class OpenidController extends CommunityID_Controller_Action
         $history->ip = $_SERVER['REMOTE_ADDR'];
         $history->result = $result;
         $history->save();
-    }
-
-    private function _getOpenIdProvider()
-    {
-        $connection = new CommunityID_OpenId_DatabaseConnection(Zend_Registry::get('db'));
-        $store = new Auth_OpenID_MySQLStore($connection, 'associations', 'nonces');
-        $server = new Auth_OpenID_Server($store, $this->_helper->ProviderUrl($this->_config));
-
-        return $server;
     }
 
     private function _sendResponse(Auth_OpenID_Server $server, Auth_OpenID_ServerResponse $response)
@@ -334,37 +341,37 @@ class OpenidController extends CommunityID_Controller_Action
         $this->_response->appendBody($webresponse->body);
     }
 
-
-    /**
-    * Circumvent PHP's automatic replacement of dots by underscore in var names in $_GET and $_POST
-    */
-    private function _queryString()
+    private function _getTrustRoot(Auth_OpenID_Request $request)
     {
-        $unfilteredVars = array_merge($_GET, $_POST);
-        $varsTemp = array();
-        $vars = array();
-        $extensions = array();
-        foreach ($unfilteredVars as $key => $value) {
-            if (substr($key, 0, 10) == 'openid_ns_') {
-                $extensions[] = substr($key, 10);
-                $varsTemp[str_replace('openid_ns_', 'openid.ns.', $key)] = $value;
-            } else {
-                $varsTemp[str_replace('openid_', 'openid.', $key)] = $value;
-            }
-        }
-        foreach ($extensions as $extension) {
-            foreach ($varsTemp as $key => $value) {
-                if (strpos($key, "openid.$extension") === 0) {
-                    $prefix = "openid.$extension.";
-                    $key = $prefix . substr($key, strlen($prefix));
-                }
-                $vars[$key] = $value;
-            }
-        }
-        if (!$extensions) {
-            $vars = $varsTemp;
-        }
+        $trustRoot = $request->trust_root;
+        Zend_OpenId::normalizeUrl($trustRoot);
 
-        return '?' . http_build_query($vars);
+        return $trustRoot;
+    }
+
+    private function _hasSreg(Auth_OpenID_Request $request)
+    {
+        // The class Auth_OpenID_SRegRequest is included in the following file
+        require_once 'libs/Auth/OpenID/SReg.php';
+
+        $sregRequest = Auth_OpenID_SRegRequest::fromOpenIDRequest($request);
+        $props = $sregRequest->allRequestedFields();
+
+        return (is_array($props) && count($props) > 0);
+    }
+
+    private function _processPape(Auth_OpenID_PAPE_Request $papeRequest, $response)
+    {
+        if (($image = $this->user->getImage()) && @$_COOKIE['image']) {
+            $cidSupportedPolicies = array(PAPE_AUTH_PHISHING_RESISTANT);
+            if ($RPPreferredTypes = $papeRequest->preferredTypes($cidSupportedPolicies)) {
+                $this->user->getLastLoginUtc();
+                $papeResponse = new Auth_OpenID_PAPE_Response(
+                    $cidSupportedPolicies,
+                    $this->user->getLastLoginUtc()
+                );
+                $papeResponse->toMessage($response->fields);
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -50,8 +50,15 @@ class Install_UpgradeController extends CommunityID_Controller_Action
         }
 
         $users = new Users_Model_Users();
-        $result = $users->authenticate($this->_request->getPost('username'),
-            $this->_request->getPost('password'));
+        list($super, $mayor, $minor) = explode('.', $this->_getDbVersion());
+        $greaterThan2 = $super >= 2;
+        $result = $users->authenticate(
+            $this->_request->getPost('username'),
+            $this->_request->getPost('password'),
+            false,
+            $this->view,
+            !$greaterThan2 // bypass mark successfull login 'cause last_login field only exists after v.2
+            );
 
         if (!$result) {
             $this->_helper->FlashMessenger->addMessage($this->view->translate('Invalid credentials'));
@@ -72,6 +79,11 @@ class Install_UpgradeController extends CommunityID_Controller_Action
 
         $this->_helper->FlashMessenger->addMessage($this->view->translate('Upgrade was successful. You are now on version %s', $upgradedVersion));
 
+        $missingConfigs = $this->_checkMissingConfigDirectives();
+        if ($missingConfigs) {
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('WARNING: there are some new configuration settings. To override their default values (as set in config.default.php) add them to your config.php file. The new settings correspond to the following directives: %s.', implode(', ', $missingConfigs)));
+        }
+
         // we need to logout user in case the user table changed
         Zend_Auth::getInstance()->clearIdentity();
         Zend_Session::forgetMe();
@@ -85,6 +97,7 @@ class Install_UpgradeController extends CommunityID_Controller_Action
 
         $includeFiles = false;
         $db = Zend_Registry::get('db');
+        $errors = array();
         foreach ($versions as $version) {
             if ($version == $this->_getDbVersion()) {
                 $includeFiles = true;
@@ -95,19 +108,29 @@ class Install_UpgradeController extends CommunityID_Controller_Action
                 continue;
             }
 
-            $fileName = APP_DIR . '/setup/upgrade_'.$version.'.sql';
+            $sqlFileName = APP_DIR . '/setup/upgrade_'.$version.'.sql';
+            $phpFileName = APP_DIR . '/setup/upgrade_'.$version.'.php';
+            $className = 'Upgrade_' . strtr($version, '.', '_');
 
             if ($onlyCheckFiles) {
-                if (!file_exists($fileName)) {
-                    $this->_helper->FlashMessenger->addMessage($this->view->translate('Correct before upgrading: File %s is required to proceed', $fileName));
+                if (!file_exists($sqlFileName)) {
+                    $this->_helper->FlashMessenger->addMessage($this->view->translate('Correct before upgrading: File %s is required to proceed', $sqlFileName));
                     $this->_redirect('index');
                     return;
                 }
+
+                if (file_exists($phpFileName)) {
+                    require_once $phpFileName;
+                    $upgradeStage = new $className($this->user, $db, $this->view);
+                    $errors = array_merge($errors, $upgradeStage->requirements());
+                }
+
                 continue;
             }
 
             $query = '';
-            $lines = file($fileName);
+            $lines = file($sqlFileName);
+            Zend_Registry::get('logger')->log("Running upgrade file $sqlFileName", Zend_Log::DEBUG);
             foreach ($lines as $line) {
                 $line = trim($line);
                 if ($line != '') {
@@ -123,8 +146,47 @@ class Install_UpgradeController extends CommunityID_Controller_Action
                     $query = '';
                 }
             }
+
+            if (file_exists($phpFileName)) {
+                Zend_Registry::get('logger')->log("Running upgrade file $phpFileName", Zend_Log::DEBUG);
+                $upgradeStage = new $className($this->user, $db, $this->view);
+                $upgradeStage->proceed();
+            }
+        }
+
+        if ($errors) {
+            $errorMessages = join('<br />', $errors);
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Please address the following requirements before proceeding with the upgrade:') . '<br />' . $errorMessages);
+            $this->_redirect('index');
         }
 
         return $version;
+    }
+
+    private function _checkMissingConfigDirectives()
+    {
+        require 'config.default.php';
+        $defaultConfig = $config;
+        unset($config);
+        require 'config.php';
+        $missingConfigs = $this->_getMissingConfigs($defaultConfig, $config);
+        return $missingConfigs;
+    }
+
+    private function _getMissingConfigs($defaultConfig, $config, $baseKey = false)
+    {
+        $missingConfigs = array();
+
+        foreach ($defaultConfig as $key => $value) {
+            if (!isset($config[$key])) {
+                $missingConfigs[] = $key;
+            } else if (is_array($value)) {
+                if ($this->_getMissingConfigs($defaultConfig[$key], $config[$key], $baseKey)) {
+                    $missingConfigs[] = $baseKey? $baseKey : $key;
+                }
+            }
+        }
+
+        return $missingConfigs;
     }
 }

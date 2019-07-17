@@ -9,6 +9,7 @@ $config['environment']['production']        = {environment.production};
 $config['environment']['YDN']               = {environment.YDN};
 $config['environment']['ajax_slowdown']     = {environment.ajax_slowdown};
 $config['environment']['keep_history_days'] = {environment.keep_history_days};
+$config['environment']['unconfirmed_accounts_days_expire'] = {environment.unconfirmed_accounts_days_expire};
 
 # Enable / Disable account self-registration.
 $config['environment']['registrations_enabled'] = {environment.registrations_enabled};
@@ -17,6 +18,14 @@ $config['environment']['registrations_enabled'] = {environment.registrations_ena
 $config['environment']['locale']            = '{environment.locale}';
 
 $config['environment']['template']          = '{environment.template}';
+
+
+
+#
+#  -------  HTML metadata ------------
+#
+$config['metadata']['description']          = '{metadata.description}';
+$config['metadata']['keywords']             = '{metadata.keywords}';
 
 
 #
@@ -70,6 +79,87 @@ $config['database']['params']['host']       = '{database.params.host}';
 $config['database']['params']['dbname']     = '{database.params.dbname}';
 $config['database']['params']['username']   = '{database.params.username}';
 $config['database']['params']['password']   = '{database.params.password}';
+
+
+
+#
+#  -------  PASSWORDS ------------
+#
+# Point to file with a blacklist of words
+# The path must relative to Community-ID's root directory.
+$config['security']['passwords']['dictionary'] = '{security.passwords.dictionary}';
+
+# If set to true, the password should not contain the username
+$config['security']['passwords']['username_different'] = {security.passwords.username_different};
+
+# Set the password's minimum length
+$config['security']['passwords']['minimum_length'] = {security.passwords.minimum_length};
+
+# Set to true if the password should contain number characters
+$config['security']['passwords']['include_numbers'] = {security.passwords.include_numbers};
+
+# Set to true if the password should contain non alpha-numeric characters
+$config['security']['passwords']['include_symbols'] = {security.passwords.include_symbols};
+
+# Set to true if the password should contain both lower case and uppercase characters
+$config['security']['passwords']['lowercase_and_uppercase'] = {security.passwords.lowercase_and_uppercase};
+
+
+#
+#  -------  USERNAMES ------------
+#
+# Enter a regular expression (or litteral) for usernames you wish to exclude
+# You can add as many entries as you want
+$config['security']['usernames']['exclude'][0] = '{security.usernames.exclude}';
+
+
+#
+#  -------  LDAP ------------
+#
+$config['ldap']['enabled']                  = {ldap.enabled};
+$config['ldap']['host']                     = '{ldap.host}';
+$config['ldap']['baseDn']                   = '{ldap.baseDn}';
+$config['ldap']['bindRequiresDn']           = {ldap.bindRequiresDn};
+
+# credentials for LDAP administator user. Username must be a DN. This is not the same
+# as the Community-ID administrator user.
+$config['ldap']['username']                 = '{ldap.username}';
+$config['ldap']['password']                 = '{ldap.password}';
+
+# CN for the Community-ID admin
+$config['ldap']['admin']                    = '{ldap.admin}';
+
+# If set to true, when the Account Info is updated or the account is deleted,
+# then the LDAP record is updated/deleted as well.
+# If set to false, the account info cannot be modified.
+# This doesn't apply to the Personal Info Section.
+$config['ldap']['keepRecordsSynced']       = {ldap.keepRecordsSynced};
+
+# If set to true, the user can change his password, and the LDAP record is updated as well.
+$config['ldap']['canChangePassword']        = {ldap.canChangePassword};
+
+# Hashing algorithm used to store passwords in LDAP
+# If you prefer to leave the passwords unhashed, set to false.
+$config['ldap']['passwordHashing']          = '{ldap.passwordHashing}';
+
+# These defaults are drawn from an inetOrgPerson LDAP Object class
+$config['ldap']['fields']['nickname']       = '{ldap.fields.nickname}';
+$config['ldap']['fields']['email']          = '{ldap.fields.email}';
+$config['ldap']['fields']['fullname']       = '{ldap.fields.fullname}';
+$config['ldap']['fields']['postcode']       = '{ldap.fields.postcode}';
+
+
+#
+#  -------  YUBIKEY ------------
+#
+$config['yubikey']['enabled']               = {yubikey.enabled};
+
+# Set to true to force utilization of the Yubikey, instead of passwords.
+# Only use it for newer installations, as current existent users won't be able to log-in.
+$config['yubikey']['force']                 = {yubikey.force};
+
+$config['yubikey']['api_id']                = '{yubikey.api_id}';
+$config['yubikey']['api_key']               = '{yubikey.api_key}';
 
 
 #

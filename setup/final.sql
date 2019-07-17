@@ -5,8 +5,11 @@ CREATE TABLE `users` (
   `openid` varchar(100) NOT NULL,
   `accepted_eula` tinyint(4) NOT NULL default '0',
   `registration_date` date NOT NULL,
+  `last_login` datetime NOT NULL,
+  `auth_type` tinyint(4) NOT NULL default '0',
   `password` char(40) NOT NULL,
   `password_changed` date NOT NULL,
+  `yubikey_publicid` varchar(50) NOT NULL,
   `firstname` varchar(50) NOT NULL,
   `lastname` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
@@ -23,7 +26,7 @@ CREATE TABLE `associations` (
   `issued` int(11) NOT NULL,
   `lifetime` int(11) NOT NULL,
   `assoc_type` varchar(64) NOT NULL,
-  PRIMARY KEY  (`server_url`(255),`handle`)
+  PRIMARY KEY  (`handle`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `nonces` (
@@ -33,7 +36,7 @@ CREATE TABLE `nonces` (
   UNIQUE KEY `server_url` (`server_url`(255),`timestamp`,`salt`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS `sites` (
+CREATE TABLE `sites` (
   `id` int(11) NOT NULL auto_increment,
   `user_id` int(11) NOT NULL,
   `site` varchar(100) NOT NULL,
@@ -71,15 +74,32 @@ CREATE TABLE `fields` (
 ) ENGINE=InnoDB ;
 
 
-CREATE TABLE `fields_values` (
+CREATE TABLE `profiles` (
+  `id` int(11) NOT NULL auto_increment,
   `user_id` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB;
+
+ALTER TABLE `profiles`
+  ADD CONSTRAINT `profiles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+
+CREATE TABLE `fields_values` (
+  `id` int(11) NOT NULL auto_increment,
+  `user_id` int(11) NOT NULL,
+  `profile_id` int(11) NOT NULL,
   `field_id` int(11) NOT NULL,
   `value` text NOT NULL,
-  PRIMARY KEY  (`user_id`,`field_id`),
-  KEY `field_id` (`field_id`)
+  PRIMARY KEY  (`id`),
+  KEY `field_id` (`field_id`),
+  KEY `profile_id` (`profile_id`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB;
 
 ALTER TABLE `fields_values`
+  ADD CONSTRAINT `fields_values_ibfk_3` FOREIGN KEY (`profile_id`) REFERENCES `profiles` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fields_values_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fields_values_ibfk_2` FOREIGN KEY (`field_id`) REFERENCES `fields` (`id`) ON DELETE CASCADE;
 
@@ -100,7 +120,7 @@ CREATE TABLE `settings` (
  ) ENGINE = MYISAM ;
 
 INSERT INTO `settings` (`name`, `value`) VALUES ('maintenance_mode', '0');
-INSERT INTO `settings` (`name`, `value`) VALUES ('version', '1.1.0.RC2');
+INSERT INTO `settings` (`name`, `value`) VALUES ('version', '2.0.0.RC3');
 
 CREATE TABLE `news` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
@@ -119,3 +139,16 @@ CREATE TABLE `auth_attempts` (
   `last_attempt` datetime NOT NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB;
+
+CREATE TABLE `users_images` (
+    `id` int(11) NOT NULL auto_increment,
+    `user_id` int(11) NOT NULL,
+    `image` mediumblob NOT NULL,
+    `mime` varchar(15) NOT NULL,
+    `cookie` char(32) NOT NULL,
+    PRIMARY KEY  (`id`),
+    KEY `user_id` (`user_id`)
+) ENGINE=InnoDB;
+
+ALTER TABLE `users_images`
+  ADD CONSTRAINT `users_images_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;

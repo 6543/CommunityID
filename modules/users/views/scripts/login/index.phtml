@@ -11,6 +11,9 @@
                 <a href="<?php echo $this->base ?>/users/personalinfo"><?php echo $this->translate('Personal Info') ?></a>
             </li>
             <li>
+                <a href="<?php echo $this->base ?>/users/signinimage"><?php echo $this->translate('Sign-in Image') ?></a>
+            </li>
+            <li>
                 <a href="<?php echo $this->base ?>/sites"><?php echo $this->translate('Sites database') ?></a>
             </li>
             <li>
@@ -53,9 +56,22 @@
         </div>
     <?php endif ?>
     <form id="loginForm" action="<?php echo $this->loginTargetBase ?>/users/login/authenticate" method="post" class="formGrid">
-        <div id="credentials">
+        <? if ($this->image): ?>
+            <div>
+                <img src="<?= $this->base ?>/users/signinimage/image/id/<?= $this->image->cookie ?>"
+                    width="<?= $this->image->getWidth() ?>"
+                    height="<?= $this->image->getHeight() ?>" 
+                    title="<?= $this->translate('This is the image that identifies your account in this computer') ?>"
+                    alt="<?= $this->translate('This is the image that identifies your account in this computer') ?>" />
+            </div>
+        <? endif ?>
+       <div id="credentials">
             <?php echo $this->loginForm->username ?>
-            <?php echo $this->loginForm->password ?>
+            <? if ($this->yubikey->enabled && $this->yubikey->force): ?>
+                <?= $this->loginForm->yubikey ?>
+            <? else: ?>
+                <?= $this->loginForm->password ?>
+            <? endif ?>
             <?php if ($this->useCaptcha): ?>
                 <?php echo $this->loginForm->captcha ?>
             <?php endif ?>
@@ -72,16 +88,18 @@
             </script> 
         </div>
         <p>
-            <a href="<?php echo $this->base ?>/users/recoverpassword" class="panel_link"><?php echo $this->translate('Forgot you password?') ?></a>
+            <a href="<?php echo $this->base ?>/users/recoverpassword" class="panel_link"><?php echo $this->translate('Forgot your password?') ?></a>
         </p>
     </form>
-    <hr/>
-    <div id="registerNow">
-        <p>
-            <?php echo $this->translate('You don\'t have an account?') ?>
-            <div>
-                <a href="<?php echo $this->base ?>/users/register"><?php echo $this->translate('REGISTER NOW!') ?></a>
-            </div>
-        </p>&nbsp;<!-- safari bug workaround -->
-    </div>
-<?php endif; ?>
+    <? if ($this->allowRegistrations): ?>
+        <hr/>
+        <div id="registerNow">
+            <p>
+                <?php echo $this->translate('You don\'t have an account?') ?>
+                <div>
+                    <a href="<?php echo $this->base ?>/users/register"><?php echo $this->translate('REGISTER NOW!') ?></a>
+                </div>
+            </p>&nbsp;<!-- safari bug workaround -->
+        </div>
+    <? endif ?>
+<? endif ?>

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -66,6 +66,9 @@ class MessageusersController extends CommunityID_Controller_Action
         }
 
         $users = new Users_Model_Users();
+
+        // here we get the users emails stored in the users table, even if using LDAP, for performance reasons.
+        // Do know however, that a user email is synced with the LDAP repository every time he logs in.
         foreach ($users->getUsers() as $user) {
             if ($user->role == Users_Model_User::ROLE_ADMIN) {
                 continue;
@@ -80,9 +83,9 @@ class MessageusersController extends CommunityID_Controller_Action
 
         try {
             $mail->send();
-            $this->_helper->FlashMessenger->addMessage('Message has been sent');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('Message has been sent'));
         } catch (Zend_Mail_Protocol_Exception $e) {
-            $this->_helper->FlashMessenger->addMessage('There was an error trying to send the message');
+            $this->_helper->FlashMessenger->addMessage($this->view->translate('There was an error trying to send the message'));
             if ($this->_config->logging->level == Zend_Log::DEBUG) {
                 $this->_helper->FlashMessenger->addMessage($e->getMessage());
 

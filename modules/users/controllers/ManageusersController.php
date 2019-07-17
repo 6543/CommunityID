@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -21,7 +21,13 @@ class Users_ManageusersController extends CommunityID_Controller_Action
         $this->_helper->layout->disableLayout();
         $this->_helper->viewRenderer->setNeverRender(true);
 
+        if ($this->_config->ldap->enabled && $this->_config->ldap->keepRecordsSynced) {
+            $ldap = Monkeys_Ldap::getInstance();
+            $ldap->delete($this->targetUser);
+        }
+
         $this->targetUser->delete();
+
         echo $this->view->translate('User has been deleted successfully');
     }
 
@@ -42,12 +48,21 @@ class Users_ManageusersController extends CommunityID_Controller_Action
             $mail = self::getMail($user, $this->view->translate('Community-ID registration reminder'));
             try {
                 $mail->send();
-                $user->reminders++;
-                $user->save();
-            } catch (Zend_Mail_Protocol_Exception $e) {
+                $this->_increaseReminderCount($user);
+            } catch (Zend_Mail_Exception $e) {
                 Zend_Registry::get('logger')->log($e->getMessage(), Zend_Log::ERR);
+                if (!$this->_config->environment->production) {
+                    // still increase the reminder counter when testing
+                    $this->_increaseReminderCount($user);
+                }
             }
         }
+    }
+
+    private function _increaseReminderCount(Users_Model_User $user)
+    {
+        $user->reminders++;
+        $user->save();
     }
 
     /**
@@ -56,17 +71,7 @@ class Users_ManageusersController extends CommunityID_Controller_Action
     */
     public static function getMail(Users_Model_User $user, $subject)
     {
-        $locale = Zend_Registry::get('Zend_Locale');
-        $localeElements = explode('_', $locale);
-        if (file_exists(APP_DIR . "/resources/$locale/reminder_mail.txt")) {
-            $file = APP_DIR . "/resources/$locale/reminder_mail.txt";
-        } else if (count($localeElements == 2)
-                && file_exists(APP_DIR . "/resources/".$localeElements[0]."/reminder_mail.txt")) {
-            $file = APP_DIR . "/resources/".$localeElements[0]."/reminder_mail.txt";
-        } else {
-            $file = APP_DIR . "/resources/en/reminder_mail.txt";
-        }
-
+        $file = CommunityID_Resources::getResourcePath('reminder_mail.txt');
         $emailTemplate = file_get_contents($file);
         $emailTemplate = str_replace('{userName}', $user->getFullName(), $emailTemplate);
 
@@ -74,7 +79,7 @@ class Users_ManageusersController extends CommunityID_Controller_Action
         preg_match('#(.*)/manageusers/sendreminder#', $currentUrl, $matches);
         $emailTemplate = str_replace('{registrationURL}', $matches[1] . '/register/eula?token=' . $user->token, $emailTemplate);
 
-        // can't use $this-_config 'cause it's a static function
+        // can't use $this->_config 'cause it's a static function
         $configEmail = Zend_Registry::get('config')->email;
 
         switch (strtolower($configEmail->transport)) {

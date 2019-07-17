@@ -1,1 +1,4 @@
-import things form https://sourceforge.net/projects/communityid/files/
+CommunityID
+===========
+
+PHP OpenID Server

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -25,10 +25,27 @@ class Users_LoginController extends CommunityID_Controller_Action
         $this->view->loginForm = new Users_Form_Login(null, $this->view->base, $this->view->useCaptcha);
 
         if ($this->_config->SSL->enable_mixed_mode) {
-            $this->view->loginTargetBase = 'https://' . $_SERVER['HTTP_HOST'] . $this->view->base;
+            if ($this->_config->subdomain->enabled) {
+                // in this case $this->view->base contains the full URL, so we just gotta replace the protocol
+                $this->view->loginTargetBase = 'https' . substr($this->view->base, strpos($this->view->base, '://'));
+            } else {
+                $this->view->loginTargetBase = 'https://' . $_SERVER['HTTP_HOST'] . $this->view->base;
+            }
         } else {
             $this->view->loginTargetBase = $this->view->base;
         }
+
+        $this->view->allowRegistrations = $this->_config->environment->registrations_enabled;
+
+
+        if ($this->user->role == Users_Model_User::ROLE_GUEST && @$_COOKIE['image']) {
+            $images = new Users_Model_SigninImages();
+            $this->view->image = $images->getByCookie($_COOKIE['image']);
+        } else {
+            $this->view->image = false;
+        }
+
+        $this->view->yubikey = $this->_config->yubikey;
 
         $this->_helper->viewRenderer->setResponseSegment('sidebar');
     }
@@ -48,9 +65,15 @@ class Users_LoginController extends CommunityID_Controller_Action
         }
 
         $users = new Users_Model_Users();
-        $result = $users->authenticate($this->_request->getPost('username'),
-            $this->_request->getPost('password'));
-
+        $result = $users->authenticate(
+            $this->_request->getPost('username'),
+            $this->_config->yubikey->enabled && $this->_config->yubikey->force?
+                $this->_request->getPost('yubikey')
+                : $this->_request->getPost('password'),
+            false,
+            $this->view
+        );
+       
         if ($result) {
             $user = $users->getUser();
 

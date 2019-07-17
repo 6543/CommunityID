@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkey Ltd
 * @since  CommunityID 0.9
@@ -24,13 +24,15 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
 
     public function accountinfoAction()
     {
+        $this->view->yubikey = $this->_config->yubikey;
     }
 
     public function editaccountinfoAction()
     {
-        if ($this->targetUser->id != $this->user->id
-            // this condition checks for an non-admin trying to add a new user
-            && ($this->targetUser->id != 0 || $this->user->role != Users_Model_User::ROLE_ADMIN))
+        if (($this->targetUser->id != $this->user->id
+                // this condition checks for an non-admin trying to add a new user
+                && ($this->targetUser->id != 0 || $this->user->role != Users_Model_User::ROLE_ADMIN))
+            || ($this->_config->ldap->enabled && !$this->_config->ldap->keepRecordsSynced))
         {
             throw new Monkeys_AccessDeniedException();
         }
@@ -46,16 +48,22 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
                 'firstname'     => $this->targetUser->firstname,
                 'lastname'      => $this->targetUser->lastname,
                 'email'         => $this->targetUser->email,
+                'authMethod'    => $this->targetUser->auth_type,
+                'yubikey'       => '' // of course empty
             ));
         }
+
+        $this->view->yubikey = $this->_config->yubikey;
     }
 
     public function saveaccountinfoAction()
     {
         $isNewUser = is_null($this->targetUser->id)? true : false;
 
-        if (!$isNewUser && $this->targetUser->id != $this->user->id) {
-            // admins can add new users, but not edit existing ones
+        if (
+                // admins can add new users, but not edit existing ones
+                (!$isNewUser && $this->targetUser->id != $this->user->id)
+                || ($this->_config->ldap->enabled && !$this->_config->ldap->keepRecordsSynced)) {
             throw new Monkeys_AccessDeniedException();
         }
 
@@ -68,9 +76,10 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
         }
 
         $existingUsernameOrEmail = false;
+        $oldUsername = $this->targetUser->username;
         $newUsername = $form->getValue('username');
         if (($isNewUser && $this->_usernameAlreadyExists($newUsername))
-            || (!$isNewUser && ($this->targetUser->username != $newUsername)
+            || (!$isNewUser && ($oldUsername != $newUsername)
                 && $this->_usernameAlreadyExists($newUsername)))
         {
             $form->username->addError($this->view->translate('This username is already in use'));
@@ -90,6 +99,21 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
             return $this->_redirectInvalidForm($form);
         }
 
+        if ($this->_config->yubikey->enabled) {
+            $this->targetUser->auth_type = $form->getValue('authMethod');
+            $yubikey = trim($form->getValue('yubikey'));
+            if ($form->getValue('authMethod') == Users_Model_User::AUTH_YUBIKEY) {
+                // only store or update yubikey for new users or existing that filled in something
+                if ($isNewUser || $yubikey) {
+                    if (!$publicId = $this->_getYubikeyPublicId($yubikey)) {
+                        $form->yubikey->addError($this->view->translate('Could not validate Yubikey'));
+                        return $this->_redirectInvalidForm($form);
+                    }
+                    $this->targetUser->yubikey_publicid = $publicId;
+                }
+            }
+        }
+
         $this->targetUser->username = $newUsername;
         $this->targetUser->firstname = $form->getValue('firstname');
         $this->targetUser->lastname = $form->getValue('lastname');
@@ -97,11 +121,35 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
         if ($isNewUser) {
             $this->targetUser->accepted_eula = 1;
             $this->targetUser->registration_date = date('Y-m-d');
-            $this->targetUser->openid = $this->_generateOpenId($this->targetUser->username);
+
+            preg_match('#(.*)/users/profile.*#', Zend_OpenId::selfURL(), $matches);
+            $this->targetUser->generateOpenId($matches[1]);
+
             $this->targetUser->role = Users_Model_User::ROLE_REGISTERED;
             $this->targetUser->setClearPassword($form->getValue('password1'));
         }
+
+        if ($this->_config->ldap->enabled && $this->_config->ldap->keepRecordsSynced) {
+            $ldap = Monkeys_Ldap::getInstance();
+
+            if ($isNewUser) {
+                $this->targetUser->setPassword($form->getValue('password1'));
+                $ldap->add($this->targetUser);
+            } else {
+                if ($oldUsername != $newUsername) {
+                    $ldap->modifyUsername($this->targetUser, $oldUsername);
+                }
+                $ldap->modify($this->targetUser);
+            }
+
+            // LDAP passwords must not be stored in the DB
+            $this->targetUser->setPassword('');
+        }
+
         $this->targetUser->save();
+        if ($isNewUser) {
+            $this->targetUser->createDefaultProfile($this->view);
+        }
 
         /**
         * When the form is submitted through a YUI request using a file, an iframe is used,
@@ -115,7 +163,7 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
     private function _usernameAlreadyExists($username)
     {
         $users = $this->_getUsers();
-        return $users->getUserWithUsername($username);
+        return $users->getUserWithUsername($username, false, $this->view);
     }
 
     private function _emailAlreadyExists($email)
@@ -144,8 +192,9 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
     */
     public function changepasswordAction()
     {
-        if ($this->targetUser->id != $this->user->id)
-        {
+        if (($this->targetUser->id != $this->user->id)
+                || ($this->_config->ldap->enabled && !$this->_config->ldap->canChangePassword)
+                || ($this->_config->yubikey->enabled && $this->_config->yubikey->force)) {
             throw new Monkeys_AccessDeniedException();
         }
 
@@ -154,18 +203,19 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
             $this->view->changePasswordForm = $appSession->changePasswordForm;
             unset($appSession->changePasswordForm);
         } else {
-            $this->view->changePasswordForm = new Users_Form_ChangePassword();
+            $this->view->changePasswordForm = new Users_Form_ChangePassword(null, $this->user->username);
         }
     }
 
     public function savepasswordAction()
     {
-        if ($this->targetUser->id != $this->user->id)
-        {
+        if (($this->targetUser->id != $this->user->id)
+                || ($this->_config->ldap->enabled && !$this->_config->ldap->canChangePassword)
+                || ($this->_config->yubikey->enabled && $this->_config->yubikey->force)) {
             throw new Monkeys_AccessDeniedException();
         }
 
-        $form = new Users_Form_ChangePassword();
+        $form = new Users_Form_ChangePassword(null, $this->user->username);
         $formData = $this->_request->getPost();
         $form->populate($formData);
         if (!$form->isValid($formData)) {
@@ -175,14 +225,21 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
         }
 
         $this->targetUser->setClearPassword($form->getValue('password1'));
-        $this->targetUser->save();
+
+        if ($this->_config->ldap->enabled && $this->_config->ldap->canChangePassword) {
+            $ldap = Monkeys_Ldap::getInstance();
+            $ldap->modify($this->targetUser, $form->getValue('password1'));
+        } else {
+            $this->targetUser->save();
+        }
 
         return $this->_forward('accountinfo', null , null, array('userid' => $this->targetUser->id));
     }
 
     public function confirmdeleteAction()
     {
-        if ($this->user->role == Users_Model_User::ROLE_ADMIN) {
+        if ($this->user->role == Users_Model_User::ROLE_ADMIN
+                || ($this->_config->ldap->enabled && !$this->_config->ldap->keepRecordsSynced)) {
             throw new Monkeys_AccessDeniedException();
         }
 
@@ -191,6 +248,11 @@ class Users_ProfilegeneralController extends CommunityID_Controller_Action
 
     public function deleteAction()
     {
+        if ($this->user->role == Users_Model_User::ROLE_ADMIN
+                || ($this->_config->ldap->enabled && !$this->_config->ldap->keepRecordsSynced)) {
+            throw new Monkeys_AccessDeniedException();
+        }
+
         $mail = self::getMail();
         $mail->setFrom($this->_config->email->supportemail);
         $mail->addTo($this->_config->email->supportemail);
@@ -234,40 +296,24 @@ EOT;
         $mail->setBodyText($body);
         try {
             $mail->send();
-        } catch (Zend_Mail_Protocol_Exception $e) {
+        } catch (Zend_Mail_Exception $e) {
             if ($this->_config->logging->level == Zend_Log::DEBUG) {
-                $this->_helper->FlashMessenger->addMessage('Account was deleted, but feedback form couldn\'t be sent to admins');
+                $this->_helper->FlashMessenger->addMessage($this->view->translate('Account was deleted, but feedback form couldn\'t be sent to admins'));
             }
         }
 
         $users = $this->_getUsers();
         $users->deleteUser($this->user);
+
+        if ($this->_config->ldap->enabled && $this->_config->ldap->keepRecordsSynced) {
+            $ldap = Monkeys_Ldap::getInstance();
+            $ldap->delete($this->user);
+        }
+
         Zend_Auth::getInstance()->clearIdentity();
 
         $this->_helper->FlashMessenger->addMessage($this->view->translate('Your acccount has been successfully deleted'));
         $this->_redirect('');
-    }
-
-    private function _generateOpenId($username)
-    {
-        $selfUrl = Zend_OpenId::selfUrl();
-        if (!preg_match('#(.*)/users/profile.*#', $selfUrl, $matches)) {
-            throw new Exception('Couldn\'t retrieve current URL');
-        }
-
-        if ($this->_config->subdomain->enabled) {
-            $openid = $this->getProtocol() . '://' . $username . '.' . $this->_config->subdomain->hostname;
-        } else {
-            $openid = $matches[1] . "/identity/$username";
-        }
-
-        if ($this->_config->SSL->enable_mixed_mode) {
-            $openid = str_replace('http://', 'https://', $openid);
-        }
-
-        Zend_OpenId::normalizeUrl($openid);
-
-        return $openid;
     }
 
     /**
@@ -307,5 +353,34 @@ EOT;
         }
 
         return $this->_users;
+    }
+
+    private function _getYubikeyPublicId($yubikey)
+    {
+        $authAdapter = new Monkeys_Auth_Adapter_Yubikey(
+            array(
+                'api_id'    => $this->_config->yubikey->api_id,
+                'api_key'   => $this->_config->yubikey->api_key
+            ),
+            null,
+            $yubikey
+        );
+
+        // do not go through Zend_Auth::getInstance() to avoid losing the session if
+        // the yubikey is invalid
+        $result = $authAdapter->authenticate($authAdapter);
+        if ($result->isValid()) {
+            $parts = Yubico_Auth::parsePasswordOTP($yubikey);
+            return $parts['prefix'];
+        }
+
+        $logger = Zend_Registry::get('logger');
+        $logger->log("Invalid authentication: " . implode(' - ', $result->getMessages()), Zend_Log::DEBUG);
+        $authOptions = $authAdapter->getOptions();
+        if ($yubi = @$authOptions['yubiClient']) {
+            $logger->log("Yubi request was: " . $yubi->getlastQuery(), Zend_Log::DEBUG);
+        }
+
+        return false;
     }
 }

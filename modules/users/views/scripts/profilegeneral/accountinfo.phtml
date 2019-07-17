@@ -31,4 +31,18 @@
             <?php echo $this->targetUser->openid ?>
         </div>
     </div>
+    <? if ($this->yubikey->enabled && !$this->yubikey->force): ?>
+        <div class="yui-gf">
+            <div class="yui-u first">
+                <?php echo $this->translate('Auth Method') ?>:
+            </div>
+            <div class="yui-u">
+                <? if ($this->targetUser->auth_type == Users_Model_User::AUTH_PASSWORD): ?>
+                    <?= $this->translate('Password') ?>
+                <? else: ?>
+                    YubiKey
+                <? endif ?>
+            </div>
+        </div>
+    <? endif ?>
 </div>

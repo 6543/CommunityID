@@ -1,7 +1,7 @@
 <?php
 
 /*
-* @copyright Copyright (C) 2005-2009 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
 * @license http://creativecommons.org/licenses/BSD/ BSD License
 * @author Keyboard Monkeys Ltd.
 * @since CommunityID 0.9
@@ -21,6 +21,7 @@ class Install_Form_UpgradeLogin extends Zend_Form
                  ->setRequired(true);
 
         $password = new Monkeys_Form_Element_Password('password');
+        translate('Password');
         $password->setLabel('Password')
                  ->setRequired(true);
 

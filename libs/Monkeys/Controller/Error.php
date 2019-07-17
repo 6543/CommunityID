@@ -1,5 +1,13 @@
 <?php
 
+/*
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @license http://creativecommons.org/licenses/BSD/ BSD Licensese
+* @author Keyboard Monkeys Ltd.
+* @package Monkeys Framework
+* @packager Keyboard Monkeys
+*/
+
 abstract class Monkeys_Controller_Error extends Monkeys_Controller_Action
 {
     protected $_numCols = 1;
@@ -24,11 +32,11 @@ abstract class Monkeys_Controller_Error extends Monkeys_Controller_Action
             case 'Monkeys_BadUrlException';
                 $this->getResponse()->setRawHeader('HTTP/1.1 404 Not Found');
 
-                $this->view->message = 'The URL you entered is incorrect. Please correct and try again.';
+                $this->view->message = $this->_getTranslationForException($exceptionClass);
                 break;
             case 'Monkeys_AccessDeniedException';
                 $this->getResponse()->setRawHeader('HTTP/1.1 401 Unauthorized');
-                $this->view->message = 'Access Denied - Maybe your session has expired? Try logging-in again.';
+                $this->view->message = $this->_getTranslationForException($exceptionClass);
                 break;
             default:
                 $this->view->message = get_class($errors->exception) . '<br />' . $errors->exception->getMessage();
@@ -37,7 +45,8 @@ abstract class Monkeys_Controller_Error extends Monkeys_Controller_Action
                 } else if ($this->_config->email->adminemail) {
                     $mail = self::getMail($errors->exception, $this->user, $errors);
                     $mail->send();
-                    $this->view->message .= '<br />The system administrator has been notified.';
+                    $this->view->message .= "<br />\n";
+                    $this->view->message .= 'The system administrator has been notified.';
                 }
                 break;
         }
@@ -109,5 +118,24 @@ EOD;
 
     protected function _validateTargetUser()
     {
+    }
+
+    /**
+    * Returns translation for an exception message
+    *
+    * Override using your translation engine.
+    */
+    protected function _getTranslationForException($ex)
+    {
+        switch ($ex) {
+            case 'Monkeys_BadUrlException':
+                return 'The URL you entered is incorrect. Please correct and try again.';
+                break;
+            case 'Monkeys_AccessDeniedException':
+                return 'Access Denied - Maybe your session has expired? Try logging-in again.';
+                break;
+            default:
+                return $ex;
+        }
     }
 }

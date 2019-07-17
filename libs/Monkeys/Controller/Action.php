@@ -1,5 +1,13 @@
 <?php
 
+/*
+* @copyright Copyright (C) 2005-2010 Keyboard Monkeys Ltd. http://www.kb-m.com
+* @license http://creativecommons.org/licenses/BSD/ BSD Licensese
+* @author Keyboard Monkeys Ltd.
+* @package Monkeys Framework
+* @packager Keyboard Monkeys
+*/
+
 abstract class Monkeys_Controller_Action extends Zend_Controller_Action
 {
     /**
@@ -16,6 +24,7 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
 
     public function init()
     {
+        Zend_Registry::get('logger')->log('Route used: ' . Application::$front->getRouter()->getCurrentRouteName(), Zend_Log::DEBUG);
         $this->_config = Zend_Registry::get('config');
         $this->_settings = new Model_Settings();
 
@@ -43,7 +52,9 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
 
         $this->view->addHelperPath('libs/Monkeys/View/Helper', 'Monkeys_View_Helper');
         $this->view->setUseStreamWrapper(true);
-        $this->_setScriptPaths();
+        $this->_addCustomTemplatePath();
+        $this->view->addBasePath(APP_DIR . '/views');
+        $this->_addCustomTemplatePath();
         $this->_setBase();
         $this->view->numCols = $this->_numCols;
 
@@ -59,6 +70,8 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
             $this->view->nextAction = '';
         }
 
+        $this->view->messages = $this->_helper->FlashMessenger->getMessages();
+
         if ($this->getRequest()->isXmlHttpRequest()) {
             $slowdown = $this->_config->environment->ajax_slowdown;
             if ($slowdown > 0) {
@@ -67,7 +80,6 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
             $this->_helper->layout->disableLayout();
         } else {
             $this->view->version = Application::VERSION;
-            $this->view->messages = $this->_helper->FlashMessenger->getMessages();
             $this->view->loaderCombine = $this->_config->environment->YDN? 'true' : 'false';
             $this->view->loaderBase = $this->_config->environment->YDN?
                                         'http://yui.yahooapis.com/2.7.0/build/'
@@ -82,7 +94,7 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
         $this->view->title = $this->_title;
     }
 
-    private function _setScriptPaths()
+    private function _addCustomTemplatePath()
     {
         if (($template = $this->_config->environment->template) == 'default') {
             return;
@@ -149,7 +161,7 @@ abstract class Monkeys_Controller_Action extends Zend_Controller_Action
         return parent::_redirect($url, $options);
     }
 
-    public function getProtocol()
+    public static function getProtocol()
     {
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
             return 'https';
